@@ -1,0 +1,189 @@
+\begin{thebibliography}{27}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[B{\l}a{\.z}ewicz et~al.(1996)B{\l}a{\.z}ewicz, Domschke, and
+  Pesch]{blazewicz1996job}
+Jacek B{\l}a{\.z}ewicz, Wolfgang Domschke, and Erwin Pesch.
+\newblock The job shop scheduling problem: Conventional and new solution
+  techniques.
+\newblock \emph{European journal of operational research}, 93\penalty0
+  (1):\penalty0 1--33, 1996.
+
+\bibitem[Fisher(1973)]{fisher1973optimal}
+Marshall~L Fisher.
+\newblock Optimal solution of scheduling problems using lagrange multipliers:
+  Part i.
+\newblock \emph{Operations Research}, 21\penalty0 (5):\penalty0 1114--1127,
+  1973.
+
+\bibitem[Jain and Meeran(1999)]{jain1999deterministic}
+Anant~Singh Jain and Sheik Meeran.
+\newblock Deterministic job-shop scheduling: Past, present and future.
+\newblock \emph{European journal of operational research}, 113\penalty0
+  (2):\penalty0 390--434, 1999.
+
+\bibitem[Garey et~al.(1976)Garey, Johnson, and Sethi]{garey1976complexity}
+Michael~R Garey, David~S Johnson, and Ravi Sethi.
+\newblock The complexity of flowshop and jobshop scheduling.
+\newblock \emph{Mathematics of operations research}, 1\penalty0 (2):\penalty0
+  117--129, 1976.
+
+\bibitem[Sotskov and Shakhlevich(1995)]{sotskov1995np}
+Yu~N Sotskov and Natalia~V Shakhlevich.
+\newblock Np-hardness of shop-scheduling problems with three jobs.
+\newblock \emph{Discrete Applied Mathematics}, 59\penalty0 (3):\penalty0
+  237--266, 1995.
+
+\bibitem[Pezzella et~al.(2008)Pezzella, Morganti, and
+  Ciaschetti]{pezzella2008genetic}
+F~Pezzella, G~Morganti, and G~Ciaschetti.
+\newblock A genetic algorithm for the flexible job-shop scheduling problem.
+\newblock \emph{Computers \& Operations Research}, 35\penalty0 (10):\penalty0
+  3202--3212, 2008.
+
+\bibitem[Aarts and Lenstra(2003)]{aarts2003local}
+Emile~HL Aarts and Jan~Karel Lenstra.
+\newblock \emph{Local search in combinatorial optimization}.
+\newblock Princeton University Press, 2003.
+
+\bibitem[Pirlot(1996)]{pirlot1996general}
+Marc Pirlot.
+\newblock General local search methods.
+\newblock \emph{European journal of operational research}, 92\penalty0
+  (3):\penalty0 493--511, 1996.
+
+\bibitem[Najid et~al.(2002)Najid, Dauzere-Peres, and Zaidat]{najid2002modified}
+NM~Najid, S~Dauzere-Peres, and A~Zaidat.
+\newblock A modified simulated annealing method for flexible job shop
+  scheduling problem.
+\newblock In \emph{Systems, Man and Cybernetics, 2002 IEEE International
+  Conference on}, volume~5, pages 6--pp. IEEE, 2002.
+
+\bibitem[Zhang et~al.(2009)Zhang, Shao, Li, and Gao]{zhang2009effective}
+Guohui Zhang, Xinyu Shao, Peigen Li, and Liang Gao.
+\newblock An effective hybrid particle swarm optimization algorithm for
+  multi-objective flexible job-shop scheduling problem.
+\newblock \emph{Computers \& Industrial Engineering}, 56\penalty0 (4):\penalty0
+  1309--1318, 2009.
+
+\bibitem[Gao et~al.(2006)Gao, Peng, Zhou, and Li]{gao2006solving}
+Liang Gao, CY~Peng, C~Zhou, and PG~Li.
+\newblock Solving flexible job shop scheduling problem using general particle
+  swarm optimization.
+\newblock In \emph{Proceedings of the 36th CIE conference on computers \&
+  industrial engineering}, pages 3018--3027, 2006.
+
+\bibitem[Xing et~al.(2010)Xing, Chen, Wang, Zhao, and Xiong]{xing2010knowledge}
+Li-Ning Xing, Ying-Wu Chen, Peng Wang, Qing-Song Zhao, and Jian Xiong.
+\newblock A knowledge-based ant colony optimization for flexible job shop
+  scheduling problems.
+\newblock \emph{Applied Soft Computing}, 10\penalty0 (3):\penalty0 888--896,
+  2010.
+
+\bibitem[Zhang et~al.(2011)Zhang, Gao, and Shi]{zhang2011effective}
+Guohui Zhang, Liang Gao, and Yang Shi.
+\newblock An effective genetic algorithm for the flexible job-shop scheduling
+  problem.
+\newblock \emph{Expert Systems with Applications}, 38\penalty0 (4):\penalty0
+  3563--3573, 2011.
+
+\bibitem[Ho et~al.(2007)Ho, Tay, and Lai]{ho2007effective}
+Nhu~Binh Ho, Joc~Cing Tay, and Edmund M-K Lai.
+\newblock An effective architecture for learning and evolving flexible job-shop
+  schedules.
+\newblock \emph{European Journal of Operational Research}, 179\penalty0
+  (2):\penalty0 316--333, 2007.
+
+\bibitem[Liu et~al.(2007)Liu, Abraham, and Grosan]{liu2007novel}
+Hongbo Liu, Ajith Abraham, and Crina Grosan.
+\newblock A novel variable neighborhood particle swarm optimization for
+  multi-objective flexible job-shop scheduling problems.
+\newblock In \emph{Digital Information Management, 2007. ICDIM'07. 2nd
+  International Conference on}, volume~1, pages 138--145. IEEE, 2007.
+
+\bibitem[Watanabe et~al.(2005)Watanabe, Ida, and Gen]{watanabe2005genetic}
+Masato Watanabe, Kenichi Ida, and Mitsuo Gen.
+\newblock A genetic algorithm with modified crossover operator and search area
+  adaptation for the job-shop scheduling problem.
+\newblock \emph{Computers \& Industrial Engineering}, 48\penalty0 (4):\penalty0
+  743--752, 2005.
+
+\bibitem[Gao et~al.(2008)Gao, Sun, and Gen]{gao2008hybrid}
+Jie Gao, Linyan Sun, and Mitsuo Gen.
+\newblock A hybrid genetic and variable neighborhood descent algorithm for
+  flexible job shop scheduling problems.
+\newblock \emph{Computers \& Operations Research}, 35\penalty0 (9):\penalty0
+  2892--2907, 2008.
+
+\bibitem[Lee et~al.(1998)Lee, Yamakawa, and Lee]{lee1998genetic}
+Kyung-Mi Lee, Takeshi Yamakawa, and Keon-Myung Lee.
+\newblock A genetic algorithm for general machine scheduling problems.
+\newblock In \emph{Knowledge-Based Intelligent Electronic Systems, 1998.
+  Proceedings KES'98. 1998 Second International Conference on}, volume~2, pages
+  60--66. IEEE, 1998.
+
+\bibitem[Fattahi et~al.(2007)Fattahi, Mehrabad, and
+  Jolai]{fattahi2007mathematical}
+Parviz Fattahi, Mohammad~Saidi Mehrabad, and Fariborz Jolai.
+\newblock Mathematical modeling and heuristic approaches to flexible job shop
+  scheduling problems.
+\newblock \emph{Journal of Intelligent Manufacturing}, 18\penalty0
+  (3):\penalty0 331--342, 2007.
+
+\bibitem[Li et~al.(2011)Li, Pan, Suganthan, and Chua]{li2011hybrid}
+Jun-Qing Li, Quan-Ke Pan, PN~Suganthan, and TJ~Chua.
+\newblock A hybrid tabu search algorithm with an efficient neighborhood
+  structure for the flexible job shop scheduling problem.
+\newblock \emph{The international journal of advanced manufacturing
+  technology}, 52\penalty0 (5-8):\penalty0 683--697, 2011.
+
+\bibitem[Gen et~al.(1994)Gen, Tsujimura, and Kubota]{gen1994solving}
+Mitsuo Gen, Yasuhiro Tsujimura, and Erika Kubota.
+\newblock Solving job-shop scheduling problems by genetic algorithm.
+\newblock In \emph{Systems, Man, and Cybernetics, 1994. Humans, Information and
+  Technology., 1994 IEEE International Conference on}, volume~2, pages
+  1577--1582. IEEE, 1994.
+
+\bibitem[Van~Laarhoven et~al.(1992)Van~Laarhoven, Aarts, and
+  Lenstra]{van1992job}
+Peter~JM Van~Laarhoven, Emile~HL Aarts, and Jan~Karel Lenstra.
+\newblock Job shop scheduling by simulated annealing.
+\newblock \emph{Operations research}, 40\penalty0 (1):\penalty0 113--125, 1992.
+
+\bibitem[Dell'Amico and Trubian(1993)]{dell1993applying}
+Mauro Dell'Amico and Marco Trubian.
+\newblock Applying tabu search to the job-shop scheduling problem.
+\newblock \emph{Annals of Operations Research}, 41\penalty0 (3):\penalty0
+  231--252, 1993.
+
+\bibitem[Karaboga and Akay(2009)]{karaboga2009comparative}
+Dervis Karaboga and Bahriye Akay.
+\newblock A comparative study of artificial bee colony algorithm.
+\newblock \emph{Applied Mathematics and Computation}, 214\penalty0
+  (1):\penalty0 108--132, 2009.
+
+\bibitem[Karaboga and Basturk(2007)]{karaboga2007powerful}
+Dervis Karaboga and Bahriye Basturk.
+\newblock A powerful and efficient algorithm for numerical function
+  optimization: artificial bee colony (abc) algorithm.
+\newblock \emph{Journal of global optimization}, 39\penalty0 (3):\penalty0
+  459--471, 2007.
+
+\bibitem[Wang et~al.(2012)Wang, Zhou, Xu, Wang, and Liu]{wang2012effective}
+Ling Wang, Gang Zhou, Ye~Xu, Shengyao Wang, and Min Liu.
+\newblock An effective artificial bee colony algorithm for the flexible
+  job-shop scheduling problem.
+\newblock \emph{The International Journal of Advanced Manufacturing
+  Technology}, 60\penalty0 (1-4):\penalty0 303--315, 2012.
+
+\bibitem[Brandimarte(1993)]{brandimarte1993routing}
+Paolo Brandimarte.
+\newblock Routing and scheduling in a flexible job shop by tabu search.
+\newblock \emph{Annals of Operations research}, 41\penalty0 (3):\penalty0
+  157--183, 1993.
+
+\end{thebibliography}

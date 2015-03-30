@@ -1,0 +1,47 @@
+\begin{thebibliography}{7}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Colton et~al.(2012)Colton, Wiggins, et~al.]{colton2012computational}
+Simon Colton, Geraint~A Wiggins, et~al.
+\newblock Computational creativity: the final frontier?
+\newblock In \emph{ECAI}, pages 21--26, 2012.
+
+\bibitem[Toyomasu()]{Haiku_poem}
+Kei~Grieg Toyomasu.
+\newblock Haiku for people.
+\newblock URL \url{http://www.toyomasu.com/haiku/}.
+
+\bibitem[Hai()]{Haiku_JP}
+Haiku in english.
+\newblock URL \url{https://www.ryukoku.ac.jp/haiku/haiku\_en.html}.
+
+\bibitem[Capes()]{Haiku_kireji}
+Ashley Capes.
+\newblock An introduction to haiku - form and structure: Kireji and kigo.
+\newblock URL
+  \url{http://ashleycapes.com/2013/08/26/an-introduction-to-haiku-form-structure-kireji-kigo/}.
+
+\bibitem[Welch()]{Haiku_poet}
+Michael~Dylan Welch.
+\newblock Becoming a haiku poet.
+\newblock URL \url{http://www.haikuworld.org/begin/mdwelch.apr2003.html}.
+
+\bibitem[University()]{CMUDict}
+Carnegie~Mellon University.
+\newblock The cmu pronouncing dictionary.
+\newblock URL \url{http://www.speech.cs.cmu.edu/cgi-bin/cmudict}.
+
+\bibitem[Bartlett et~al.(2009)Bartlett, Kondrak, and
+  Cherry]{bartlett2009syllabification}
+Susan Bartlett, Grzegorz Kondrak, and Colin Cherry.
+\newblock On the syllabification of phonemes.
+\newblock In \emph{Proceedings of Human Language Technologies: The 2009 Annual
+  Conference of the North American Chapter of the Association for Computational
+  Linguistics}, pages 308--316. Association for Computational Linguistics,
+  2009.
+
+\end{thebibliography}

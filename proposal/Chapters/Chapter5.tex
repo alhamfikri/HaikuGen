@@ -1,0 +1,54 @@
+\section{Methodology}
+
+The brief concept of implementing Haiku generator is by learning the grammatical pattern and rules of existing Haiku poems and build a new grammar skeleton based on it. The generator will select words to fill-in the grammar skeleton based on statistical approach. Other resources such as CMUPD and WordNet will be supporting the decision making of words selection.
+
+\subsection{PoS Tag Extraction}
+
+Learning grammar structure is done by applying Part of Speech (PoS) tagger algorithm for every collected Haiku poems. PoS tagger gives tag for each word in the input sentence. Therefore, in this phase we aim to acquire grammar tag pattern of the We are only interested in the grammar tag, therefore we can remove the Haiku after tagging. One simple illustration of this process is shown below:
+
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline Haiku & Extracted PoS Tag Information \\
+		\hline Three strokes of lightning & CD NNS IN NN \\ 
+		One hit mountain frightening &  CD NN NN JJ  \\ 
+		Dark clouds thunder loud &  JJ NNS NN RB \\ 
+		\hline
+	\end{tabular} 
+\end{table}
+	
+The reason of choosing this method over using grammar tree or context free grammar is because sometimes poetry does not follow standard grammar rules. By using formal grammar rule, we might achieve less poetic result. By learning from existing Haiku, we hope that we are able to capture the grammatical pattern used in Haiku.
+
+\subsection{Creating Haiku: Grammar Skeleton}
+
+Grammar skeleton is sequence of tags that will be used to create a Haiku. The generated Haiku should follow the grammar tag defined by the skeleton. In this phase, grammar skeleton is created by combining several tag patterns in previous part.
+
+The/ leaves/NNS of/IN Autumn/NNP lovely/JJ gold/NN and/CC brown/JJ colors/NNS painting/VBG the/DT landscape/NN 
+
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|c|}
+		\hline Pattern 1 & Pattern 2 & Pattern 3 \\
+		\hline CD NNS IN NN & DT NNS IN NNP & JJ JJ NN \\ 
+		 CD NN NN JJ & JJ NN CC JJ NNS & VBG IN DT NN IN NN \\ 
+		 JJ NNS NN RB & VBG DT NN & NN IN\\ 
+		\hline
+	\end{tabular} 
+	
+	\begin{tabular}{|c|}
+			\hline Generated Skeleton \\
+			\hline  \\ 
+			  CD NN NN JJ  \\ 
+			  JJ NNS NN RB \\ 
+			\hline
+		\end{tabular} 
+\end{table}
+
+
+Illustration of creating a grammar skeleton based on tag data is shown above. 
+
+\subsection{Creating Haiku: Word Filling}
+
+
+
+\subsection{Creating Haiku: Poetic Scoring}
