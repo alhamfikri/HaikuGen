@@ -2,21 +2,69 @@
 
 \subsection{WordNet}
 
-WordNet is huge English lexical database that focuses on relationships between the meaning and the concept of words. WordNet groups nouns, verb, adjectives, and adverbs based on their meaning and usage into set called sysnet. Words in a sysnet shares same concept and can be substituted by each other in most cases. WordNet has about 117.000 sysnets covering broad topics.
+WordNet is huge English lexical database that focuses on relationships between the meaning and the concept of words \cite{wordnet1}\cite{wordnet2}. WordNet groups nouns, verb, adjectives, and adverbs based on their meaning and usage into set called sysnet. Words in a sysnet shares same concept and can be substituted by each other in most cases. WordNet has about 117.000 sysnets covering broad topics\cite{wordnet3}.
 
-Relationship between sysnets are defined by linking them with conceptual relational attribute. This relational
+Relationship between sysnets are defined by linking them with conceptual relational attribute. Some sysnet relations examples in the wordNet are:
+\begin{itemize}
+	\item Hypernym
+	
+	Relates a concept into its superordinate concepts. In verb, it connects the verb into the superordinate events. For example: book $\rightarrow$ publication, write $\rightarrow$ create.
+	\item Hyponym
+	
+	Simply the inversion of hypernym. It relates the connects subtype concept relations. For example: book $\rightarrow$ catalogue, textbook, story book, etc. 
+	
+	\item Troponym
+	
+	Similar with hyponym. Troponym is a verb relationship that captures subordinate event of another event. For example: travel $\rightarrow$ fly, ride, etc
+	
+	\item Antonym
+	
+	Relates the opposite of word senses. For example: happy $\rightarrow$ infelicitous, travel $\rightarrow$ stay in place.
+	
+	\item Derivationally Related Form
+	
+	Connects lemma with the same root. For example: burn $\rightarrow$ fire.
+	
+	\item Entailment 
+	
+	A verb to verb relations where one verb is involved with the other. For example: snore $\rightarrow$ sleep
+	
+\end{itemize}
 
+WordNet is useful resource for text generation. It can be used to paraphrase generated text. Its relational concept is helpful to build the knowledge base of the system. WordNet can be used to enrich the system's dictionary by replacing some words with other words that shares similar usage and characteristics.
 
 \subsection{Standford PoS Tagger}
 
-Standford implement
+Standford Part-of-Speech (PoS) tagger is an application with purpose to assigns part of speech label verb, noun, adjective, etc. to each input text word \cite{toutanova2003feature}. For English language, Stanford PoS tagger uses labels in Penn Treebank tag set. This tag set has a total of 36 different labels with more specified and extended labels such as verb-past, verb-present, adjective-superlative, etc\cite{marcus1993building}.
 
+\begin{figure}[h]
+	\centering
+	\begin{tabular}{c}
+		\textbf{Input} \\
+		 \textit{A frog jumps into the pond }\\
+		 
+	\end{tabular} 
+	\\~
+	$\downarrow$
+	~
+	\\
+	\begin{tabular}{c}
+	\textbf{Output} \\
+	 A/DT frog/NN jumps/VBZ into/IN the/DT pond/NN \\
+	 
+	\end{tabular} 
+	
+	\caption{Example of PoS tagger}
+	\label{PoSexample}
+\end{figure}
+
+Figure \ref{PoSexample} illustrates an use example of Standford PoS tagger. An input sentence is tokenized and given a label for each token. The output of PoS tagger will be list of paired token and its speech tag.
 
 \subsection{CMU Pronouncing Dictionary}
 
-Carnegie Mellon University Pronouncing Dictionary (CMUPD) provides machine-readable pronunciation dictionary for over 133.000 words. It uses 39 set of phonemes based on ARPAbet symbol set. Each vowel contains lexical stress pattern information, further categorised into three different levels: 0 for no stress, 1 for primary stress, and 2 for secondary stress\cite{CMUDict}. The stress pattern and pronunciation are useful to analyse the beautifulness of a poetry.
+Carnegie Mellon University Pronouncing Dictionary (CMUPD) provides machine-readable pronunciation dictionary for over 133.000 words. It uses 39 set of phonemes based on ARPAbet symbol set. Each vowel contains lexical stress pattern information, further categorized into three different levels: 0 for no stress, 1 for primary stress, and 2 for secondary stress\cite{CMUDict}. The stress pattern and pronunciation are invaluable resources that can be used to analyze the beautifulness of a poetry.
 
-\begin{table}
+\begin{table}[h]
 	\centering
 	
 	\begin{tabular}{|c|c|}
@@ -26,9 +74,10 @@ Carnegie Mellon University Pronouncing Dictionary (CMUPD) provides machine-reada
 		\hline Thesis  &  TH IY1 - S AH0 S0 \\
 		\hline
 	\end{tabular} 
-	\label{Sylla}
+	
 	\caption{Examples of Syllabified CMU Pronunciation Dictionary}
+	\label{Sylla}
 \end{table}
 
-\citeauthor{bartlett2009syllabification} further improve the CMUPD and add additional syllables information. This syllabified CMUPD provides syllable boundaries that splits between one syllable to another \cite{bartlett2009syllabification}. This information can be used to compute the total syllables of given word which is invaluable resource for fitting the syllable constraints in Haiku. Table .. shows some examples of words and their corresponding pronunciation data.
+\citeauthor{bartlett2009syllabification} further improve the CMUPD and add additional syllables information. This syllabified CMUPD provides syllable boundaries that splits between one syllable to another \cite{bartlett2009syllabification}. This information can be used to compute the total syllables of given word which is invaluable resource for fitting the syllable constraints in Haiku. Table \ref{Sylla} shows some examples of words and their corresponding pronunciation data.
 

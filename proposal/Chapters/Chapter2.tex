@@ -2,11 +2,9 @@
 
 \subsection{Haiku}
 
-Haiku is traditional Japanese poetry . 
+Haiku is traditional Japanese poetry . Rules of writing Haiku are clear in Japan. However, problem occurs when Haiku is adopted into different language \cite{Haiku_poem}. The issue comes from different linguistic concepts and designs from Japanese to foreign language. Some Japanese language concepts simply does not exists in English. Cultural difference is also one reason of variety rules in foreign Haiku. Therefore, there is no strict rule of writing Haiku in English \cite{Haiku_JP}.
 
-Rules of writing Haiku are clear in Japan. However, problem occurs when Haiku is adopted into different language \cite{Haiku_poem}. The issue comes from different linguistic concepts and designs from Japanese to foreign language. Some Japanese language concepts simply does not exists in English. Cultural difference is also one reason of variety rules in foreign Haiku. Therefore, there is no strict rule of writing Haiku in English \cite{Haiku_JP}.
-
-Haiku is three-parts short poem consists of 17 syllables. The syllables are further distributed into each part with ratio of 5, 7, 5. Therefore, the first and the last part have 5 syllables and the second part has 7 syllables. However, converting this rule from Japanese language which has monosyllabic phonetic system into English which has different phonetic system can sometimes be challenging  \cite{Haiku_poem}. Thus, 5,7,5 syllables distribution rule is still important in English Haiku, but not completely mandatory \cite{Haiku_JP}.
+Haiku is three-parts short poem consists of 17 syllables. The syllables are further distributed so that the first and the last part have 5 syllables and the second part has 7 syllables. However, converting this rule from Japanese language which has monosyllabic phonetic system into English which has different phonetic system can sometimes be challenging  \cite{Haiku_poem}. Thus, 5,7,5 syllables distribution rule is still important in English Haiku, but not completely mandatory \cite{Haiku_JP}.
 
 
 Romaji:
@@ -29,18 +27,25 @@ Translation:\\
 
 ~\\
 
-Haiku consists of two different sub-ideas, separated by \textit{kireji}, or "cutting word". In Japanese, \textit{kireji} is used to extend emotional context. It may be used as punctuation. As \textit{kireji} does not exists in English, it is replaced by punctuation mark, such as dash or question mark. In some cases, \textit{kireji} is simply unmarked and understood as implied delay \cite{Haiku_kireji}. In example above, \textit{kireji} "ya" is often used to emphasises the previous word. In English, it is translated with long dash.
+Haiku consists of two different sub-ideas, separated by \textit{kireji}, or "cutting word". In Japanese, \textit{kireji} is used to extend emotional context. It may be used as punctuation. As \textit{kireji} does not exists in English, it is replaced by punctuation mark, such as dash or question mark. In some cases, \textit{kireji} is simply unmarked and understood as implied delay \cite{Haiku_kireji}. In example above, \textit{kireji} "ya" is often used to emphasizes the previous word. In English, it is translated with long dash.
 
-
-There is no specific genre in Haiku. Any subjects can be written in Haiku \cite{Haiku_JP}. Haiku poem often can be  <><>. This expression can be achieved by choosing words that relate with one of human senses such as visual, hearing, or touch. Moreover, Haiku uses \textit{kigo}, or 'seasonal words' to refer and visualise the poem into one of the seasons in Japan. However, modern Haiku may do not contains any seasonal word. \cite{Haiku_JP}. It is also important to collaborate the five senses perception with correct seasonal theme \cite{Haiku_poet}.
-
-
-
-
-The underlined words in
+There is no specific genre in Haiku. Any subjects can be written in Haiku \cite{Haiku_JP}. Haiku poem often delivers the content physically. This expression can be achieved by choosing words that relate with one of human senses such as visual, hearing, or touch. Moreover, Haiku uses \textit{kigo}, or 'seasonal words' to refer and visualise the poem into one of the seasons in Japan. However, modern Haiku may do not contains any seasonal word. \cite{Haiku_JP}. It is also important to collaborate the five senses perception with correct seasonal theme \cite{Haiku_poet}.
 
 \subsection{Automated Poetry Generation}
 
+Before moving into automated poetry generation, we need to discuss about automated text generation in general. Computer generated text is ...
+
+We define automatic poetry text generation simply as automatic text generation with additional poetic constraint. The . Some poetic measurements have been described and will be discussed in next part of this chapter.
+
+Automated poetry generation is not something new. Previous attempts have been done to develop poetry generator. 
+
+\subsection{Measuring Poetry}
+
+As mentioned in the first chapter, one major issue of poetry generation is how to objectively evaluate the result. Hence, a method to answer "how good your poetry" should be defined formally. In this part, we some definitions and methods to achieve such goal.
+
+\citeauthor{manurung2000towards} mentioned that there are three aspects of poem that can be scored. The first one is the phonetics. This information can be evaluated through the poem's phonetic structure such as rhyme, metre, alliteration, etc. The second measurement is linguistic. Word and syntax choices is measured in this point. The last part of evaluation is semantics, where a poem is scored based on its semantics structure relative to the desired semantics\cite{manurung2000towards}.
+
+ \citeauthor{colton2012full} suggest more statistical approach on measuring a poem. Evaluation done by analyzing each word and assign some scores based on several criterion. A flamboyance is defined on word frequency, where a word obtained less score based how frequent it used in the constructed poem. It also computes the relevancy of each word from given baseline article. Lastly, appropriateness is a score defined by its average word's sentiment distance towards a given sentiment level \cite{colton2012full}.
 
 
 

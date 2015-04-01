@@ -4,59 +4,63 @@ The top-level auxiliary file: Thesis Proposal.aux
 The style file: unsrtnat.bst
 Database file #1: sample.bib
 Warning--entry type for "Haiku_JP" isn't style-file defined
---line 18 of file sample.bib
+--line 98 of file sample.bib
 Warning--entry type for "Haiku_poem" isn't style-file defined
---line 24 of file sample.bib
+--line 104 of file sample.bib
+Warning--entry type for "wordnet3" isn't style-file defined
+--line 111 of file sample.bib
 Warning--entry type for "Haiku_poet" isn't style-file defined
---line 32 of file sample.bib
+--line 121 of file sample.bib
 Warning--entry type for "Haiku_kireji" isn't style-file defined
---line 39 of file sample.bib
+--line 128 of file sample.bib
 Warning--entry type for "CMUDict" isn't style-file defined
---line 46 of file sample.bib
+--line 135 of file sample.bib
+Warning--empty journal in manurung2004evolutionary
+Warning--empty journal in binsted1996machine
 Warning--empty year in Haiku_poem
 Warning--empty year in Haiku_JP
 Warning--empty year in Haiku_kireji
 Warning--empty year in Haiku_poet
 Warning--empty year in CMUDict
-You've used 7 entries,
+You've used 17 entries,
             2481 wiz_defined-function locations,
-            588 strings with 5459 characters,
-and the built_in function-call counts, 2302 in all, are:
-= -- 199
-> -- 70
-< -- 6
-+ -- 34
-- -- 20
-* -- 125
-:= -- 325
-add.period$ -- 21
-call.type$ -- 7
-change.case$ -- 14
-chr.to.int$ -- 7
-cite$ -- 13
-duplicate$ -- 130
-empty$ -- 252
-format.name$ -- 26
-if$ -- 518
-int.to.chr$ -- 1
-int.to.str$ -- 8
-missing$ -- 2
-newline$ -- 42
-num.names$ -- 18
-pop$ -- 85
+            645 strings with 6979 characters,
+and the built_in function-call counts, 5702 in all, are:
+= -- 495
+> -- 202
+< -- 14
++ -- 93
+- -- 58
+* -- 340
+:= -- 854
+add.period$ -- 52
+call.type$ -- 17
+change.case$ -- 34
+chr.to.int$ -- 16
+cite$ -- 25
+duplicate$ -- 329
+empty$ -- 591
+format.name$ -- 74
+if$ -- 1257
+int.to.chr$ -- 2
+int.to.str$ -- 18
+missing$ -- 11
+newline$ -- 92
+num.names$ -- 48
+pop$ -- 184
 preamble$ -- 1
-purify$ -- 7
+purify$ -- 17
 quote$ -- 0
-skip$ -- 107
+skip$ -- 229
 stack$ -- 0
-substring$ -- 71
-swap$ -- 32
-text.length$ -- 2
+substring$ -- 194
+swap$ -- 69
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 49
-warning$ -- 5
-while$ -- 18
+type$ -- 116
+warning$ -- 7
+while$ -- 48
 width$ -- 0
-write$ -- 87
-(There were 10 warnings)
+write$ -- 211
+(There were 13 warnings)

@@ -1,14 +1,36 @@
-\begin{thebibliography}{7}
+\begin{thebibliography}{17}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[Colton et~al.(2012)Colton, Wiggins, et~al.]{colton2012computational}
+\bibitem[Wordsworth(1990)]{wordsworth1990preface}
+William Wordsworth.
+\newblock Preface to lyrical ballads (1802).
+\newblock \emph{Romantic Prose and Poetry}, 1990.
+
+\bibitem[Manurung(2004)]{manurung2004evolutionary}
+Hisar Manurung.
+\newblock An evolutionary algorithm approach to poetry generation.
+\newblock 2004.
+
+\bibitem[Colton et~al.(2012{\natexlab{a}})Colton, Wiggins,
+  et~al.]{colton2012computational}
 Simon Colton, Geraint~A Wiggins, et~al.
 \newblock Computational creativity: the final frontier?
-\newblock In \emph{ECAI}, pages 21--26, 2012.
+\newblock In \emph{ECAI}, pages 21--26, 2012{\natexlab{a}}.
+
+\bibitem[Binsted(1996)]{binsted1996machine}
+Kim Binsted.
+\newblock Machine humour: An implemented model of puns.
+\newblock 1996.
+
+\bibitem[Manurung et~al.(2000)Manurung, Ritchie, and
+  Thompson]{manurung2000towards}
+Hisar Manurung, Graeme Ritchie, and Henry Thompson.
+\newblock Towards a computational model of poetry generation.
+\newblock Technical report, The University of Edinburgh, 2000.
 
 \bibitem[Toyomasu()]{Haiku_poem}
 Kei~Grieg Toyomasu.
@@ -29,6 +51,45 @@ Ashley Capes.
 Michael~Dylan Welch.
 \newblock Becoming a haiku poet.
 \newblock URL \url{http://www.haikuworld.org/begin/mdwelch.apr2003.html}.
+
+\bibitem[Colton et~al.(2012{\natexlab{b}})Colton, Goodwin, and
+  Veale]{colton2012full}
+Simon Colton, Jacob Goodwin, and Tony Veale.
+\newblock Full face poetry generation.
+\newblock In \emph{Proceedings of the Third International Conference on
+  Computational Creativity}, pages 95--102, 2012{\natexlab{b}}.
+
+\bibitem[Miller(1995)]{wordnet1}
+George~A Miller.
+\newblock Wordnet: a lexical database for english.
+\newblock \emph{Communications of the ACM}, 38\penalty0 (11):\penalty0 39--41,
+  1995.
+
+\bibitem[Fellbaum(1998)]{wordnet2}
+Christiane Fellbaum.
+\newblock \emph{WordNet}.
+\newblock Wiley Online Library, 1998.
+
+\bibitem[University(2010)]{wordnet3}
+Princeton University.
+\newblock About wordnet, 2010.
+\newblock URL \url{http://wordnet.princeton.edu}.
+
+\bibitem[Toutanova et~al.(2003)Toutanova, Klein, Manning, and
+  Singer]{toutanova2003feature}
+Kristina Toutanova, Dan Klein, Christopher~D Manning, and Yoram Singer.
+\newblock Feature-rich part-of-speech tagging with a cyclic dependency network.
+\newblock In \emph{Proceedings of the 2003 Conference of the North American
+  Chapter of the Association for Computational Linguistics on Human Language
+  Technology-Volume 1}, pages 173--180. Association for Computational
+  Linguistics, 2003.
+
+\bibitem[Marcus et~al.(1993)Marcus, Marcinkiewicz, and
+  Santorini]{marcus1993building}
+Mitchell~P Marcus, Mary~Ann Marcinkiewicz, and Beatrice Santorini.
+\newblock Building a large annotated corpus of english: The penn treebank.
+\newblock \emph{Computational linguistics}, 19\penalty0 (2):\penalty0 313--330,
+  1993.
 
 \bibitem[University()]{CMUDict}
 Carnegie~Mellon University.
