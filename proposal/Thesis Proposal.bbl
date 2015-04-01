@@ -1,4 +1,4 @@
-\begin{thebibliography}{17}
+\begin{thebibliography}{19}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -51,6 +51,18 @@ Ashley Capes.
 Michael~Dylan Welch.
 \newblock Becoming a haiku poet.
 \newblock URL \url{http://www.haikuworld.org/begin/mdwelch.apr2003.html}.
+
+\bibitem[Rashel and Manurung()]{rashelpemuisi}
+Fam Rashel and Ruli Manurung.
+\newblock Pemuisi: a constraint satisfaction-based generator of topical
+  indonesian poetry.
+
+\bibitem[Manurung et~al.(2012)Manurung, Ritchie, and
+  Thompson]{manurung2012using}
+Ruli Manurung, Graeme Ritchie, and Henry Thompson.
+\newblock Using genetic algorithms to create meaningful poetic text.
+\newblock \emph{Journal of Experimental \& Theoretical Artificial
+  Intelligence}, 24\penalty0 (1):\penalty0 43--64, 2012.
 
 \bibitem[Colton et~al.(2012{\natexlab{b}})Colton, Goodwin, and
   Veale]{colton2012full}

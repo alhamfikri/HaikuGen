@@ -4,63 +4,66 @@ The top-level auxiliary file: Thesis Proposal.aux
 The style file: unsrtnat.bst
 Database file #1: sample.bib
 Warning--entry type for "Haiku_JP" isn't style-file defined
---line 98 of file sample.bib
+--line 103 of file sample.bib
 Warning--entry type for "Haiku_poem" isn't style-file defined
---line 104 of file sample.bib
+--line 109 of file sample.bib
 Warning--entry type for "wordnet3" isn't style-file defined
---line 111 of file sample.bib
+--line 116 of file sample.bib
 Warning--entry type for "Haiku_poet" isn't style-file defined
---line 121 of file sample.bib
+--line 126 of file sample.bib
 Warning--entry type for "Haiku_kireji" isn't style-file defined
---line 128 of file sample.bib
+--line 133 of file sample.bib
 Warning--entry type for "CMUDict" isn't style-file defined
---line 135 of file sample.bib
+--line 140 of file sample.bib
 Warning--empty journal in manurung2004evolutionary
 Warning--empty journal in binsted1996machine
 Warning--empty year in Haiku_poem
 Warning--empty year in Haiku_JP
 Warning--empty year in Haiku_kireji
 Warning--empty year in Haiku_poet
+Warning--empty journal in rashelpemuisi
+Warning--empty year in rashelpemuisi
+Warning--empty year in rashelpemuisi
 Warning--empty year in CMUDict
-You've used 17 entries,
+You've used 19 entries,
             2481 wiz_defined-function locations,
-            645 strings with 6979 characters,
-and the built_in function-call counts, 5702 in all, are:
-= -- 495
-> -- 202
-< -- 14
-+ -- 93
-- -- 58
-* -- 340
-:= -- 854
-add.period$ -- 52
-call.type$ -- 17
-change.case$ -- 34
-chr.to.int$ -- 16
-cite$ -- 25
-duplicate$ -- 329
-empty$ -- 591
-format.name$ -- 74
-if$ -- 1257
+            655 strings with 7316 characters,
+and the built_in function-call counts, 6393 in all, are:
+= -- 551
+> -- 238
+< -- 15
++ -- 107
+- -- 68
+* -- 396
+:= -- 963
+add.period$ -- 57
+call.type$ -- 19
+change.case$ -- 38
+chr.to.int$ -- 18
+cite$ -- 30
+duplicate$ -- 366
+empty$ -- 655
+format.name$ -- 88
+if$ -- 1400
 int.to.chr$ -- 2
-int.to.str$ -- 18
-missing$ -- 11
-newline$ -- 92
-num.names$ -- 48
-pop$ -- 184
+int.to.str$ -- 20
+missing$ -- 13
+newline$ -- 101
+num.names$ -- 54
+pop$ -- 205
 preamble$ -- 1
-purify$ -- 17
+purify$ -- 19
 quote$ -- 0
-skip$ -- 229
+skip$ -- 249
 stack$ -- 0
-substring$ -- 194
-swap$ -- 69
+substring$ -- 217
+swap$ -- 72
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 116
-warning$ -- 7
-while$ -- 48
+type$ -- 130
+warning$ -- 10
+while$ -- 54
 width$ -- 0
-write$ -- 211
-(There were 13 warnings)
+write$ -- 233
+(There were 16 warnings)
