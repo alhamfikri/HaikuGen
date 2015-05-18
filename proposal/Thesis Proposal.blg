@@ -4,17 +4,19 @@ The top-level auxiliary file: Thesis Proposal.aux
 The style file: unsrtnat.bst
 Database file #1: sample.bib
 Warning--entry type for "Haiku_JP" isn't style-file defined
---line 103 of file sample.bib
+--line 110 of file sample.bib
 Warning--entry type for "Haiku_poem" isn't style-file defined
---line 109 of file sample.bib
-Warning--entry type for "wordnet3" isn't style-file defined
 --line 116 of file sample.bib
+Warning--entry type for "wordnet3" isn't style-file defined
+--line 123 of file sample.bib
 Warning--entry type for "Haiku_poet" isn't style-file defined
---line 126 of file sample.bib
-Warning--entry type for "Haiku_kireji" isn't style-file defined
 --line 133 of file sample.bib
-Warning--entry type for "CMUDict" isn't style-file defined
+Warning--entry type for "Haiku_kireji" isn't style-file defined
 --line 140 of file sample.bib
+Warning--entry type for "CMUDict" isn't style-file defined
+--line 147 of file sample.bib
+Warning--entry type for "HaikuThunder" isn't style-file defined
+--line 153 of file sample.bib
 Warning--empty journal in manurung2004evolutionary
 Warning--empty journal in binsted1996machine
 Warning--empty year in Haiku_poem
@@ -25,45 +27,46 @@ Warning--empty journal in rashelpemuisi
 Warning--empty year in rashelpemuisi
 Warning--empty year in rashelpemuisi
 Warning--empty year in CMUDict
-You've used 19 entries,
+Warning--empty year in HaikuThunder
+You've used 21 entries,
             2481 wiz_defined-function locations,
-            655 strings with 7316 characters,
-and the built_in function-call counts, 6393 in all, are:
-= -- 551
-> -- 238
-< -- 15
-+ -- 107
-- -- 68
-* -- 396
-:= -- 963
-add.period$ -- 57
-call.type$ -- 19
-change.case$ -- 38
-chr.to.int$ -- 18
-cite$ -- 30
-duplicate$ -- 366
-empty$ -- 655
-format.name$ -- 88
-if$ -- 1400
+            665 strings with 7549 characters,
+and the built_in function-call counts, 6907 in all, are:
+= -- 592
+> -- 252
+< -- 17
++ -- 115
+- -- 72
+* -- 418
+:= -- 1043
+add.period$ -- 63
+call.type$ -- 21
+change.case$ -- 41
+chr.to.int$ -- 20
+cite$ -- 33
+duplicate$ -- 399
+empty$ -- 715
+format.name$ -- 94
+if$ -- 1512
 int.to.chr$ -- 2
-int.to.str$ -- 20
-missing$ -- 13
-newline$ -- 101
-num.names$ -- 54
-pop$ -- 205
+int.to.str$ -- 22
+missing$ -- 15
+newline$ -- 111
+num.names$ -- 60
+pop$ -- 229
 preamble$ -- 1
-purify$ -- 19
+purify$ -- 21
 quote$ -- 0
-skip$ -- 249
+skip$ -- 272
 stack$ -- 0
-substring$ -- 217
-swap$ -- 72
+substring$ -- 221
+swap$ -- 76
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 130
-warning$ -- 10
-while$ -- 54
+type$ -- 141
+warning$ -- 11
+while$ -- 58
 width$ -- 0
-write$ -- 233
-(There were 16 warnings)
+write$ -- 256
+(There were 18 warnings)

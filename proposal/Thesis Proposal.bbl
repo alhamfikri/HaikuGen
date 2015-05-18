@@ -1,4 +1,4 @@
-\begin{thebibliography}{19}
+\begin{thebibliography}{21}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -40,6 +40,11 @@ Kei~Grieg Toyomasu.
 \bibitem[Hai()]{Haiku_JP}
 Haiku in english.
 \newblock URL \url{https://www.ryukoku.ac.jp/haiku/haiku\_en.html}.
+
+\bibitem[Keene(1999)]{keene1999travelers}
+Donald Keene.
+\newblock \emph{Travelers of a hundred ages}.
+\newblock Columbia University Press, 1999.
 
 \bibitem[Capes()]{Haiku_kireji}
 Ashley Capes.
@@ -116,5 +121,7 @@ Susan Bartlett, Grzegorz Kondrak, and Colin Cherry.
   Conference of the North American Chapter of the Association for Computational
   Linguistics}, pages 308--316. Association for Computational Linguistics,
   2009.
+
+
 
 \end{thebibliography}
