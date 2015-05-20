@@ -31,8 +31,12 @@ public class Corpus {
 	//global list of words, divided by its POS tag
 	private HashMap<String,HashSet<String>> allWordlist;
 	
+	//markov chain model
+	private MarkovModel markov;
+	
 	@SuppressWarnings("unchecked")
 	public Corpus() {
+		markov = new MarkovModel();
 		wordDatabase = new HashMap<String,WordInfo>();
 		allWordlist = new HashMap<String,HashSet<String>>();
 		wordlist = new HashMap[10];
@@ -97,6 +101,11 @@ public class Corpus {
 	            		//database.put(word, WORD.);
 	            	}
 	            	tokens[i] = word;
+	            	
+	            	//update the markov model
+	            	if (i > 0 && word.length() > 0 && tokens[i-1].length() > 0){
+	            		markov.add(word, tokens[i-1]);
+	            	}
 	            }
 
 	            //re-tagging with Penn Treebank Tagset
@@ -171,4 +180,22 @@ public class Corpus {
 		return wordDatabase.get(word);
 	}
 
+	/**
+	 * Given a tag, return all possible number of syllables available within the tag
+	 * @param tag
+	 * @return sequence of int
+	 */
+	public ArrayList<Integer> getPossibleSyllables(String tag) {
+		ArrayList<Integer> res = new ArrayList<Integer>();
+		for (int i=1;i<10;i++){
+			if (wordlist[i].get(tag) != null) 
+				res.add(i);
+		}
+		
+		return res;
+	}
+
+	public int getMarkovCount(String string, String word2) {
+		return markov.getCount(string,word2);
+	}
 }
