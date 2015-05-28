@@ -1,7 +1,10 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ import opennlp.tools.postag.POSTaggerME;
  * Words relation  : 
  * Word list based on Tag : Given a PoS tag/label, all possible words with that label are provided, sorted by their probability.
  */
-public class Corpus {
+public class LanguageModel {
 	
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
@@ -32,10 +35,10 @@ public class Corpus {
 	private HashMap<String,HashSet<String>> allWordlist;
 	
 	//markov chain model
-	private MarkovModel markov;
+	public MarkovModel markov;
 	
 	@SuppressWarnings("unchecked")
-	public Corpus() {
+	public LanguageModel() {
 		markov = new MarkovModel();
 		wordDatabase = new HashMap<String,WordInfo>();
 		allWordlist = new HashMap<String,HashSet<String>>();
@@ -66,7 +69,6 @@ public class Corpus {
 				}
 				WordInfo w = new WordInfo(word,syllables,null);
 				wordDatabase.put(word, w);
-				System.out.println(word+" "+syllables);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -74,72 +76,43 @@ public class Corpus {
 		}
 	}
 	
-	/**
-	 * Open, add and process the given new data
-	 * Automatically updates the corpus
-	 * 
-	 * @param filepath
-	 */
-	public void add(String filepath) {
+	public void trainMarkov(ArrayList<ArrayList<String>> data) {
+		int N = data.size();
+		for (int i=0;i<N;i++){
+			int M = data.get(i).size();
+			String prev = "/s";
+			for (int j=0;j<M;j++) {
+				markov.add(prev,data.get(i).get(j));
+				prev = data.get(i).get(j);
+			}
+			
+			//updates list of possible words
+			String tags[] = HaikuPOSTagger.tag(data.get(i));
+			for (int j=0;j<tags.length;j++){
+            	String word = data.get(i).get(j);
+            	WordInfo wordInfo = wordDatabase.get(word);
+            	if (wordInfo == null) 
+            		continue;
+            	
+            	//updates wordlist by syllables
+            	HashSet<String> wordset = wordlist[wordInfo.syllables].get(tags[j]);
+            	if (wordset == null) {
+            		wordset = new HashSet<String>();
+            		wordlist[wordInfo.syllables].put(tags[j], wordset);
+            	}
+            	wordset.add(word);
+            	
+            	//updates global wordlist 
+            	HashSet<String> wordset2 = allWordlist.get(tags[j]);
+            	if (wordset2 == null) {
+            		wordset2 = new HashSet<String>();
+            		allWordlist.put(tags[j], wordset2);
+            	}
+            	wordset2.add(word);
+            }
+			
+		}
 		
-		String currentDirectory = System.getProperty("user.dir");
-		String line = null;
-		try {
-		  BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/brown/" + filepath));
-	         while ((line = br.readLine()) != null) {
-	            String tokens[] = line.trim().toLowerCase().split(" ");
-	            if (tokens.length == 0) 
-	            	continue;
-	            
-	            
-	            //remove the tagset, create cleaned corpus and update the wordlist
-	            for (int i=0;i<tokens.length;i++) {
-	            	String word = tokens[i].split("/")[0];
-	            	
-	            	//if new word found, updates wordlist
-	            	if ( wordDatabase.get(word) == null ) {
-	            		//database.put(word, WORD.);
-	            	}
-	            	tokens[i] = word;
-	            	
-	            	//update the markov model
-	            	if (i > 0 && word.length() > 0 && tokens[i-1].length() > 0){
-	            		markov.add(word, tokens[i-1]);
-	            	}
-	            }
-
-	            //re-tagging with Penn Treebank Tagset
-	            String tags[] = HaikuPOSTagger.tag(tokens);
-	            for (int i=0;i<tokens.length;i++){
-	            	if (tokens[i].length() == 0)
-	            		continue;
-	            	
-	            	WordInfo wordInfo = wordDatabase.get(tokens[i]);
-	            	if (wordInfo == null) 
-	            		continue;
-	            	
-	            	//updates wordlist by syllables
-	            	HashSet<String> wordset = wordlist[wordInfo.syllables].get(tags[i]);
-	            	if (wordset == null) {
-	            		wordset = new HashSet<String>();
-	            		wordlist[wordInfo.syllables].put(tags[i], wordset);
-	            	}
-	            	wordset.add(tokens[i]);
-	            	
-	            	//updates global wordlist 
-	            	HashSet<String> wordset2 = allWordlist.get(tags[i]);
-	            	if (wordset2 == null) {
-	            		wordset2 = new HashSet<String>();
-	            		allWordlist.put(tags[i], wordset2);
-	            	}
-	            	wordset2.add(tokens[i]);
-	            }
-	         }       
-		}
-		catch (IOException e) {
-		  // Model loading failed, handle the error
-		  e.printStackTrace();
-		}
 	}
 	
 	/**
@@ -197,5 +170,43 @@ public class Corpus {
 
 	public int getMarkovCount(String string, String word2) {
 		return markov.getCount(string,word2);
+	}
+	/**
+	 * Save current trained model, so you don't have to re-train the whole markov again
+	 * @param filepath
+	 */
+	public void saveMarkovModel(String filename) {
+		String currentDirectory = System.getProperty("user.dir");
+		System.err.println("Saving model... ");
+		File file = new File(currentDirectory + "/res/model/" + filename);
+		BufferedWriter bw = null;
+		// if file doesnt exists, then create it
+	
+		try {
+			if (!file.exists())
+				file.createNewFile();
+			
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			bw = new BufferedWriter(fw);
+			
+			for (String key : wordDatabase.keySet()) {
+
+			    ArrayList<String> nexts = markov.getAllPossiblePairs(key);
+			    if (nexts == null)
+			    	continue;
+			    
+			    for (int i=0;i<nexts.size();i++)
+			    	bw.write(key+" "+nexts.get(i)+" "+markov.getCount(key,nexts.get(i)) + "\n");
+			    
+			}
+			
+			//bw.close();
+			System.err.println("Done ");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+	
+			System.err.println("FAILED TO SAVE THE MODEL :(");
+		}
 	}
 }

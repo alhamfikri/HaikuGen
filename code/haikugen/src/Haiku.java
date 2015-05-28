@@ -18,7 +18,7 @@ public class Haiku {
 	 */
 	public Haiku(String poem) {
 		originalText = poem;
-		String lines[] = originalText.split("%");
+		String lines[] = originalText.split("&");
 		part = lines.length;
 		
 		text = new String[part][];

@@ -1,6 +1,7 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -71,6 +72,26 @@ public class HaikuPOSTagger {
 		}
 		
 		String tags[] = tagger.tag(sentence);
+		
+		return tags;
+	}
+
+	/**
+	 * Tags given string
+	 * @param sentence : ArrayList of string of English words that wants to be tagged
+	 * @return array of string, the tag label of the input for each word
+	 */
+	public static String[] tag(ArrayList<String> sentence) {
+
+		//first time initialization
+		if (tagger == null) {
+			init();
+		}
+		
+		String[] sentenceArr = new String[sentence.size()];
+		sentenceArr = sentence.toArray(sentenceArr);
+		
+		String tags[] = tagger.tag(sentenceArr);
 		
 		return tags;
 	}
