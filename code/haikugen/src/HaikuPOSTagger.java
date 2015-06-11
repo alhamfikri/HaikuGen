@@ -2,9 +2,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.util.Sequence;
 
 /**
  * Static POS Tagger class
@@ -94,5 +96,34 @@ public class HaikuPOSTagger {
 		String tags[] = tagger.tag(sentenceArr);
 		
 		return tags;
+	}
+	
+	/**
+	 * Return all possible tags of a given word. A given tag T[i] is possible, if its probability P(T[i]) is not less than R * P(T[i-1])
+	 * @param words
+	 * @param R
+	 * @return
+	 */
+	public static ArrayList<String> possibleTags(String w, double R) {
+		ArrayList<String> word = new ArrayList<String>();
+		word.add(w);
+		
+		Sequence topSequences[] = tagger.topKSequences(word);
+		ArrayList<String> res = new ArrayList<String>();
+		
+		int N = topSequences.length;
+		List<String> tags = topSequences[0].getOutcomes();
+		res.add(tags.get(0));
+		double prob = topSequences[0].getProbs()[0];
+		for (int i=1;i<N;i++){
+			double probNew = topSequences[i].getProbs()[0];
+			if (probNew < prob * R)
+				return res;
+			prob = probNew;
+			res.add(topSequences[i].getOutcomes().get(0));
+			
+		}
+		
+		return res;
 	}
 }

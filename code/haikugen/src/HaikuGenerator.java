@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 
@@ -47,18 +48,35 @@ public class HaikuGenerator {
 				String prev = "/s";
 				if (j > 0)
 					prev = result[i][j-1];
-				String word = words[0];
-				int best = languageModel.getMarkovCount(prev, word);
-				//pick the most probable next word
+				String word = words[random.nextInt(words.length)];
+				ArrayList<String> wordPool = new ArrayList<String>();
+				ArrayList<String> uniWordPool = new ArrayList<String>();
+				
+				//put all next possible word into word pool
 				for (int k=0;k<words.length;k++){
-					int now = languageModel.getMarkovCount(prev,words[k]) + new Random().nextInt(20) - 10;
-					if (best < now){
-						best = now;
-						word = words[k];
-					}
+					double prob = languageModel.getMarkovProbability(prev,words[k]);
+					if (prob > 0.0)
+						wordPool.add(""+String.format( "%.5f", prob )+" "+words[k]);
+					else
+						uniWordPool.add(""+String.format("%05d", languageModel.getUnigramCount(words[k])) +" "+words[k]);
 				}
 				
-				result[i][j] = word;
+				 
+				
+				if (wordPool.size() > 0) {
+					Collections.sort(wordPool);
+					Collections.reverse(wordPool);
+					
+					word = wordPool.get(random.nextInt(1 + wordPool.size() / 10));
+					}
+				else {
+					Collections.sort(uniWordPool);
+					Collections.reverse(uniWordPool);
+					
+					word = uniWordPool.get(random.nextInt(1 + uniWordPool.size() / 10));
+				}
+				
+				result[i][j] = word.split(" ")[1];
 				
 			}
 		}
@@ -101,6 +119,7 @@ public class HaikuGenerator {
 		if (dp[N][M] == 0)
 			return null;
 		
+		//uniformly chooses the valid syllables distribution
 		Random rand = new Random();
 		int pos = N;
 		for (int i=M;i>0;i--) {

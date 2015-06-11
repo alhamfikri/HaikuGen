@@ -8,10 +8,13 @@ import javax.swing.text.html.HTMLDocument.Iterator;
 public class MarkovModel {
 
 	HashMap<String, HashMap<String,Integer>> count;
+	HashMap<String, Integer> totalWords;
 	int size;
 	
 	public MarkovModel() {
 		count = new HashMap<String, HashMap<String,Integer>>();
+		totalWords = new HashMap<String,Integer>();
+		
 		size = 0;
 	}
 
@@ -23,8 +26,9 @@ public class MarkovModel {
 	public void add(String wordPrev, String wordNext) {
 		if (count.get(wordPrev) == null) {
 			count.put(wordPrev, new HashMap<String,Integer>());
+			totalWords.put(wordPrev, 0);
 		}
-		
+		totalWords.put(wordPrev, totalWords.get(wordPrev) + 1);
 		HashMap<String,Integer> count_map = count.get(wordPrev);
 		
 		if (count_map.get(wordNext) == null) {
@@ -46,6 +50,26 @@ public class MarkovModel {
 		return count_map.get(wordNext);
 		
 	}
+	
+	public int getCount(String wordPrev) {
+		if (totalWords.get(wordPrev) == null)
+			return 0;
+		
+		return totalWords.get(wordPrev);
+		
+	}
+	
+	public double getProbability(String wordPrev, String wordNext) {
+		if (count.get(wordPrev) == null)
+			return 0;
+		HashMap<String,Integer> count_map = count.get(wordPrev);
+		if (count_map.get(wordNext) == null)
+			return 0;
+		
+		return count_map.get(wordNext) /( (double) totalWords.get(wordPrev));
+		
+	}
+	
 	
 	public int size(){
 		return size;
