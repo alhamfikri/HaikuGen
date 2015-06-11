@@ -106,7 +106,7 @@ public class HaikuGenerator {
 		int backtrack[][] = new int[N+1][M+1];
 		
 		//bottom-up dynamic programming
-		for (int i=0;i<N;i++){
+		for (int i=0;i<=N;i++){
 			for (int j=0;j<M;j++){
 				if (dp[i][j] == 0) 
 					continue;

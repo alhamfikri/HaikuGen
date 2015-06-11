@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -30,6 +31,8 @@ public class LanguageModel {
 
 	//list of words, divided by its syllables and POS tag
 	private HashMap<String,HashSet<String>> wordlist[];
+	//word vector
+	private HashMap<String,ArrayList<Double>> wordVector;
 	
 	final String[] topicTags = {"JJ", "JJR", "JJS", "NN", "NNS" , "NNP" , "NNPS" , "RB", "RBS", "RBR", 
 								"VB", "VBD" , "VBG", "VBN" , "VBP" , "VBZ" };
@@ -38,21 +41,23 @@ public class LanguageModel {
 	//global list of removed words
 	private HashSet<String> unusedWords;
 	
+	//global list of used words
+	private HashSet<String> dictionary;
 	HashSet<String> stopWords;
+	
 	
 	//markov chain model
 	MarkovModel markov;
-	TopicModel topic;
 	
 	@SuppressWarnings("unchecked")
 	public LanguageModel() {
 		markov = new MarkovModel();
-		topic = new TopicModel();
-		
+		dictionary = new HashSet<String>();
 		unusedWords = new HashSet<String>();
 		stopWords = new HashSet<String>();
 		
 		wordDatabase = new HashMap<String,WordInfo>();
+		wordVector = new HashMap<String,ArrayList<Double>>();
 		wordDatabase.put("/s", new WordInfo("/s", 0, null) );
 		
 		wordlist = new HashMap[10];
@@ -62,8 +67,20 @@ public class LanguageModel {
 		topicTagSet = new HashSet<String>();
 		for (int i=0;i<topicTags.length;i++)
 			topicTagSet.add(topicTags[i]);
+		
+		addSpecialSeparator("...",":");
 	}
 	
+	private void addSpecialSeparator(String separator, String tag) {
+		HashSet<String> wordset = wordlist[0].get(tag);
+    	if (wordset == null) {
+    		wordset = new HashSet<String>();
+    		wordlist[0].put(tag, wordset);
+    	}
+    	wordset.add(separator);
+		
+	}
+
 	/**
 	 * Open forbidden words dictionary
 	 */
@@ -103,11 +120,56 @@ public class LanguageModel {
 		}	
 	}
 	
+	public void loadDictionary(String filepath) {
+		String currentDirectory = System.getProperty("user.dir");
+		String line = null;
+		
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/model/" + filepath));
+			String input;
+			while ((input = br.readLine()) != null) {
+				dictionary.add(input);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
+	}
+	
+	public void loadVectorModel(String filepath) {
+		String currentDirectory = System.getProperty("user.dir");
+		String line = null;
+		
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/wordvector/" + filepath));
+			String input;
+			while ((input = br.readLine()) != null) {
+				String[] data = input.split(" ");
+				String word = data[0];
+				
+				if (wordDatabase.get(word) == null || stopWords.contains(word))
+					continue;
+				
+				ArrayList<Double> vector = new ArrayList<Double>();
+				for (int i=1;i<data.length;i++) {
+					vector.add(Double.valueOf(data[i]));
+				}
+				
+				wordVector.put(word,vector);
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
+	}
 	/**
 	 * Open CMUDictionary dictionary for initial word base
 	 * @param filepath location of CMUDict
 	 */
-	public void loadDictionary(String filepath) {
+	public void loadSyllableDictionary(String filepath) {
 		String currentDirectory = System.getProperty("user.dir");
 		String line = null;
 		
@@ -131,6 +193,9 @@ public class LanguageModel {
 				if (unusedWords.contains(word))
 					continue;
 				
+				if (!dictionary.contains(word))
+					continue;
+				
 				WordInfo w = new WordInfo(word,syllables,null);
 				wordDatabase.put(word, w);
 				
@@ -144,8 +209,7 @@ public class LanguageModel {
 	            		wordlist[w.syllables].put(tags.get(i), wordset);
 	            	}
 	            	wordset.add(word);
-		            if (topicTagSet.contains(tags.get(i)) && !stopWords.contains(word))
-		            	topic.addTopicWord(word);	
+
 	            }
 			}
 			
@@ -157,15 +221,6 @@ public class LanguageModel {
 		}
 	}
 	
-	public void trainTopicModel(ArrayList<ArrayList<String>> data) {
-		int N = data.size();
-		//ArrayList<String> mergedData = new ArrayList<String>();
-		for (int i=0;i<N;i++) {
-			topic.add(data.get(i));
-			//mergedData.addAll(data.get(i));
-		}
-		
-	}
 	
 	public void trainMarkov(ArrayList<ArrayList<String>> data) {
 		int N = data.size();
@@ -237,7 +292,7 @@ public class LanguageModel {
 	 */
 	public ArrayList<Integer> getPossibleSyllables(String tag) {
 		ArrayList<Integer> res = new ArrayList<Integer>();
-		for (int i=1;i<10;i++){
+		for (int i=0;i<10;i++){
 			if (wordlist[i].get(tag) != null) 
 				res.add(i);
 		}
@@ -302,8 +357,29 @@ public class LanguageModel {
 		return markov.getCount(string);
 	}
 	
-	public double getRelevance(String s1, String s2) {
+	public double getDistance(String s1, String s2) {
+		ArrayList<Double> v1 = wordVector.get(s1);
+		ArrayList<Double> v2 = wordVector.get(s2); 
 		
-		return topic.topicRelevanceScore(s1.split(" "), s2.split(" "));
+		if (v1 == null || v2 == null)
+			return 9999;
+		
+		return WordVector.euclidian(v1,v2);
 	}
+
+	public String[] getClosestWords(String word, int K) {
+		String[] res = new String[K];
+		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
+		for (String key : wordDatabase.keySet()) {
+			double dist = getDistance(word, key);
+			candidates.add(new StringDouble(key,dist));
+		}
+		Collections.sort(candidates);
+		for (int i=0;i<K;i++)
+			res[i] = candidates.get(i).s;
+		
+		return res;
+	}
+
+
 }

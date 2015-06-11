@@ -33,7 +33,12 @@ public class Main {
 			Scanner scanner = new Scanner(System.in);
 			String x = scanner.nextLine();
 			String y = scanner.nextLine();
-			System.out.println(languageModel.getRelevance(x, y));
+			System.out.println(languageModel.getDistance(x, y));
+			String[] bestX = languageModel.getClosestWords(x, 20);
+			String[] bestY = languageModel.getClosestWords(y, 20);
+			
+			System.out.println(Arrays.toString(bestX));
+			System.out.println(Arrays.toString(bestY));
 		}
 	}
 	
@@ -76,7 +81,6 @@ public class Main {
 				data = CorpusReader.readBrown(code+i);
 		
 			languageModel.trainMarkov(data);
-			languageModel.trainTopicModel(data);
 		}		
 	}
 	
@@ -87,6 +91,7 @@ public class Main {
 	private static LanguageModel loadCorpus() {
 		LanguageModel languageModel = new LanguageModel();
 
+		languageModel.loadDictionary("en");
 		languageModel.loadForbiddenDictionary("names__f.csv");
 		languageModel.loadForbiddenDictionary("names__m.csv");
 		languageModel.loadStopWords("names__f.csv");
@@ -99,13 +104,14 @@ public class Main {
 		languageModel.loadStopWords("stop-words_english_6_en.txt");
 		
 		//loading word dictionary
-		languageModel.loadDictionary("cmudict");
+		languageModel.loadSyllableDictionary("cmudict");
+		
+		languageModel.loadVectorModel("glove.6B.50d.txt");
 		for (int i=0;i<1;i++) {
 			System.err.println("TRAIN WIKI! " + i);
 			ArrayList<ArrayList<String>> data;
 			data = CorpusReader.readWikipedia("englishText_"+i*10000+"_"+(i+1)*1000+"0");
 			languageModel.trainMarkov(data);
-			languageModel.trainTopicModel(data);
 			
 		}
 		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
