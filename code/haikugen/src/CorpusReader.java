@@ -53,8 +53,9 @@ public class CorpusReader {
 	        	if (line.length() == 0 || (line.charAt(0) == '<' && line.charAt(line.length() - 1) == '>' ))
 	        		continue;
 	        	
-	        	//replace non-alphanumeric char into space
-	        	line = line.replaceAll("[^A-Za-z0-9 ]", " ");
+	        	//replace non-alphanumeric char into space, except separators (like space, dash,etc)
+	        	line = line.replaceAll("[^A-Za-z0-9., ]", " ");
+	        	line = line.replaceAll("[.,]", " . ");
 	        	line = line.trim();
 	        	//end of document: ignore
 	        	if (line.equalsIgnoreCase("ENDOFARTICLE"))

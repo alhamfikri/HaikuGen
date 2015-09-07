@@ -3,13 +3,16 @@
  * 
  * Class to storage Haiku. Records the Haiku's original text, parsed text, and its POS-Tag.
  */
-public class Haiku {
+public class Haiku implements Comparable<Haiku>{
 	
 	private String originalText;
 	private String[][] text;
 	private String[][] tag;
 	private int part;
-	
+	private String topic;
+	double topicScore;
+	double meaningScore;
+	double beautyScore;
 	/**
 	 * construct the Haiku based on given text.
 	 * 
@@ -34,16 +37,29 @@ public class Haiku {
 		}	
 	}
 	
+	public Haiku(String[][] result, String[][] tag, double topicScore, double meaningScore,
+			int j) {
+		this.text = result;
+		this.tag = tag;
+		this.topicScore = topicScore;
+		this.meaningScore = meaningScore;
+		this.part = result.length;
+	}
+
 	/**
 	 * Display the haiku in (hopefully) beautiful format
 	 */
 	public void print(){
+		System.out.println("TOPIC = "+topic);
 		for (int i=0;i<part;i++) {
 			for (int j=0;j<text[i].length;j++) {
-				System.out.print(text[i][j]+"/"+tag[i][j]+" ");
+				System.out.print(text[i][j]+" ");
 			}
 			System.out.println();
 		}
+		//System.out.println("Haiku topic closeness score = "+topicScore);
+		//System.out.println("Haiku meaningful score = "+meaningScore);
+		
 	}
 
 	/**
@@ -52,6 +68,26 @@ public class Haiku {
 	 */
 	public String[][] getTag() {
 		return tag;
+	}
+
+	@Override
+	public int compareTo(Haiku o) {
+		
+		if (o.getTotalScore() - this.getTotalScore() < 0) return -1;
+		if (o.getTotalScore() - this.getTotalScore() > 0) return 1;
+		return 0;
+	}
+
+	public double getTotalScore() {
+		return meaningScore + topicScore;
+	}
+
+	public String[][] getWord() {
+		return text;
+	}
+
+	public void setTopics(String string) {
+		topic = string;
 	}
 	
 
