@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="AI Haiku Generator: Computer poetry">
+    <meta name="author" content="Aji Alham Fikri and Daniel Winterstein">
+    <link rel="icon" href="/static/img/favicon.ico">
+
+    <title>AI Haiku Generator</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+	<link rel="stylesheet/less" type="text/css" href="/static/css/coinvent.less">
+  </head>
+
+  <body role="document">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">AI Haiku</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav><!-- ./navbar -->
+
+    <div id='main-container' class="container" role="main">
+      
+     <div class="jumbotron">
+      	<form id='topic-form' role='form' class='form-inline'>
+      		<div class='form-group'>
+      			<label>Topic</label>
+      			<input id='topic-input' class='form-control' name='topic' type='text'>      			
+      		</div>
+      		<button class='btn btn-default'>Compose Haiku</button>
+      	</form>
+     </div>
+     
+     <div class="jumbotron output-wrapper">
+   		<h3>AI Haiku</h3>
+   		<div id='haiku-output'>
+   			<!-- Haiku go here -->
+   		</div>
+   	</div>      	
+
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="/static/lib/less.js" type="text/javascript"></script>
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>	
+    <script src="/static/lib/SJTest.js" type="text/javascript"></script>
+    <script src="/static/lib/Templates.js" type="text/javascript"></script>
+    
+    <script src="haikugen.js" type="text/javascript"></script>    	
+    
+  </body>
+</html>
