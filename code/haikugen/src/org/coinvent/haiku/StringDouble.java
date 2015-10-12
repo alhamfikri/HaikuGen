@@ -1,3 +1,5 @@
+package org.coinvent.haiku;
+
 
 public class StringDouble implements Comparable<StringDouble>{
 	public String s;

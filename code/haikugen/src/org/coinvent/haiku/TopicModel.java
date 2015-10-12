@@ -1,6 +1,14 @@
+package org.coinvent.haiku;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.net.ssl.SSLEngineResult.Status;
+
+import winterwell.utils.containers.Containers;
 
 
 public class TopicModel {
@@ -73,10 +81,15 @@ public class TopicModel {
 			HashMap<String,Double> m = count.get(sentence[i]);
 			if (m == null)
 				continue;
-			System.err.println(sentence[i]);
-			System.err.println(m.size());
+//			System.err.println(sentence[i]);
+//			System.err.println(m.size());
 			
-			m.forEach((k, v) -> res.merge(k, v, (v1, v2) -> v1 + v2));
+			for(String k : m.keySet()) {
+				Double v = m.get(k);
+				if (v==null) continue;
+				Containers.plus(res, k, v);				
+			}			
+			// m.forEach((k, v) -> res.merge(k, v, (v1, v2) -> v1 + v2));
 
 			System.err.println(res.size());
 		}
@@ -87,14 +100,18 @@ public class TopicModel {
 		}
 		
 		final double len2 = Math.sqrt(len);
-		System.err.println("Topic vector length "+len2);
-		res.forEach((k, v) -> res.put(k, v / len2));
+//		System.err.println("Topic vector length "+len2);
+		// Normalise
+		//res.forEach((k, v) -> res.put(k, v / len2));
+		for(String k : res.keySet().toArray(new String[0])) {
+			res.put(k, res.get(k) / len2);
+		}				
 		
 		len = 0.0;
 		for (double value : res.values()) {
 		    len += (value * value);
 		}
-		System.err.println(Math.sqrt(len));
+//		System.err.println(Math.sqrt(len));
 		return res;
 		
 	}

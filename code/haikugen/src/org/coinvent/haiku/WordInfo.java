@@ -1,3 +1,5 @@
+package org.coinvent.haiku;
+
 
 public class WordInfo {
 	public String word;

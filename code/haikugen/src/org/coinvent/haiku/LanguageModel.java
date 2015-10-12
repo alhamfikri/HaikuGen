@@ -1,3 +1,5 @@
+package org.coinvent.haiku;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -69,6 +73,16 @@ public class LanguageModel {
 			topicTagSet.add(topicTags[i]);
 		
 		addSpecialSeparator("...",":");
+		addSpecialSeparator("..",":");
+		addSpecialSeparator(",",":");
+		addSpecialSeparator("--",":");
+		addSpecialSeparator(";",":");
+		addSpecialSeparator(",",",");
+		addSpecialSeparator(".",".");
+		addSpecialSeparator("",".");
+		addSpecialSeparator("?",".");
+		addSpecialSeparator("!",".");
+		addSpecialSeparator("..",".");
 	}
 	
 	private void addSpecialSeparator(String separator, String tag) {
@@ -228,10 +242,15 @@ public class LanguageModel {
 			int M = data.get(i).size();
 			String prev = "/s";
 			for (int j=0;j<M;j++) {
+				if (data.get(i).get(j).equals("/s"))
+					data.get(i).set(j, "/s");
 				if (wordDatabase.get(data.get(i).get(j)) != null && wordDatabase.get(prev) != null)
 					markov.add(prev,data.get(i).get(j));
 				prev = data.get(i).get(j);
+				
 			}
+			if (wordDatabase.get(prev) != null)
+				markov.add(prev,"/s");
 			/*
 			//updates list of possible words
 			String tags[] = HaikuPOSTagger.tag(data.get(i));
@@ -292,6 +311,10 @@ public class LanguageModel {
 	 */
 	public ArrayList<Integer> getPossibleSyllables(String tag) {
 		ArrayList<Integer> res = new ArrayList<Integer>();
+		if (tag.length() < 2){
+			res.add(0);
+			return res;
+		}			
 		for (int i=0;i<10;i++){
 			if (wordlist[i].get(tag) != null) 
 				res.add(i);
@@ -300,6 +323,17 @@ public class LanguageModel {
 		return res;
 	}
 
+	/**
+	 * get a syllable for count a given word
+	 * @param word
+	 * @return int: the number of sylable
+	 */
+	public int getSyllable(String word){
+		WordInfo w = wordDatabase.get(word);
+		if (w == null) return 0;
+		return w.syllables;
+	}
+	
 	public int getMarkovCount(String string, String word2) {
 		return markov.getCount(string,word2);
 	}
@@ -363,15 +397,57 @@ public class LanguageModel {
 		
 		if (v1 == null || v2 == null)
 			return 9999;
+		return -WordVector.cosineSimilarity(v1,v2);
 		
-		return WordVector.euclidian(v1,v2);
+		//return WordVector.dotProduct(v1,v2);
+		//return WordVector.euclidian(v1,v2);
 	}
 
+
+	
+	public double getDistance(ArrayList<Double> v1, String s2) {
+		ArrayList<Double> v2 = wordVector.get(s2); 
+		
+		if (v1 == null || v2 == null)
+			return 9999;
+		
+		return -WordVector.cosineSimilarity(v1,v2);
+		//return WordVector.dotProduct(v1,v2);
+		//return WordVector.euclidian(v1,v2);
+	}
+	
 	public String[] getClosestWords(String word, int K) {
 		String[] res = new String[K];
 		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
+		
+		//construct vector representation of the keyword
+		ArrayList<Double> topicVector = new ArrayList<Double>();
+		for (int i=0;i<300;i++)
+			topicVector.add(.0);
+		
+		String[] words = word.split(" ");
+		for (int i=0;i<words.length;i++) {
+			ArrayList<Double> v = getVector(words[i]);
+			if (v != null)
+				topicVector = WordVector.add(topicVector, v);	
+		}
+		
 		for (String key : wordDatabase.keySet()) {
-			double dist = getDistance(word, key);
+			double dist = getDistance(topicVector, key);
+			candidates.add(new StringDouble(key,dist));
+		}
+		Collections.sort(candidates);
+		for (int i=0;i<K;i++)
+			res[i] = candidates.get(i).s;
+		
+		return res;
+	}
+	
+	public String[] getClosestWords(ArrayList<Double> v, int K) {
+		String[] res = new String[K];
+		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
+		for (String key : wordDatabase.keySet()) {
+			double dist = getDistance(v, key);
 			candidates.add(new StringDouble(key,dist));
 		}
 		Collections.sort(candidates);
@@ -381,5 +457,86 @@ public class LanguageModel {
 		return res;
 	}
 
+	public String[] getClosestPattern(String x, String y, String z, int K) {
+		//pattern: y - x = result - z
+		//ex: men to women is like king to [queen]
+		ArrayList<Double> vx = wordVector.get(x);
+		ArrayList<Double> vy = wordVector.get(y); 
+		ArrayList<Double> vz = wordVector.get(z); 
+		
+		if (vx == null || vy == null || vz == null)
+			return null;
+		
+		ArrayList<Double> distanceVector = WordVector.subtract(vy, vx);
+		distanceVector = WordVector.add(distanceVector,vz);
+		return getClosestWords(distanceVector,K);
+	}
 
+	public boolean isTopicTag(String topic) {
+		return topicTagSet.contains(topic);
+	}
+	
+	public ArrayList<Double> getVector(String word){
+		return wordVector.get(word);
+	}
+
+	public String getRandomTopic(){
+		List<String> keysAsArray = new ArrayList<String>(wordVector.keySet());
+		Random r = new Random();
+
+		return keysAsArray.get(r.nextInt(keysAsArray.size()));
+	}
+	
+	public String[] getClosestTopic(String text){
+		String words[] = text.split(" ");
+		String res[] = new String[20];
+		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
+		
+		
+		for (String key : wordDatabase.keySet()) {
+			double dist = 0.0;
+			double n = 0.0;
+			for (int i=0;i<words.length;i++){
+				double tmp = getDistance(key,words[i]);
+				if (tmp < 9999){
+					dist += tmp*tmp;
+					n++;
+					}
+			}
+			dist /= n;
+			if (n > 0)
+				candidates.add(new StringDouble(key, -dist));
+		}
+		Collections.sort(candidates);
+		for (int i=0;i<20;i++)
+			res[i] = candidates.get(i).s;
+		
+		return res;
+	}
+
+	public String getClosestExcludedTopic(String text) {
+		String words[] = text.split(" ");
+		String res = "";
+		double best = 0;
+		for (String key : wordDatabase.keySet()) {
+			double dist = 0.0;
+			double n = 0.0;
+			for (int i=0;i<words.length;i++){
+				double tmp = getDistance(key,words[i]);
+				if (tmp < 9999){
+					dist += tmp*tmp;
+					n++;
+					}
+				//excluded topic penalty
+				if (key.equalsIgnoreCase(words[i]))
+					dist -= 99999999;
+			}
+			dist /= n;
+			if (best < dist) {
+				best = dist;
+				res = key;
+			}
+		}
+		return res;
+	}
 }
