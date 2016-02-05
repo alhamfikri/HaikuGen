@@ -157,7 +157,7 @@ public class HaikuMain {
 		//loading word dictionary
 		languageModel.loadSyllableDictionary("cmudict");
 		
-		languageModel.loadVectorModel("glove.6B.300d.txt");
+//		languageModel.loadVectorModel("glove.6B.300d.txt");
 		for (int i=0;i<10;i++) {
 			System.err.print(".");
 			System.err.flush();

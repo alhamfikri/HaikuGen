@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
+import no.uib.cipr.matrix.DenseVector;
+import no.uib.cipr.matrix.Vector;
 import winterwell.utils.Utils;
 
 
@@ -15,7 +17,7 @@ public class HaikuGenerator {
 	private int syllableConstraint[];
 	private int haikuSize;
 	private int backedoff;
-	private ArrayList<Double> topicVector;
+	private Vector topicVector;
 	/**
 	 * Constructor
 	 * @param languageModel : set corpus for words and relational information
@@ -62,7 +64,7 @@ public class HaikuGenerator {
 		}
 		
 		String topic = "";
-		ArrayList<Double> focusedTopicVector = topicVector;
+		Vector focusedTopicVector = topicVector;
 		double topicScore = 0.0;
 		int topicSplit = 1 + random.nextInt(2);
 		int topicCount = 0;
@@ -270,15 +272,13 @@ public class HaikuGenerator {
 		assert ! Utils.isBlank(keywords);
 		//backedoff = 0;
 		//System.err.println("Creating haiku, main idea "+keywords);
-		topicVector = new ArrayList<Double>();
-		for (int i=0;i<300;i++)
-			topicVector.add(.0);
+		topicVector = new DenseVector(300);
 		
 		String[] words = keywords.split(" ");
 		for (int i=0;i<words.length;i++) {
-			ArrayList<Double> v = languageModel.getVector(words[i]);
+			Vector v = languageModel.getVector(words[i]);
 			if (v != null)
-				topicVector = WordVector.add(topicVector, v);	
+				topicVector = topicVector.add(v);	
 		}
 		//System.out.println("before "+topicVector.get(0));
 		Haiku res = generate();

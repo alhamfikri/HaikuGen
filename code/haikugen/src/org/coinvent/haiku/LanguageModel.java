@@ -16,8 +16,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import no.uib.cipr.matrix.DenseVector;
+import no.uib.cipr.matrix.Vector;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import winterwell.nlp.vectornlp.GloveWordVectors;
+import winterwell.utils.Utils;
 
 /**
  * 
@@ -35,8 +39,8 @@ public class LanguageModel {
 
 	//list of words, divided by its syllables and POS tag
 	private HashMap<String,HashSet<String>> wordlist[];
-	//word vector
-	private HashMap<String,ArrayList<Double>> wordVector;
+	
+	static final GloveWordVectors glove = new GloveWordVectors();
 	
 	final String[] topicTags = {"JJ", "JJR", "JJS", "NN", "NNS" , "NNP" , "NNPS" , "RB", "RBS", "RBR", 
 								"VB", "VBD" , "VBG", "VBN" , "VBP" , "VBZ" };
@@ -60,8 +64,7 @@ public class LanguageModel {
 		unusedWords = new HashSet<String>();
 		stopWords = new HashSet<String>();
 		
-		wordDatabase = new HashMap<String,WordInfo>();
-		wordVector = new HashMap<String,ArrayList<Double>>();
+		wordDatabase = new HashMap<String,WordInfo>();		
 		wordDatabase.put("/s", new WordInfo("/s", 0, null) );
 		
 		wordlist = new HashMap[10];
@@ -151,34 +154,7 @@ public class LanguageModel {
 		
 	}
 	
-	public void loadVectorModel(String filepath) {
-		String currentDirectory = System.getProperty("user.dir");
-		String line = null;
-		
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/wordvector/" + filepath));
-			String input;
-			while ((input = br.readLine()) != null) {
-				String[] data = input.split(" ");
-				String word = data[0];
-				
-				if (wordDatabase.get(word) == null || stopWords.contains(word))
-					continue;
-				
-				ArrayList<Double> vector = new ArrayList<Double>();
-				for (int i=1;i<data.length;i++) {
-					vector.add(Double.valueOf(data[i]));
-				}
-				
-				wordVector.put(word,vector);
-				
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		
-	}
+	
 	/**
 	 * Open CMUDictionary dictionary for initial word base
 	 * @param filepath location of CMUDict
@@ -391,9 +367,9 @@ public class LanguageModel {
 		return markov.getCount(string);
 	}
 	
-	public double getDistance(String s1, String s2) {
-		ArrayList<Double> v1 = wordVector.get(s1);
-		ArrayList<Double> v2 = wordVector.get(s2); 
+	public double getDistance(String s1, String s2) {		
+		Vector v1 = glove.getVector(s1);
+		Vector v2 = glove.getVector(s2); 
 		
 		if (v1 == null || v2 == null)
 			return 9999;
@@ -405,8 +381,8 @@ public class LanguageModel {
 
 
 	
-	public double getDistance(ArrayList<Double> v1, String s2) {
-		ArrayList<Double> v2 = wordVector.get(s2); 
+	public double getDistance(Vector v1, String s2) {
+		Vector v2 = glove.getVector(s2); 
 		
 		if (v1 == null || v2 == null)
 			return 9999;
@@ -421,15 +397,13 @@ public class LanguageModel {
 		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
 		
 		//construct vector representation of the keyword
-		ArrayList<Double> topicVector = new ArrayList<Double>();
-		for (int i=0;i<300;i++)
-			topicVector.add(.0);
+		Vector topicVector = new DenseVector(300);
 		
 		String[] words = word.split(" ");
 		for (int i=0;i<words.length;i++) {
-			ArrayList<Double> v = getVector(words[i]);
+			Vector v = getVector(words[i]);
 			if (v != null)
-				topicVector = WordVector.add(topicVector, v);	
+				topicVector = topicVector.add(v);	
 		}
 		
 		for (String key : wordDatabase.keySet()) {
@@ -443,7 +417,7 @@ public class LanguageModel {
 		return res;
 	}
 	
-	public String[] getClosestWords(ArrayList<Double> v, int K) {
+	public String[] getClosestWords(Vector v, int K) {
 		String[] res = new String[K];
 		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
 		for (String key : wordDatabase.keySet()) {
@@ -460,15 +434,16 @@ public class LanguageModel {
 	public String[] getClosestPattern(String x, String y, String z, int K) {
 		//pattern: y - x = result - z
 		//ex: men to women is like king to [queen]
-		ArrayList<Double> vx = wordVector.get(x);
-		ArrayList<Double> vy = wordVector.get(y); 
-		ArrayList<Double> vz = wordVector.get(z); 
+		Vector vx = getVector(x);
+		Vector vy = getVector(y); 
+		Vector vz = getVector(z); 
 		
 		if (vx == null || vy == null || vz == null)
 			return null;
 		
-		ArrayList<Double> distanceVector = WordVector.subtract(vy, vx);
-		distanceVector = WordVector.add(distanceVector,vz);
+		Vector vyx = vy.copy().add(-1, vx);
+//		ArrayList<Double> distanceVector = WordVector.subtract(vy, vx);
+		Vector distanceVector = vyx.add(vz); // WordVector.add(distanceVector,vz);
 		return getClosestWords(distanceVector,K);
 	}
 
@@ -476,15 +451,16 @@ public class LanguageModel {
 		return topicTagSet.contains(topic);
 	}
 	
-	public ArrayList<Double> getVector(String word){
-		return wordVector.get(word);
+	public Vector getVector(String word){
+		return glove.getVector(word);
 	}
 
 	public String getRandomTopic(){
-		List<String> keysAsArray = new ArrayList<String>(wordVector.keySet());
-		Random r = new Random();
-
-		return keysAsArray.get(r.nextInt(keysAsArray.size()));
+		return Utils.getRandomMember(glove.getWords());
+//		List<String> keysAsArray = new ArrayList<String>(wordVector.keySet());
+//		Random r = new Random();
+//
+//		return keysAsArray.get(r.nextInt(keysAsArray.size()));
 	}
 	
 	public String[] getClosestTopic(String text){

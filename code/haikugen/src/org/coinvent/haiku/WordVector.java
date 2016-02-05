@@ -2,6 +2,9 @@ package org.coinvent.haiku;
 
 import java.util.ArrayList;
 
+import no.uib.cipr.matrix.Vector;
+import no.uib.cipr.matrix.Vector.Norm;
+
 
 public class WordVector {
 
@@ -51,6 +54,16 @@ public class WordVector {
 		double dot = dotProduct(v1, v2);
 		double len1 = Math.sqrt(dotProduct(v1, v1));
 		double len2 = Math.sqrt(dotProduct(v2, v2)); 
+		
+		return dot/(len1*len2);
+	}
+	
+	public static double cosineSimilarity(Vector v1,
+			Vector v2) {
+		
+		double dot = v1.dot(v2);
+		double len1 = v1.norm(Norm.Two);
+		double len2 = v2.norm(Norm.Two);; 
 		
 		return dot/(len1*len2);
 	}
