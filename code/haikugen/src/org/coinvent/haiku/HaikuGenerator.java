@@ -272,13 +272,14 @@ public class HaikuGenerator {
 		assert ! Utils.isBlank(keywords);
 		//backedoff = 0;
 		//System.err.println("Creating haiku, main idea "+keywords);
-		topicVector = new DenseVector(300);
+		topicVector = null;
 		
 		String[] words = keywords.split(" ");
 		for (int i=0;i<words.length;i++) {
 			Vector v = languageModel.getVector(words[i]);
-			if (v != null)
-				topicVector = topicVector.add(v);	
+			if (v == null) continue;
+			if (topicVector==null) topicVector = v.copy();
+			else topicVector = topicVector.add(v);	
 		}
 		//System.out.println("before "+topicVector.get(0));
 		Haiku res = generate();

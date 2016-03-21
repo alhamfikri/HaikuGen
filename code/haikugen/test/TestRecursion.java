@@ -12,6 +12,7 @@ import winterwell.utils.Utils;
 /**
  * What happens if we feed the output Haiku back in as the concept?
  * Will it converge?
+ * Nope. But interesting, and the underlying topic feels strong.
  * @author daniel
  *
  */
@@ -19,7 +20,7 @@ public class TestRecursion {
 
 	@Test
 	public void testRecursion() {
-		String topic = "love";
+		String topic = "poetry";
 		
 		Haiku[] haikus = HaikuMain.loadHaikus();
 		LanguageModel languageModel = HaikuMain.loadCorpus();

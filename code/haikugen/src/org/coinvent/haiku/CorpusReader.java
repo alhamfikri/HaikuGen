@@ -5,7 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
+/**
+ * 
+ * Data?? https://dumps.wikimedia.org/enwiki/latest/
+ * 
+ * @author Aji
+ *
+ */
 public class CorpusReader {
 	/**
 	 * Reads brown corpus

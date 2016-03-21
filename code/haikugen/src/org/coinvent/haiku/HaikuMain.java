@@ -158,13 +158,17 @@ public class HaikuMain {
 		languageModel.loadSyllableDictionary("cmudict");
 		
 //		languageModel.loadVectorModel("glove.6B.300d.txt");
-		for (int i=0;i<10;i++) {
-			System.err.print(".");
-			System.err.flush();
-			ArrayList<ArrayList<String>> data;
-			data = CorpusReader.readWikipedia("englishText_"+i*10000+"_"+(i+1)*1000+"0");
-			languageModel.trainMarkov(data);
-		}
+		
+		// TODO data from somewhere??
+//		for (int i=0;i<10;i++) {
+//			System.err.print(".");
+//			System.err.flush();
+//			ArrayList<ArrayList<String>> data;
+//			data = CorpusReader.readWikipedia("englishText_"+i*10000+"_"+(i+1)*1000+"0");
+//			assert data != null;
+//			languageModel.trainMarkov(data);
+//		}
+		
 		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
 		brownOpen(languageModel,44,"ca");
 		brownOpen(languageModel,75,"cg");
