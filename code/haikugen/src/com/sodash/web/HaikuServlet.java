@@ -12,7 +12,7 @@ import org.coinvent.haiku.HaikuGenerator;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 
-import winterwell.utils.Proc;
+import com.winterwell.utils.Proc;
 import winterwell.utils.Utils;
 
 import com.winterwell.utils.io.FileUtils;
