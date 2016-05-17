@@ -6,14 +6,17 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
+import winterwell.utils.Utils;
 import winterwell.utils.io.FileUtils;
+import winterwell.utils.io.LineReader;
 
 
 public class HaikuMain {
 	public static void main(String args[]){		
-		Haiku haikus[] = loadHaikus();
+		List<Haiku> haikus = loadHaikus();
 		LanguageModel languageModel = loadCorpus();
 		
 		
@@ -98,17 +101,16 @@ public class HaikuMain {
 		}
 	}
 	
-	public static Haiku[] loadHaikus() {		
+	public static List<Haiku> loadHaikus() {		
 		File currentDirectory = FileUtils.getWorkingDirectory();
-		BufferedReader br = FileUtils.getReader(new File(currentDirectory, "res/model/haiku"));
-		String input = br.readLine();
-		int i = 0;
-		int N = Integer.parseInt(input);
-		Haiku[] haikus = new Haiku[N];		
-		while ((input = br.readLine()) != null) {
-			haikus[i++] = new Haiku(input);
-			//haikus[i-1].print();
+		File fhaikus = new File(currentDirectory, "res/model/haiku");
+		List<Haiku> haikus = new ArrayList();
+		LineReader lr = new LineReader(fhaikus);
+		for (String line : lr) {
+			if (Utils.isBlank(line)) continue;
+			haikus.add(new Haiku(line));
 		}
+		lr.close();
 		return haikus;
 	}
 

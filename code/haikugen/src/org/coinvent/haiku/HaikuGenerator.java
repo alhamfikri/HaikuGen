@@ -3,6 +3,7 @@ package org.coinvent.haiku;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import no.uib.cipr.matrix.DenseVector;
@@ -13,9 +14,8 @@ import winterwell.utils.Utils;
 public class HaikuGenerator {
 
 	private LanguageModel languageModel;
-	private Haiku haikus[];
+	private List<Haiku> haikus;
 	private int syllableConstraint[];
-	private int haikuSize;
 	private int backedoff;
 	private Vector topicVector;
 	/**
@@ -24,11 +24,10 @@ public class HaikuGenerator {
 	 * @param haikus : set haikus for generating the grammatical skeleton
 	 * @param syllables : syllables constraint, ex: [5,7,5]. Set 0 for no constraint
 	 */
-	public HaikuGenerator(LanguageModel languageModel, Haiku haikus[], int syllableConstraint[]){
+	public HaikuGenerator(LanguageModel languageModel, List<Haiku> haikus, int syllableConstraint[]){
 		this.languageModel = languageModel;
 		this.haikus = haikus;
 		this.syllableConstraint = syllableConstraint;
-		this.haikuSize = haikus.length;
 	}
 	
 	public Haiku generate() {
@@ -39,8 +38,9 @@ public class HaikuGenerator {
 		int syllable[][] = new int[3][];
 		
 		for (int i=0;i<3;i++){
-			int id = random.nextInt(haikuSize);
-			tag[i] = haikus[id].getTag()[i];
+			int id = random.nextInt(haikus.size());
+			Haiku haiku = haikus.get(id);
+			tag[i] = haiku.getTag()[i];
 
 			result[i] = new String[tag[i].length];
 			
@@ -50,9 +50,9 @@ public class HaikuGenerator {
 			//filter the words that will not be removed
 			if (Config.isKeep) {
 				for (int j=0;j<tag[i].length;j++){
-					if (languageModel.stopWords.contains(haikus[id].getWord()[i][j]) ){
-						penalty += languageModel.getSyllable(haikus[id].getWord()[i][j]);
-						result[i][j] = haikus[id].getWord()[i][j];
+					if (languageModel.stopWords.contains(haiku.getWord()[i][j]) ){
+						penalty += languageModel.getSyllable(haiku.getWord()[i][j]);
+						result[i][j] = haiku.getWord()[i][j];
 						keepList[j] = true;
 					}
 				}

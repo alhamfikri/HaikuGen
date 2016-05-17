@@ -1,5 +1,6 @@
 package org.coinvent.haiku;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.coinvent.haiku.Haiku;
 import org.coinvent.haiku.HaikuGenerator;
@@ -12,7 +13,7 @@ public class HaikuMainTest {
 
 	@Test
 	public void testLove() {
-		Haiku haikus[] = HaikuMain.loadHaikus();
+		List<Haiku> haikus = HaikuMain.loadHaikus();
 		LanguageModel languageModel = HaikuMain.loadCorpus();
 		int constraint[] = {5,7,5};
 		HaikuGenerator generator = new HaikuGenerator(languageModel, haikus, constraint);

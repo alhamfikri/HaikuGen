@@ -36,7 +36,7 @@ public class HaikuServlet implements IServlet {
 
 	private static boolean initFlag;
 	private static LanguageModel languageModel;
-	private static Haiku[] haikus;
+	private static List<Haiku> haikus;
 
 	static void init() {
 		if (initFlag) return;

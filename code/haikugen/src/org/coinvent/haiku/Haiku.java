@@ -55,8 +55,7 @@ public class Haiku implements Comparable<Haiku>{
 		System.out.println("TOPIC = "+topic);
 		System.out.println(toString());
 		//System.out.println("Haiku topic closeness score = "+topicScore);
-		//System.out.println("Haiku meaningful score = "+meaningScore);
-		
+		//System.out.println("Haiku meaningful score = "+meaningScore);		
 	}
 	
 	@Override
