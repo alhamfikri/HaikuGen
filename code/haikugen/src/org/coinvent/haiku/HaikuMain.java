@@ -1,11 +1,14 @@
 package org.coinvent.haiku;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
+
+import winterwell.utils.io.FileUtils;
 
 
 public class HaikuMain {
@@ -95,27 +98,17 @@ public class HaikuMain {
 		}
 	}
 	
-	public static Haiku[] loadHaikus() {
-		
-		String currentDirectory = System.getProperty("user.dir");
-		Haiku haikus[] = null;
-		
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/model/haiku"));
-			String input = br.readLine();
-			int i = 0;
-			int N = Integer.parseInt(input);
-			haikus = new Haiku[N];
-			
-			while ((input = br.readLine()) != null) {
-				haikus[i++] = new Haiku(input);
-				//haikus[i-1].print();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+	public static Haiku[] loadHaikus() {		
+		File currentDirectory = FileUtils.getWorkingDirectory();
+		BufferedReader br = FileUtils.getReader(new File(currentDirectory, "res/model/haiku"));
+		String input = br.readLine();
+		int i = 0;
+		int N = Integer.parseInt(input);
+		Haiku[] haikus = new Haiku[N];		
+		while ((input = br.readLine()) != null) {
+			haikus[i++] = new Haiku(input);
+			//haikus[i-1].print();
 		}
-		
 		return haikus;
 	}
 
