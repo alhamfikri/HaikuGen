@@ -12,7 +12,13 @@ import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import winterwell.utils.Utils;
 
+/**
+ * What is and isn’t haiku: http://www.litkicks.com/EssentialElementsofHaiku
+Lists of season marker words: https://en.wikipedia.org/wiki/Saijiki http://www.2hweb.net/haikai/renku/500ESWd.html
 
+ * @author daniel
+ *
+ */
 public class HaikuGenerator2 {
 
 	private LanguageModel languageModel;
