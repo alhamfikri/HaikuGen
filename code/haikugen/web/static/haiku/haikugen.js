@@ -6,24 +6,31 @@ $(function() {
 	assert($('#topic-form')).submit(function(event) {
 		event.preventDefault();
 		var topic = assert($('#topic-input')).val();
-		makeHaiku(topic);	
+		var topic2 = $('#topic-input2').val();
+		makeHaiku(topic, topic2);	
 		return false;
 	});		
 
+	var $apidoc = $('#api-doc');
+	var h = $apidoc.html();
+	h = h.replace(/_host_/g, window.location.host);
+	$apidoc.html(h);
+	
 });
 
 /**
  * 
  * @param topic {!string} A word or phrase to compose about.
  */
-function makeHaiku(topic) {
+function makeHaiku(topic, topic2) {
 	if ( ! topic) {
 		return;
 	}
 	
 	$('#haiku-output').text("Composing...");
 	
-	$.get('/haiku.json?topic='+escape(topic))
+	var url = '/haiku.json?topic='+escape(topic)+'&topic2='+(topic2? escape(topic2) : '');
+	$.get(url)
 	.then(function(result) {
 		console.log('Haiku',result);
 		$('#haiku-output').html("");		

@@ -10,11 +10,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+
+import com.winterwell.utils.MathUtils;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
@@ -42,9 +45,11 @@ public class LanguageModel {
 	
 	static final GloveWordVectors glove = new GloveWordVectors();
 	
-	final String[] topicTags = {"JJ", "JJR", "JJS", "NN", "NNS" , "NNP" , "NNPS" , "RB", "RBS", "RBR", 
-								"VB", "VBD" , "VBG", "VBN" , "VBP" , "VBZ" };
-	private HashSet<String> topicTagSet;
+	/**
+	 * The POS tags where we want topic-aligned choices
+	 */
+	private HashSet<String> topicTagSet = new HashSet(Arrays.asList("JJ", "JJR", "JJS", "NN", "NNS" , "NNP" , "NNPS" , "RB", "RBS", "RBR", 
+			"VB", "VBD" , "VBG", "VBN" , "VBP" , "VBZ"));
 	
 	//global list of removed words
 	private HashSet<String> unusedWords;
@@ -69,11 +74,7 @@ public class LanguageModel {
 		
 		wordlist = new HashMap[10];
 		for (int i=0;i<10;i++)
-			wordlist[i] = new HashMap<String,HashSet<String>>();
-		
-		topicTagSet = new HashSet<String>();
-		for (int i=0;i<topicTags.length;i++)
-			topicTagSet.add(topicTags[i]);
+			wordlist[i] = new HashMap<String,HashSet<String>>();			
 		
 		addSpecialSeparator("...",":");
 		addSpecialSeparator("..",":");
@@ -359,7 +360,9 @@ public class LanguageModel {
 	}
 
 	public double getMarkovProbability(String prev, String next) {
-		return markov.getProbability(prev,next);
+		double p = markov.getProbability(prev,next) + 0.0000001;		
+		assert MathUtils.isProb(p) && p!=0 : prev+" -> "+next;
+		return p;
 	}
 
 	public int getUnigramCount(String string) {

@@ -1,5 +1,7 @@
 package org.coinvent.haiku;
 
+import winterwell.utils.StrUtils;
+
 
 public class StringDouble implements Comparable<StringDouble>{
 	public String s;
@@ -16,5 +18,10 @@ public class StringDouble implements Comparable<StringDouble>{
 		if (d > o.d)
 			return 1;
 		return 0;
+	}
+	
+	@Override
+	public String toString() {
+		return s+":"+StrUtils.toNSigFigs(d, 2);
 	}
 }

@@ -12,6 +12,7 @@ import java.util.Scanner;
 import winterwell.utils.Utils;
 import winterwell.utils.io.FileUtils;
 import winterwell.utils.io.LineReader;
+import winterwell.utils.reporting.Log;
 
 
 public class HaikuMain {
@@ -111,6 +112,7 @@ public class HaikuMain {
 			haikus.add(new Haiku(line));
 		}
 		lr.close();
+		Log.d("haikus", "loaded corpus of "+haikus.size()+" haikus");
 		return haikus;
 	}
 
@@ -135,7 +137,7 @@ public class HaikuMain {
 	 */
 	public static LanguageModel loadCorpus() {
 		LanguageModel languageModel = new LanguageModel();
-		System.err.print("Preparing..\nIt may take a minute");
+		Log.d("haiku", "Preparing LanguageModel... It may take a minute");
 		languageModel.loadDictionary("en");
 		languageModel.loadForbiddenDictionary("names__f.csv");
 		languageModel.loadForbiddenDictionary("names__m.csv");
@@ -147,23 +149,10 @@ public class HaikuMain {
 		languageModel.loadStopWords("stop-words_english_4_google_en.txt");
 		languageModel.loadStopWords("stop-words_english_5_en.txt");
 		languageModel.loadStopWords("stop-words_english_6_en.txt");
-		
-		
+				
 		//loading word dictionary
 		languageModel.loadSyllableDictionary("cmudict");
-		
-//		languageModel.loadVectorModel("glove.6B.300d.txt");
-		
-		// TODO data from somewhere??
-//		for (int i=0;i<10;i++) {
-//			System.err.print(".");
-//			System.err.flush();
-//			ArrayList<ArrayList<String>> data;
-//			data = CorpusReader.readWikipedia("englishText_"+i*10000+"_"+(i+1)*1000+"0");
-//			assert data != null;
-//			languageModel.trainMarkov(data);
-//		}
-		
+
 		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
 		brownOpen(languageModel,44,"ca");
 		brownOpen(languageModel,75,"cg");
@@ -171,8 +160,8 @@ public class HaikuMain {
 		brownOpen(languageModel,24,"ch");
 		brownOpen(languageModel,20,"ck");
 		brownOpen(languageModel,9,"cr");
-		
-		System.err.println("\nDONE");
+				
+		Log.d("haiku", "...prepared LanguageModel");
 		return languageModel;
 	}
 }

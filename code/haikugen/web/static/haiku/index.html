@@ -43,10 +43,16 @@
       
      <div class="jumbotron">
       	<form id='topic-form' role='form' class='form-inline'>
-      		<div class='form-group'>
-      			<label>Topic</label>
-      			<input id='topic-input' class='form-control' name='topic' type='text'>      			
-      		</div>
+      		<div class='flex-container'>
+	      		<div class='form-group'>
+	      			<label>First Topic</label>
+	      			<input id='topic-input' class='form-control' name='topic' type='text'>      			
+	      		</div>
+	      		<div class='form-group'>
+	      			<label>Second Topic (optional)</label>
+	      			<input id='topic-input2' class='form-control' name='topic2' type='text'>      			
+	      		</div>
+	      	</div>
       		<button class='btn btn-default'>Compose Haiku</button>
       	</form>
      </div>
@@ -57,6 +63,12 @@
    			<!-- Haiku go here -->
    		</div>
    	</div>      	
+
+	<div id='api-doc'>	
+	API: Call http://_host_/haiku.json with the parameters topic and topic2, e.g. 
+	<a href='http://_host_/haiku.json?topic=love&topic2=food'>http://_host_/haiku.json?topic=love&topic2=food</a>. 
+	The server will return haiku in a json format.
+	</div>
 
     </div> <!-- /container -->
 

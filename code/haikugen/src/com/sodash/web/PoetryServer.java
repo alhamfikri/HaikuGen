@@ -3,6 +3,8 @@ package com.sodash.web;
 import java.io.File;
 import java.util.logging.Level;
 
+import org.coinvent.haiku.LanguageModel;
+
 import winterwell.utils.gui.GuiUtils;
 import winterwell.utils.reporting.LogFile;
 import winterwell.utils.time.Dt;
@@ -17,21 +19,25 @@ import com.winterwell.utils.web.WebUtils;
 
 /**
  * Run this! It starts up a web-server.
+ * 
+ * java -Xmx2g -cp poetry-server.jar:lib/* com.sodash.web.PoetryServer
+ * 
+ * 
  * @author Daniel
  *
  */
-public class SimpleServer {
+public class PoetryServer {
 
 	private ServerConfig config;
 	private JettyLauncher jl;
 
-	public SimpleServer(ServerConfig config) {
+	public PoetryServer(ServerConfig config) {
 		this.config = config;		
 	}
 	
 	static LogFile logFile;
 	
-	public static SimpleServer app;
+	public static PoetryServer app;
 	
 	public ServerConfig getConfig() {
 		return config;
@@ -40,17 +46,17 @@ public class SimpleServer {
 	public static void main(String[] args) {
 		// Load config, if we have any
 		ServerConfig config = new ServerConfig();
-		File props = new File("config/ServerConfig.properties");		
-		config = ArgsParser.parse(config, args, props, null);
+		File props = new File("config/haiku.properties");		
+		config = ArgsParser.getConfig(config, args, props, null);
 		
 		// Log file - if not already set by run()
 		assert logFile==null;
-		logFile = new LogFile(new File(config.webAppDir, "SimpleServer.log"));
+		logFile = new LogFile(new File(config.webAppDir, "PoetryServer.log"));
 		// keep 14 days of log files
 		logFile.setLogRotation(new Dt(24, TUnit.HOUR), 14);
 		
 		// Run it!
-		app = new SimpleServer(config);
+		app = new PoetryServer(config);
 		app.run();
 		
 		// Open test view?
@@ -58,6 +64,9 @@ public class SimpleServer {
 			Log.i("init", "Open links in local browser...");
 			WebUtils.display(WebUtils.URI("http://localhost:"+config.port+"/static/haiku/index.html"));
 		}
+		// prod data loading, by asking "what is love?"
+		LanguageModel lm = new LanguageModel();
+		lm.getVector("love");
 	}
 
 	public void run() {

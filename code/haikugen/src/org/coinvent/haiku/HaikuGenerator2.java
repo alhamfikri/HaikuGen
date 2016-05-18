@@ -6,25 +6,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import com.winterwell.utils.MathUtils;
+
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import winterwell.utils.Utils;
 
 
-public class HaikuGenerator {
+public class HaikuGenerator2 {
 
 	private LanguageModel languageModel;
 	private List<Haiku> haikus;
 	private int syllableConstraint[];
 	private int backedoff;
 	private Vector topicVector;
+	private String topic2;
+	private String topic1;
 	/**
 	 * Constructor
 	 * @param languageModel : set corpus for words and relational information
 	 * @param haikus : set haikus for generating the grammatical skeleton
 	 * @param syllables : syllables constraint, ex: [5,7,5]. Set 0 for no constraint
 	 */
-	public HaikuGenerator(LanguageModel languageModel, List<Haiku> haikus, int syllableConstraint[]){
+	public HaikuGenerator2(LanguageModel languageModel, List<Haiku> haikus, int syllableConstraint[]){
 		Utils.check4null(languageModel, haikus, syllableConstraint);
 		this.languageModel = languageModel;
 		this.haikus = haikus;
@@ -69,52 +73,41 @@ public class HaikuGenerator {
 		// Fill in words
 		double topicScore = 0.0;
 		int topicCount=0;
-		for (int i=0;i<postagFromLineWord.length;i++){
-			String words[] = null;
-			
+		for (int i=0;i<postagFromLineWord.length;i++){						
 			for (int j=0;j<postagFromLineWord[i].length;j++){								
-				words = languageModel.getWordlist(postagFromLineWord[i][j], syllable[i][j]);
-				if (result[i][j] != null)
-					continue;
-				String prev = "/s";
-				if (j > 0)
-					prev = result[i][j-1];
-				String word = words[random.nextInt(words.length)];
+				if (result[i][j] != null) continue;
+				String posTag = postagFromLineWord[i][j];
+				String words[] = languageModel.getWordlist(posTag,syllable[i][j]);
+				String prev = j==0? "/s" : result[i][j-1];
 				ArrayList<StringDouble> wordPool = new ArrayList<StringDouble>();
 				ArrayList<StringDouble> uniWordPool = new ArrayList<StringDouble>();
 				
 				//put all next possible word into word pool
-				for (int k=0;k<words.length;k++){				
-					double dist = languageModel.getDistance(topicVector, words[k]);					
-					int count = languageModel.getMarkovCount(prev,words[k]);					
+				for (String word : words){				
+					double dist = languageModel.getDistance(topicVector, word);					
+					int count = languageModel.getMarkovCount(prev,word);					
 					if (count > 3) {
-						wordPool.add(new StringDouble(words[k],dist));
+						wordPool.add(new StringDouble(word,dist));
 					} else {
-						uniWordPool.add(new StringDouble(words[k],dist));
+						uniWordPool.add(new StringDouble(word,dist));
 					}
 				}
 				
 				//if exsists some words that has bigram occurence with the previous word, pick one randomly,
 				//from top K of the list, sorted by its closeness with the topics
-				int divider = 50;
-				if (topicVector==null) {
-					divider = 20;
-				} 
-				if (languageModel.isTopicTag(postagFromLineWord[i][j])==false) {
-					divider = 1;
-				}
+				int k = 10;
+				String word = null;
 				if (wordPool.size() > 0) {
 					Collections.sort(wordPool);
-					int bound = (divider - 1 + wordPool.size())/divider;
-					
+					int bound = Math.min(k, wordPool.size());					
 					word = wordPool.get(random.nextInt(bound)).s;
-				}
-				//else, pick any word with unigram occurence (backoff)
-				else {
+				} else { //else, pick any word with unigram occurence (backoff)
 					Collections.sort(uniWordPool);
-					int bound = (divider - 1 + uniWordPool.size())/divider;
-					
+					int bound = Math.min(k, uniWordPool.size());					
 					word = uniWordPool.get(random.nextInt(bound)).s;					
+				}
+				if (word==null) {
+					word = words[random.nextInt(words.length)];
 				}
 								
 				result[i][j] = word;
@@ -167,6 +160,7 @@ public class HaikuGenerator {
 				double logLikelihoodContinue = Math.log(languageModel.getMarkovProbability(lastWord, result[i][0]));
 				ct++;
 				score = score + Math.max(logLikelihoodEnd,logLikelihoodContinue);
+				assert MathUtils.isFinite(score);
 				if (logLikelihoodContinue < logLikelihoodEnd) //is -Infinity
 					result[i-1][result[i-1].length - 1] = result[i-1][result[i-1].length - 1] + separator[new Random().nextInt(5)];
 					
@@ -184,12 +178,15 @@ public class HaikuGenerator {
 				prev = result[i][j];
 				if (!(prev.equals("/s") || languageModel.stopWords.contains(prev)) || !languageModel.stopWords.contains(result[i][j])){
 					score = score + logLikelihood;
+					assert MathUtils.isFinite(score);
 					if (logLikelihood < -10000)
 						result[i][j] = result[i][j];
 					ct++;
 				}
 			}
 		}
+		assert MathUtils.isFinite(score);
+		assert ct > 0;
 		return (score*0.01)/ct;
 	}
 
@@ -253,10 +250,18 @@ public class HaikuGenerator {
 		return res;
 	}
 
-	public Haiku generate(String keywords) {
-		assert ! Utils.isBlank(keywords);
-		//backedoff = 0;
-		//System.err.println("Creating haiku, main idea "+keywords);
+	/**
+	 * 
+	 * @param topic1
+	 * @param topic2 Can be null
+	 * @return
+	 */
+	public Haiku generate(String topic1, String topic2) {		
+		assert ! Utils.isBlank(topic1);
+		String keywords = topic1;
+		if (topic2!=null) keywords += " "+topic2;
+		this.topic1 = topic1;
+		this.topic2 = topic2;
 		topicVector = null;
 		
 		String[] words = keywords.split(" ");
@@ -266,10 +271,15 @@ public class HaikuGenerator {
 			if (topicVector==null) topicVector = v.copy();
 			else topicVector = topicVector.add(v);	
 		}
-		//System.out.println("before "+topicVector.get(0));
-		Haiku res = generate2();
-		//System.out.println("after "+topicVector.get(0));
-		return res;
+
+		List<Haiku> candidates = new ArrayList();
+		for(int i=0; i<5; i++) {
+			Haiku res = generate2();
+			candidates.add(res);
+		}
+		Collections.sort(candidates);
+		Haiku winner = candidates.get(0);
+		return winner;
 	}
 	
 	

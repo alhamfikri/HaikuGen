@@ -22,7 +22,7 @@ public class HaikuMainTest {
 		if (idea.length() == 0) {
 			randomizedIdea = languageModel.getRandomTopic();
 		}
-		System.out.print("Creating Haiku");
+		System.out.println("Creating Haiku...");
 		Haiku res = generator.generate(idea + randomizedIdea);
 		System.out.println(res);		
 	}

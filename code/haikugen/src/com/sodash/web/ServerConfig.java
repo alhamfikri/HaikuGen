@@ -12,7 +12,7 @@ import com.winterwell.utils.io.Option;
 public class ServerConfig {
 
 	@Option
-	public int port = 8300;
+	public int port = 8642;
 	
 	@Option
 	public File webAppDir = FileUtils.getWorkingDirectory();	

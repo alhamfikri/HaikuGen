@@ -9,7 +9,6 @@ import java.util.Scanner;
 
 import org.coinvent.haiku.Haiku;
 import org.coinvent.haiku.HaikuGenerator;
-import org.coinvent.haiku.HaikuGenerator2;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 
@@ -29,26 +28,24 @@ import com.winterwell.utils.web.WebUtils2;
 import com.winterwell.web.ajax.JsonResponse;
 
 /**
-  @author daniel
+ 
  *
  */
-public class HaikuServlet implements IServlet {
+public class VillanelleServlet implements IServlet {
 
 	private static boolean initFlag;
 	private static LanguageModel languageModel;
-	private static List<Haiku> haikus;
 
 	static void init() {
 		if (initFlag) return;
-		synchronized (HaikuServlet.class) {
-			if (initFlag) return;
-			haikus = HaikuMain.loadHaikus();
+		synchronized (VillanelleServlet.class) {
+			if (initFlag) return;			
 			languageModel = HaikuMain.loadCorpus();
 			initFlag = true;
 		}
 	}
 	
-	public HaikuServlet() {
+	public VillanelleServlet() {
 		init();
 	}
 	
@@ -57,29 +54,22 @@ public class HaikuServlet implements IServlet {
 		assert initFlag : "not init!?";
 		assert languageModel!=null : "no model?!";
 		String topic = webRequest.get("topic");
-		String topic2 = webRequest.get("topic2");
 		int constraint[] = {5,7,5};
 
-		HaikuGenerator2 generator = new HaikuGenerator2(languageModel, haikus, constraint);
 		ArrayList<Haiku> candidates = new ArrayList<Haiku>();
 		if (Utils.isBlank(topic)) {
 			topic = languageModel.getRandomTopic();
 		}
-//		if (topic2!=null) topic = topic+" "+topic2;
 
-		Log.d("haiku", "Creating Haiku topic:"+topic+" "+topic2);
+		Log.d("haiku", "Creating Haiku topic:"+topic);
 		for (int i=0;i<=100;i++){			
-			Haiku res = generator.generate(topic, topic2);			
-			if (res==null) continue;
-			res.setTopics(topic);
-			candidates.add(res);
-			Log.d("haiku", "..."+res);
+//			candidates.add(res);
 		}
 				
 		Collections.sort(candidates);
 		
 		List<Haiku> candidates10 = Containers.subList(candidates, 0, 10);
-		Log.d("haiku", "Sending top 10 results");
+		Log.d("poetry", "Sending top 10 results");
 		JsonResponse out = new JsonResponse(webRequest, candidates10);
 		WebUtils2.sendJson(out, webRequest);
 	}

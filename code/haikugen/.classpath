@@ -2,12 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="build"/>
 	<classpathentry kind="lib" path="lib/jwnl-1.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp-maxent-3.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp-tools-1.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp-uima-1.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/winterwell.utils.jar"/>
-	<classpathentry kind="lib" path="lib/winterwell.web.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-http.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-io.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-server.jar"/>
@@ -23,5 +22,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.nlp"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.utils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.web"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.bob"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.datalog"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

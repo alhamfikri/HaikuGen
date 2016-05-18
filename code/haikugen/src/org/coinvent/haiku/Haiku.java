@@ -1,5 +1,7 @@
 package org.coinvent.haiku;
 
+import com.winterwell.utils.MathUtils;
+
 /**
  * @author Alham Fikri Aji
  * 
@@ -12,14 +14,15 @@ public class Haiku implements Comparable<Haiku>{
 	private String[][] tag;
 	private int part;
 	private String topic;
-	double topicScore;
-	double meaningScore;
+	final double topicScore;
+	final double meaningScore;
 	double beautyScore;
+	private double totalScore;
 	/**
-	 * construct the Haiku based on given text.
+	 * For loading Haiku from the corpus - construct the Haiku based on given text.
 	 * 
-	 * @param poem 	the haiku. Each line of haiku MUST be separated by % (percent dash) sign. 
-	 * 				For example: "Lightning flash -- % what I thought were faces % are plumes of pampas grass ."
+	 * @param poem 	the haiku. Each line of haiku MUST be separated by & sign. 
+	 * 				For example: "Lightning flash -- & what I thought were faces & are plumes of pampas grass ."
 	 */
 	public Haiku(String poem) {
 		originalText = poem;
@@ -37,6 +40,10 @@ public class Haiku implements Comparable<Haiku>{
 			
 			tag[i] = HaikuPOSTagger.tag(text[i]);
 		}	
+		// This is a corpus poem - just put any value in for the scores
+		meaningScore=1;
+		topicScore=1;
+		totalScore = meaningScore + topicScore;
 	}
 	
 	public Haiku(String[][] result, String[][] tag, double topicScore, double meaningScore,
@@ -45,7 +52,10 @@ public class Haiku implements Comparable<Haiku>{
 		this.tag = tag;
 		this.topicScore = topicScore;
 		this.meaningScore = meaningScore;
+		assert MathUtils.isFinite(meaningScore);
+		assert MathUtils.isFinite(topicScore);
 		this.part = result.length;
+		totalScore = meaningScore + topicScore;
 	}
 
 	/**
@@ -79,15 +89,14 @@ public class Haiku implements Comparable<Haiku>{
 	}
 
 	@Override
-	public int compareTo(Haiku o) {
-		
+	public int compareTo(Haiku o) {		
 		if (o.getTotalScore() - this.getTotalScore() < 0) return -1;
 		if (o.getTotalScore() - this.getTotalScore() > 0) return 1;
 		return 0;
 	}
 
 	public double getTotalScore() {
-		return meaningScore + topicScore;
+		return totalScore;
 	}
 
 	public String[][] getWord() {
