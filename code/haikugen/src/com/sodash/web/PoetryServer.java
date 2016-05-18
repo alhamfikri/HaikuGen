@@ -20,7 +20,7 @@ import com.winterwell.utils.web.WebUtils;
 /**
  * Run this! It starts up a web-server.
  * 
- * java -Xmx2g -cp poetry-server.jar:lib/* com.sodash.web.PoetryServer
+ * java -Xmx3g -cp poetry-server.jar:lib/* com.sodash.web.PoetryServer
  * 
  * 
  * @author Daniel

@@ -1,9 +1,11 @@
 import java.io.File;
 
+import jobs.BuildDepot;
+import jobs.BuildMaths;
+import jobs.BuildNLP;
 import jobs.BuildUtils;
 import jobs.BuildWeb;
 import jobs.BuildWinterwellProject;
-
 import winterwell.bob.BuildTask;
 import winterwell.bob.tasks.GitTask;
 import winterwell.bob.tasks.JarTask;
@@ -21,7 +23,10 @@ public class PublishPoetryServer extends BuildTask {
 	protected void doTask() throws Exception {
 		BuildWinterwellProject[] projects = new BuildWinterwellProject[]{ 
 			new BuildUtils(),
-			new BuildWeb()				
+			new BuildWeb(),
+			new BuildMaths(),
+			new BuildNLP(),
+			new BuildDepot()
 		};
 		for (BuildWinterwellProject bwp : projects) {
 			File jar = bwp.getJar();

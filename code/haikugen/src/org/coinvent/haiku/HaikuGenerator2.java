@@ -275,6 +275,7 @@ public class HaikuGenerator2 {
 		List<Haiku> candidates = new ArrayList();
 		for(int i=0; i<5; i++) {
 			Haiku res = generate2();
+			if (res==null) continue;
 			candidates.add(res);
 		}
 		Collections.sort(candidates);
