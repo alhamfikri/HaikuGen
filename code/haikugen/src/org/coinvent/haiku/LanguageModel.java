@@ -40,7 +40,7 @@ public class LanguageModel {
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
 
-	//list of words, divided by its syllables and POS tag
+	/** list of words, divided by its syllables and POS tag TODO a clearer form */
 	private HashMap<String,HashSet<String>> wordlist[];
 	
 	static final GloveWordVectors glove = new GloveWordVectors();
@@ -51,7 +51,7 @@ public class LanguageModel {
 	private HashSet<String> topicTagSet = new HashSet(Arrays.asList("JJ", "JJR", "JJS", "NN", "NNS" , "NNP" , "NNPS" , "RB", "RBS", "RBR", 
 			"VB", "VBD" , "VBG", "VBN" , "VBP" , "VBZ"));
 	
-	//global list of removed words
+	/** global list of removed words */
 	private HashSet<String> unusedWords;
 	
 	//global list of used words
