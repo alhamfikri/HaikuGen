@@ -6,12 +6,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import com.winterwell.maths.stats.distributions.IDistributionBase;
 import com.winterwell.utils.MathUtils;
 import com.winterwell.utils.StrUtils;
 import com.winterwell.utils.log.Log;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
+import winterwell.maths.stats.distributions.cond.Cntxt;
+import winterwell.maths.stats.distributions.cond.ICondDistribution;
+import winterwell.maths.stats.distributions.discrete.IFiniteDistribution;
+import winterwell.nlp.docmodels.IDocModel;
+import winterwell.nlp.io.Tkn;
 import winterwell.utils.FailureException;
 import winterwell.utils.Utils;
 
@@ -101,49 +107,26 @@ public class HaikuGenerator2 {
 		}
 	}
 	
-	String generateWord(WordInfo word, Line line) {
-		String posTag = word.pos;
-		assert posTag != null;
-		String words[] = languageModel.getWordlist(posTag,syllable[i][j]);
-		String prev = j==0? "/s" : result[i][j-1];
-		ArrayList<StringDouble> wordPool = new ArrayList<StringDouble>();
-		ArrayList<StringDouble> uniWordPool = new ArrayList<StringDouble>();
+	/**
+	 * TODO score the text consistency (eg markov chain log-prob)
+	 */
+	IDocModel docModel;
+	
+	ICondDistribution<Tkn, Cntxt> wordGen;
+	
+	String generateWord(WordInfo wordInfo, Line line) {
+		String posTag = wordInfo.pos;
+		assert posTag != null;		
+		assert wordInfo.syllables > 0 : wordInfo;
 		
-		//put all next possible word into word pool
-		for (String word : words){				
-			double dist = languageModel.getDistance(topicVector, word);					
-			int count = languageModel.getMarkovCount(prev,word);					
-			if (count > 3) {
-				wordPool.add(new StringDouble(word,dist));
-			} else {
-				uniWordPool.add(new StringDouble(word,dist));
-			}
-		}
-		
-		//if exsists some words that has bigram occurence with the previous word, pick one randomly,
-		//from top K of the list, sorted by its closeness with the topics
-		int k = 10;
-		String word = null;
-		if (wordPool.size() > 0) {
-			Collections.sort(wordPool);
-			int bound = Math.min(k, wordPool.size());					
-			word = wordPool.get(random.nextInt(bound)).s;
-		} else { //else, pick any word with unigram occurence (backoff)
-			Collections.sort(uniWordPool);
-			int bound = Math.min(k, uniWordPool.size());					
-			word = uniWordPool.get(random.nextInt(bound)).s;					
-		}
-		if (word==null) {
-			word = words[random.nextInt(words.length)];
-		}
+		Cntxt context = new Cntxt(signature, bits);
+		Tkn sampled = wordGen.sample(context);
+		IFiniteDistribution<Tkn> marginal = (IFiniteDistribution<Tkn>) wordGen.getMarginal(context);
+		Tkn mle = marginal.getMostLikely();
 						
-		result[i][j] = word;
-		//updates the score
-		double dist = languageModel.getDistance(topicVector, word);
-		if (dist < 1000) {
-			topicScore += dist*dist;
-			topicCount++;	
-		}				
+		String word = sampled.getText();
+		wordInfo.setWord(word);
+		return word;
 	}
 
 	private boolean keepTemplateWord(String word) {

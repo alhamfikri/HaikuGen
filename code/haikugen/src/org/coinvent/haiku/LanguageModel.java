@@ -265,6 +265,7 @@ public class LanguageModel {
 	 * @return Array of String, a list of all possible words with given tag and syllables
 	 */
 	public String[] getWordlist(String tag, int syllables) {
+		assert syllables > 0;
 		HashSet<String> wordSet = wordlist[syllables].get(tag);
 		if (wordSet == null) 
 			return null;
