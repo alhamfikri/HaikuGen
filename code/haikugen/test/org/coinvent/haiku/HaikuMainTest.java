@@ -14,7 +14,7 @@ public class HaikuMainTest {
 	@Test
 	public void testLove() {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
-		LanguageModel languageModel = HaikuMain.loadCorpus();
+		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
 		HaikuGenerator generator = new HaikuGenerator(languageModel, haikus, constraint);
 		String idea = "love";

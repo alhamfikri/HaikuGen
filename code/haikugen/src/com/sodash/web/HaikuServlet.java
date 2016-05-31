@@ -12,6 +12,7 @@ import org.coinvent.haiku.HaikuGenerator;
 import org.coinvent.haiku.HaikuGenerator2;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
+import org.coinvent.haiku.Poem;
 
 import com.winterwell.utils.Proc;
 
@@ -43,7 +44,7 @@ public class HaikuServlet implements IServlet {
 		synchronized (HaikuServlet.class) {
 			if (initFlag) return;
 			haikus = HaikuMain.loadHaikus();
-			languageModel = HaikuMain.loadCorpus();
+			languageModel = LanguageModel.get();
 			initFlag = true;
 		}
 	}
@@ -61,7 +62,7 @@ public class HaikuServlet implements IServlet {
 		int constraint[] = {5,7,5};
 
 		HaikuGenerator2 generator = new HaikuGenerator2(languageModel, haikus, constraint);
-		ArrayList<Haiku> candidates = new ArrayList<Haiku>();
+		ArrayList<Poem> candidates = new ArrayList<>();
 		if (Utils.isBlank(topic)) {
 			topic = languageModel.getRandomTopic();
 		}
@@ -69,7 +70,7 @@ public class HaikuServlet implements IServlet {
 
 		Log.d("haiku", "Creating Haiku topic:"+topic+" "+topic2);
 		for (int i=0;i<=100;i++){			
-			Haiku res = generator.generate(topic, topic2);			
+			Poem res = generator.generate(topic, topic2);			
 			if (res==null) continue;
 			res.setTopics(topic);
 			candidates.add(res);
@@ -78,7 +79,7 @@ public class HaikuServlet implements IServlet {
 				
 		Collections.sort(candidates);
 		
-		List<Haiku> candidates10 = Containers.subList(candidates, 0, 10);
+		List<Poem> candidates10 = Containers.subList(candidates, 0, 10);
 		Log.d("haiku", "Sending top 10 results");
 		JsonResponse out = new JsonResponse(webRequest, candidates10);
 		WebUtils2.sendJson(out, webRequest);

@@ -18,7 +18,7 @@ import winterwell.utils.reporting.Log;
 public class HaikuMain {
 	public static void main(String args[]){		
 		List<Haiku> haikus = loadHaikus();
-		LanguageModel languageModel = loadCorpus();
+		LanguageModel languageModel = LanguageModel.get();
 		
 		
 		//System.out.println(languageModel.markov.size());
@@ -116,52 +116,4 @@ public class HaikuMain {
 		return haikus;
 	}
 
-	private static void brownOpen(LanguageModel languageModel,int N,String code) {
-		ArrayList<ArrayList<String>> data;
-		
-		//adding corpus 
-		for (int i=1;i<N;i++) {
-			//System.out.println("Loading corpus: );
-			if (i < 10)
-				data = CorpusReader.readBrown(code+"0"+i);
-			else
-				data = CorpusReader.readBrown(code+i);
-		
-			languageModel.trainMarkov(data);
-		}		
-	}
-	
-	/**
-	 * load and train new a corpus
-	 * @param corpus
-	 */
-	public static LanguageModel loadCorpus() {
-		LanguageModel languageModel = new LanguageModel();
-		Log.d("haiku", "Preparing LanguageModel... It may take a minute");
-		languageModel.loadDictionary("en");
-		languageModel.loadForbiddenDictionary("names__f.csv");
-		languageModel.loadForbiddenDictionary("names__m.csv");
-		//languageModel.loadStopWords("names__f.csv");
-		//languageModel.loadStopWords("names__m.csv");
-		languageModel.loadStopWords("stop-words_english_1_en.txt");
-		languageModel.loadStopWords("stop-words_english_2_en.txt");
-		languageModel.loadStopWords("stop-words_english_3_en.txt");
-		languageModel.loadStopWords("stop-words_english_4_google_en.txt");
-		languageModel.loadStopWords("stop-words_english_5_en.txt");
-		languageModel.loadStopWords("stop-words_english_6_en.txt");
-				
-		//loading word dictionary
-		languageModel.loadSyllableDictionary("cmudict");
-
-		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
-		brownOpen(languageModel,44,"ca");
-		brownOpen(languageModel,75,"cg");
-		brownOpen(languageModel,80,"cj");
-		brownOpen(languageModel,24,"ch");
-		brownOpen(languageModel,20,"ck");
-		brownOpen(languageModel,9,"cr");
-				
-		Log.d("haiku", "...prepared LanguageModel");
-		return languageModel;
-	}
 }

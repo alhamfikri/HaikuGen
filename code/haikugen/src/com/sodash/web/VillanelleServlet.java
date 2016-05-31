@@ -40,7 +40,7 @@ public class VillanelleServlet implements IServlet {
 		if (initFlag) return;
 		synchronized (VillanelleServlet.class) {
 			if (initFlag) return;			
-			languageModel = HaikuMain.loadCorpus();
+			languageModel = LanguageModel.get();
 			initFlag = true;
 		}
 	}

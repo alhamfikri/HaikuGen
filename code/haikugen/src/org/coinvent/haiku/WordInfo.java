@@ -3,7 +3,7 @@ package org.coinvent.haiku;
 
 public class WordInfo {
 	
-	public static final WordInfo UNKNOWN = new WordInfo("?",-1, null);
+	public static final WordInfo UNKNOWN = new WordInfo("?", -1, null);
 	public String word;
 	public int syllables;
 	public int[] tone;
@@ -11,10 +11,10 @@ public class WordInfo {
 	boolean punctuation;
 	public String pos;
 	
-	public WordInfo(String word, int syllables, int[] tone) {
-		this.word = word;
-		this.syllables = syllables;
+	public WordInfo(String word, int syllables, int[] tone) {		
 		this.tone = tone;
+		setWord(word);
+		this.syllables = syllables;
 	}
 	
 	public WordInfo() {
@@ -26,6 +26,7 @@ public class WordInfo {
 	}
 
 	public void setWord(String word) {
-		this.word = word;
+		this.word = word;		
+		this.syllables = word==null? -1 : LanguageModel.get().getSyllable(word);
 	}
 }

@@ -11,10 +11,10 @@ public class HaikuGenerator2Test {
 	@Test
 	public void testGenerate() {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
-		LanguageModel languageModel = HaikuMain.loadCorpus();
+		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
 		HaikuGenerator2 generator = new HaikuGenerator2(languageModel, haikus, constraint);
-		Haiku haiku = generator.generate("love", "food");
+		Poem haiku = generator.generate("love", "food");
 		System.out.println("Love Food");
 		System.out.println(haiku);
 	}

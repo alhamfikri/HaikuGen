@@ -65,7 +65,7 @@ public class PoetryServer {
 			WebUtils.display(WebUtils.URI("http://localhost:"+config.port+"/static/haiku/index.html"));
 		}
 		// prod data loading, by asking "what is love?"
-		LanguageModel lm = new LanguageModel();
+		LanguageModel lm = LanguageModel.get();
 		lm.getVector("love");
 	}
 

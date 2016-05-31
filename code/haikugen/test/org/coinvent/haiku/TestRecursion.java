@@ -25,7 +25,7 @@ public class TestRecursion {
 		String topic = "poetry";
 		
 		List<Haiku> haikus = HaikuMain.loadHaikus();
-		LanguageModel languageModel = HaikuMain.loadCorpus();
+		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
 		HaikuGenerator generator = new HaikuGenerator(languageModel, haikus, constraint);
 		if (Utils.isBlank(topic)) {

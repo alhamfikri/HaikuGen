@@ -23,8 +23,10 @@ import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import winterwell.nlp.analysis.SyllableCounter;
 import winterwell.nlp.vectornlp.GloveWordVectors;
 import winterwell.utils.Utils;
+import winterwell.utils.reporting.Log;
 
 /**
  * 
@@ -44,6 +46,8 @@ public class LanguageModel {
 	private HashMap<String,HashSet<String>> wordlist[];
 	
 	static final GloveWordVectors glove = new GloveWordVectors();
+
+	private static LanguageModel dflt;
 	
 	/**
 	 * The POS tags where we want topic-aligned choices
@@ -62,8 +66,7 @@ public class LanguageModel {
 	//markov chain model
 	MarkovModel markov;
 	
-	@SuppressWarnings("unchecked")
-	public LanguageModel() {
+	private LanguageModel() {
 		markov = new MarkovModel();
 		dictionary = new HashSet<String>();
 		unusedWords = new HashSet<String>();
@@ -187,7 +190,7 @@ public class LanguageModel {
 				if (!dictionary.contains(word))
 					continue;
 				
-				WordInfo w = new WordInfo(word,syllables,null);
+				WordInfo w = new WordInfo(word, syllables,null);
 				wordDatabase.put(word, w);
 				
 				ArrayList<String> tags = HaikuPOSTagger.possibleTags(word, 1);
@@ -294,22 +297,22 @@ public class LanguageModel {
 			return res;
 		}			
 		for (int i=0;i<10;i++){
-			if (wordlist[i].get(tag) != null) 
+			if (wordlist[i].get(tag) != null) { 
 				res.add(i);
-		}
-		
+			}
+		}		
 		return res;
 	}
 
 	/**
 	 * get a syllable for count a given word
 	 * @param word
-	 * @return int: the number of sylable
+	 * @return int: the number of syllables or 0
 	 */
 	public int getSyllable(String word){
 		WordInfo w = wordDatabase.get(word);
-		if (w == null) return 0;
-		return w.syllables;
+		if (w != null && w.syllables > 0) return w.syllables;
+		return SyllableCounter.syllableCount(word);
 	}
 	
 	public int getMarkovCount(String string, String word2) {
@@ -518,5 +521,53 @@ public class LanguageModel {
 			}
 		}
 		return res;
+	}
+
+	public synchronized static LanguageModel get() {
+		if (dflt!=null) return dflt;
+		Log.d("haiku", "Preparing LanguageModel... It may take a minute");
+		LanguageModel languageModel = new LanguageModel();
+		languageModel.loadDictionary("en");
+		languageModel.loadForbiddenDictionary("names__f.csv");
+		languageModel.loadForbiddenDictionary("names__m.csv");
+		//languageModel.loadStopWords("names__f.csv");
+		//languageModel.loadStopWords("names__m.csv");
+		languageModel.loadStopWords("stop-words_english_1_en.txt");
+		languageModel.loadStopWords("stop-words_english_2_en.txt");
+		languageModel.loadStopWords("stop-words_english_3_en.txt");
+		languageModel.loadStopWords("stop-words_english_4_google_en.txt");
+		languageModel.loadStopWords("stop-words_english_5_en.txt");
+		languageModel.loadStopWords("stop-words_english_6_en.txt");
+				
+		//loading word dictionary
+		languageModel.loadSyllableDictionary("cmudict");
+
+		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
+		brownOpen(languageModel,44,"ca");
+		brownOpen(languageModel,75,"cg");
+		brownOpen(languageModel,80,"cj");
+		brownOpen(languageModel,24,"ch");
+		brownOpen(languageModel,20,"ck");
+		brownOpen(languageModel,9,"cr");
+				
+		dflt = languageModel;
+		Log.d("haiku", "...prepared LanguageModel");
+		return dflt;
+	}
+	
+
+	private static void brownOpen(LanguageModel languageModel,int N,String code) {
+		ArrayList<ArrayList<String>> data;
+		
+		//adding corpus 
+		for (int i=1;i<N;i++) {
+			//System.out.println("Loading corpus: );
+			if (i < 10)
+				data = CorpusReader.readBrown(code+"0"+i);
+			else
+				data = CorpusReader.readBrown(code+i);
+		
+			languageModel.trainMarkov(data);
+		}		
 	}
 }

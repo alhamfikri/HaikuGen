@@ -4,6 +4,7 @@ import com.winterwell.utils.StrUtils;
 
 public class Poem implements Comparable<Poem> {
 
+	String topics;
 	Line[] lines;
 	public double score = -1;
 	
@@ -30,5 +31,10 @@ public class Poem implements Comparable<Poem> {
 	public int compareTo(Poem arg0) {
 		// highest score first
 		return - Double.compare(score, arg0.score);
+	}
+
+
+	public void setTopics(String topic) {
+		this.topics = topic;
 	}
 }

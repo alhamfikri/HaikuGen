@@ -82,7 +82,8 @@ public class HaikuGenerator2 {
 				}
 			}
 			
-			int[] syllables = randomizeSyllable(line);
+			SyllableAssignment sa = new SyllableAssignment(line);
+			int[] syllables = sa.randomizeSyllable();
 			if(syllables == null) {
 				Log.d(LOGTAG, "failed to fill in syllable template for "+StrUtils.str(line));
 				return null;
@@ -191,71 +192,7 @@ public class HaikuGenerator2 {
 		return (score*0.01)/ct;
 	}
 
-	/**
-	 * Uniformly randomize the syllable distribution with dynamic programming
-	 * @param N = target syllable
-	 * @param tags = array of tag 
-	 * @param isKeep = array of integer. If isKeep[i] equal to 1, we keep the original words, thus we force their syllable is equal to the origin.
-	 * @return array of integer : the syllable count for each tag
-	 */
-	public int[] randomizeSyllable(Line line) {
-		int numWords = line.words.size();
-		assert numWords > 0;
-		int res[] = new int[numWords];
-		int syllablesLeft = line.syllables;
-		assert syllablesLeft > 0;
-		
-		ArrayList<Integer> options[] = new ArrayList[numWords];
-		for (int i=0; i<numWords; i++) {
-			WordInfo word = line.words.get(i);
-			if (word.fixed) {
-				options[i] = languageModel.getPossibleSyllables(tags[i]);
-			} else {
-				options[i] = new ArrayList<Integer>();
-				options[i].add(0);
-			}
-		}
-		//dp[i][j] = 1, if we can make first j words subsequence with total of i syllables
-		if (N < 0)
-			return null;
-		int dp[][] = new int[N+1][M+1];
-		dp[0][0] = 1;
-		
-		//bottom-up dynamic programming
-		for (int i=0;i<=N;i++){
-			for (int j=0;j<M;j++){
-				if (dp[i][j] == 0) 
-					continue;
-				for (int k=0;k<options[j].size() && i + options[j].get(k) <= N;k++){
-					dp[i + options[j].get(k)][j+1] += dp[i][j];
-				}
-			}
-		}
-		
-		if (dp[N][M] == 0)
-			return null;
-		
-		//uniformly chooses the valid syllables distribution
-		Random rand = new Random();
-		int pos = N;
-		for (int i=M;i>0;i--) {
-			int chance = rand.nextInt(dp[pos][i]) + 1;
-			for (int j=0;j<options[i-1].size();j++){
-				if (pos - options[i-1].get(j) >= 0 && chance <= dp[pos - options[i-1].get(j)][i-1]) {
-					res[i-1] = options[i-1].get(j);
-					break;
-				}
-				if (pos - options[i-1].get(j) >= 0)
-					chance -= dp[pos - options[i-1].get(j)][i-1];
-			}
-			pos = pos - res[i-1];
-		}
-		// set the answers
-		for(int i=0; i<line.words.size(); i++) {
-			line.words.get(i).syllables = res[i];
-		}
-		return res;
-	}
+	
 
 	/**
 	 * 
