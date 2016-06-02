@@ -1,12 +1,13 @@
 package org.coinvent.haiku;
 
+import winterwell.nlp.io.Tkn;
+
 
 public class WordInfo {
 	
-	public static final WordInfo UNKNOWN = new WordInfo("?", -1, null);
+	public static final WordInfo UNKNOWN = new WordInfo("?", -1);
 	public String word;
 	public int syllables;
-	public int[] tone;
 	boolean fixed;
 	boolean punctuation;
 	public String pos;
@@ -42,8 +43,7 @@ public class WordInfo {
 		return true;
 	}
 
-	public WordInfo(String word, int syllables, int[] tone) {		
-		this.tone = tone;
+	public WordInfo(String word, int syllables) {		
 		this.word = word;
 		this.syllables = syllables;		
 	}
@@ -69,5 +69,11 @@ public class WordInfo {
 	public WordInfo setPOS(String posTag) {
 		this.pos = posTag;
 		return this;
+	}
+
+	public Tkn getTkn() {
+		Tkn tkn = new Tkn(word);
+		tkn.put(tkn.POS, pos);
+		return tkn;
 	}
 }

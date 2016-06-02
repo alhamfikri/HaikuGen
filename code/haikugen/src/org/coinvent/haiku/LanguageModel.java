@@ -74,7 +74,7 @@ public class LanguageModel {
 		stopWords = new HashSet<String>();
 		
 		wordDatabase = new HashMap<String,WordInfo>();		
-		wordDatabase.put(Tkn.START_TOKEN.getText(), new WordInfo(Tkn.START_TOKEN.getText(), 0, null) );
+		wordDatabase.put(Tkn.START_TOKEN.getText(), new WordInfo(Tkn.START_TOKEN.getText(), 0) );
 
 		
 		
@@ -92,7 +92,7 @@ public class LanguageModel {
 	}
 	
 	private void addSpecialSeparator(String separator, String tag) {
-		allVocab.addWord(new WordInfo(separator, 0, null).setPOS(tag));
+		allVocab.addWord(new WordInfo(separator, 0).setPOS(tag));
 	}
 
 	/**
@@ -185,14 +185,14 @@ public class LanguageModel {
 			if ( ! dictionary.contains(word))
 				continue;
 			
-			WordInfo w = new WordInfo(word, syllables,null);
+			WordInfo w = new WordInfo(word, syllables);
 			wordDatabase.put(word, w);
 			
 			List<String> tags = PosTagByOpenNLP.getPossibleTags(word);
 			
 			//updates wordlist by syllables
             for (String posTag  : tags) {
-            	WordInfo wi = new WordInfo(word, syllables, null);
+            	WordInfo wi = new WordInfo(word, syllables);
             	wi.setPOS(posTag);
             	allVocab.addWord(wi);
             }

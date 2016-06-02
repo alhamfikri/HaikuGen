@@ -27,7 +27,7 @@ public class SyllableAssignmentTest {
 	public void testRandomizeSyllableTemplateLine() {
 		Line line = new Line(5);
 		line.words.add(new WordInfo());
-		line.words.add(new WordInfo("of", 1, null).setFixed(true));
+		line.words.add(new WordInfo("of", 1).setFixed(true));
 		line.words.add(new WordInfo());
 		SyllableAssignment sa = new SyllableAssignment(line, LanguageModel.get().allVocab);		
 		int[] syllables = sa.randomizeSyllable();
@@ -42,9 +42,9 @@ public class SyllableAssignmentTest {
 	@Test
 	public void testRandomizeSyllableAllFixed() {
 		Line line = new Line(5);
-		line.words.add(new WordInfo("the", 1, null).setFixed(true));
-		line.words.add(new WordInfo("joyful", 2, null).setFixed(true));
-		line.words.add(new WordInfo("hippo", 2, null).setFixed(true));
+		line.words.add(new WordInfo("the", 1).setFixed(true));
+		line.words.add(new WordInfo("joyful", 2).setFixed(true));
+		line.words.add(new WordInfo("hippo", 2).setFixed(true));
 		SyllableAssignment sa = new SyllableAssignment(line, LanguageModel.get().allVocab);		
 		int[] syllables = sa.randomizeSyllable();
 		Printer.out(syllables);

@@ -9,14 +9,17 @@ import java.util.Random;
 import com.winterwell.maths.stats.distributions.IDistributionBase;
 import com.winterwell.utils.MathUtils;
 import com.winterwell.utils.StrUtils;
+import com.winterwell.utils.containers.Containers;
 import com.winterwell.utils.log.Log;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import winterwell.maths.stats.distributions.cond.Cntxt;
 import winterwell.maths.stats.distributions.cond.ICondDistribution;
+import winterwell.maths.stats.distributions.cond.Sitn;
 import winterwell.maths.stats.distributions.discrete.IFiniteDistribution;
 import winterwell.nlp.docmodels.IDocModel;
+import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.utils.FailureException;
 import winterwell.utils.Utils;
@@ -109,7 +112,8 @@ public class PoemGenerator {
 		int topicCount=0;
 		for(Line line : poem.lines) {
 			for(WordInfo word : line.words) {
-				String picked = generateWord(word, line);
+				Tkn picked = generateWord(word, line);
+				word.setWord(picked.getText());
 			}
 		}
 	}
@@ -121,19 +125,32 @@ public class PoemGenerator {
 	
 	ICondDistribution<Tkn, Cntxt> wordGen;
 	
-	String generateWord(WordInfo wordInfo, Line line) {
+	/**
+	 * 
+	 * @param wordInfo Will not be modified
+	 * @param line
+	 * @return
+	 */
+	Tkn generateWord(WordInfo wordInfo, Line line) {
+		assert wordInfo!=null;
+		// context
 		String posTag = wordInfo.pos;
 		assert posTag != null;		
 		assert wordInfo.syllables > 0 : wordInfo;
+		int wi = line.words.indexOf(wordInfo);
+		assert wi != -1 : wordInfo+" not in "+line;
+		String[] sig = new String[]{Tkn.POS.name,"w-2","w-1","w+1"};
+		SitnStream ss = new SitnStream(null, line, sig);
+		List<Sitn<Tkn>> list = Containers.list(ss);
+		Cntxt context = list.get(wi).context;
 		
-		Cntxt context = new Cntxt(signature, bits);
+		// sample
 		Tkn sampled = wordGen.sample(context);
+		
 		IFiniteDistribution<Tkn> marginal = (IFiniteDistribution<Tkn>) wordGen.getMarginal(context);
 		Tkn mle = marginal.getMostLikely();
 						
-		String word = sampled.getText();
-		wordInfo.setWord(word);
-		return word;
+		return sampled;
 	}
 
 	private boolean keepTemplateWord(String word) {
