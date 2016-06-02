@@ -28,7 +28,7 @@ Lists of season marker words: https://en.wikipedia.org/wiki/Saijiki http://www.2
  * @author daniel
  *
  */
-public class HaikuGenerator2 {
+public class PoemGenerator {
 
 	private static final String LOGTAG = "haiku";
 	private LanguageModel languageModel;
@@ -38,17 +38,23 @@ public class HaikuGenerator2 {
 	private Vector topicVector;
 	private String topic2;
 	private String topic1;
+	private PoemVocab vocab;
 	/**
 	 * Constructor
 	 * @param languageModel : set corpus for words and relational information
 	 * @param haikus : set haikus for generating the grammatical skeleton
 	 * @param syllables : syllables constraint, ex: [5,7,5]. Set 0 for no constraint
 	 */
-	public HaikuGenerator2(LanguageModel languageModel, List<Haiku> haikus, int syllableConstraint[]){
+	public PoemGenerator(LanguageModel languageModel, List<Haiku> haikus, int syllableConstraint[]){
 		Utils.check4null(languageModel, haikus, syllableConstraint);
 		this.languageModel = languageModel;
+		this.vocab = languageModel.allVocab;
 		this.haikus = haikus;
 		this.syllableConstraint = syllableConstraint;
+	}
+	
+	public void setVocab(PoemVocab vocab) {
+		this.vocab = vocab;
 	}
 	
 	Poem generate2() {
@@ -82,7 +88,7 @@ public class HaikuGenerator2 {
 				}
 			}
 			
-			SyllableAssignment sa = new SyllableAssignment(line);
+			SyllableAssignment sa = new SyllableAssignment(line, vocab);
 			int[] syllables = sa.randomizeSyllable();
 			if(syllables == null) {
 				Log.d(LOGTAG, "failed to fill in syllable template for "+StrUtils.str(line));
@@ -156,9 +162,9 @@ public class HaikuGenerator2 {
 		double ct = 0;
 		String[] separator = {"","","...",",","--"};
 		for (int i=0;i<result.length;i++){
-			String prev = "/s";
+			String prev = Tkn.START_TOKEN.getText();
 			if (i > 0 && lastWord.length() > 0) {
-				double logLikelihoodEnd = Math.log(languageModel.getMarkovProbability(lastWord, "/s"));
+				double logLikelihoodEnd = Math.log(languageModel.getMarkovProbability(lastWord, Tkn.END_TOKEN.getText()));
 				double logLikelihoodContinue = Math.log(languageModel.getMarkovProbability(lastWord, result[i][0]));
 				ct++;
 				score = score + Math.max(logLikelihoodEnd,logLikelihoodContinue);
@@ -169,7 +175,7 @@ public class HaikuGenerator2 {
 			}
 			for (int j=0;j<result[i].length;j++){
 				if (tag[i][j].length() < 2){
-					prev = "/s";
+					prev = Tkn.START_TOKEN.getText();
 					lastWord = "";
 					continue;
 				}
@@ -178,7 +184,7 @@ public class HaikuGenerator2 {
 				double logLikelihood = Math.log(languageModel.getMarkovProbability(prev, result[i][j]));
 				//logLikelihood = -Math.log10(8);
 				prev = result[i][j];
-				if (!(prev.equals("/s") || languageModel.stopWords.contains(prev)) || !languageModel.stopWords.contains(result[i][j])){
+				if ( ! (prev.equals(Tkn.START_TOKEN.getText()) || languageModel.stopWords.contains(prev)) || !languageModel.stopWords.contains(result[i][j])){
 					score = score + logLikelihood;
 					assert MathUtils.isFinite(score);
 					if (logLikelihood < -10000)
@@ -229,6 +235,10 @@ public class HaikuGenerator2 {
 		Collections.sort(candidates);
 		Poem winner = (Poem) candidates.get(0);
 		return winner;
+	}
+
+	public Poem generate(String topic) {
+		return generate(topic, null);
 	}
 	
 	

@@ -13,7 +13,7 @@ public class HaikuGenerator2Test {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
 		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
-		HaikuGenerator2 generator = new HaikuGenerator2(languageModel, haikus, constraint);
+		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 		Poem haiku = generator.generate("love", "food");
 		System.out.println("Love Food");
 		System.out.println(haiku);

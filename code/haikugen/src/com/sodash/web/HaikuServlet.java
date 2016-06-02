@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.coinvent.haiku.Haiku;
-import org.coinvent.haiku.HaikuGenerator;
-import org.coinvent.haiku.HaikuGenerator2;
+import org.coinvent.haiku.PoemGenerator;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 import org.coinvent.haiku.Poem;
@@ -61,7 +60,7 @@ public class HaikuServlet implements IServlet {
 		String topic2 = webRequest.get("topic2");
 		int constraint[] = {5,7,5};
 
-		HaikuGenerator2 generator = new HaikuGenerator2(languageModel, haikus, constraint);
+		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 		ArrayList<Poem> candidates = new ArrayList<>();
 		if (Utils.isBlank(topic)) {
 			topic = languageModel.getRandomTopic();

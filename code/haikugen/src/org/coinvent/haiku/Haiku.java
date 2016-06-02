@@ -1,6 +1,14 @@
 package org.coinvent.haiku;
 
+import java.util.List;
+
+import winterwell.nlp.io.DumbTokenStream;
+import winterwell.nlp.io.ITokenStream;
+import winterwell.nlp.io.Tkn;
+import winterwell.nlp.io.pos.PosTagByOpenNLP;
+
 import com.winterwell.utils.MathUtils;
+import com.winterwell.utils.StrUtils;
 
 /**
  * @author Alham Fikri Aji
@@ -31,14 +39,21 @@ public class Haiku implements Comparable<Haiku>{
 		
 		text = new String[part][];
 		tag = new String[part][];
-		
+				
 		for (int i=0;i<part;i++) {
 			text[i] = lines[i].trim().split(" ");
 			//removing extra white-spaces
-			for (int j=0;j<text[i].length;j++)
-				text[i][j] = text[i][j].replaceAll("\\s+","");
-			
-			tag[i] = HaikuPOSTagger.tag(text[i]);
+			for (int j=0;j<text[i].length;j++) {
+				text[i][j] = text[i][j].trim();
+			}
+			ITokenStream linei = new DumbTokenStream(text[i]);
+			PosTagByOpenNLP tagger = new PosTagByOpenNLP(linei);
+			List<Tkn> tkns = tagger.toList();			
+			assert tkns.size() == text[i].length;
+			tag[i] = new String[tkns.size()];
+			for (int j = 0; j < tag[i].length; j++) {
+				tag[i][j] = tkns.get(j).getPOS();
+			}			
 		}	
 		// This is a corpus poem - just put any value in for the scores
 		meaningScore=1;

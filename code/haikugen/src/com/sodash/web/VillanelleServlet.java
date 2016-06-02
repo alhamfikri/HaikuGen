@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.coinvent.haiku.Haiku;
-import org.coinvent.haiku.HaikuGenerator;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 
@@ -54,7 +53,7 @@ public class VillanelleServlet implements IServlet {
 		assert initFlag : "not init!?";
 		assert languageModel!=null : "no model?!";
 		String topic = webRequest.get("topic");
-		int constraint[] = {5,7,5};
+		int constraint[] = {5,7,5}; // TODO
 
 		ArrayList<Haiku> candidates = new ArrayList<Haiku>();
 		if (Utils.isBlank(topic)) {

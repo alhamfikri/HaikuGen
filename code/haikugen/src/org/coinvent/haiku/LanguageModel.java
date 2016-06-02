@@ -18,12 +18,15 @@ import java.util.List;
 import java.util.Random;
 
 import com.winterwell.utils.MathUtils;
+import com.winterwell.utils.io.FileUtils;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import winterwell.nlp.analysis.SyllableCounter;
+import winterwell.nlp.io.Tkn;
+import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.nlp.vectornlp.GloveWordVectors;
 import winterwell.utils.Utils;
 import winterwell.utils.reporting.Log;
@@ -42,8 +45,6 @@ public class LanguageModel {
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
 
-	/** list of words, divided by its syllables and POS tag TODO a clearer form */
-	private HashMap<String,HashSet<String>> wordlist[];
 	
 	static final GloveWordVectors glove = new GloveWordVectors();
 
@@ -73,11 +74,9 @@ public class LanguageModel {
 		stopWords = new HashSet<String>();
 		
 		wordDatabase = new HashMap<String,WordInfo>();		
-		wordDatabase.put("/s", new WordInfo("/s", 0, null) );
+		wordDatabase.put(Tkn.START_TOKEN.getText(), new WordInfo(Tkn.START_TOKEN.getText(), 0, null) );
+
 		
-		wordlist = new HashMap[10];
-		for (int i=0;i<10;i++)
-			wordlist[i] = new HashMap<String,HashSet<String>>();			
 		
 		addSpecialSeparator("...",":");
 		addSpecialSeparator("..",":");
@@ -93,13 +92,7 @@ public class LanguageModel {
 	}
 	
 	private void addSpecialSeparator(String separator, String tag) {
-		HashSet<String> wordset = wordlist[0].get(tag);
-    	if (wordset == null) {
-    		wordset = new HashSet<String>();
-    		wordlist[0].put(tag, wordset);
-    	}
-    	wordset.add(separator);
-		
+		allVocab.addWord(new WordInfo(separator, 0, null).setPOS(tag));
 	}
 
 	/**
@@ -162,57 +155,50 @@ public class LanguageModel {
 	/**
 	 * Open CMUDictionary dictionary for initial word base
 	 * @param filepath location of CMUDict
+	 * @throws IOException 
 	 */
-	public void loadSyllableDictionary(String filepath) {
+	public void loadSyllableDictionary(String filepath) throws IOException {
 		String currentDirectory = System.getProperty("user.dir");
 		String line = null;
-		
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/model/" + filepath));
-			String input;
-			while ((input = br.readLine()) != null) {
-				String parsed[] = input.toLowerCase().split(" ");
-				String word = parsed[0];
-				int syllables = 1;
-				for (int i=1;i<parsed.length;i++){
-					if (parsed[i].length() > 0 && parsed[i].charAt(0) == '-'){
-						syllables++;
-					}
+		File file = new File(currentDirectory + "/res/model/" + filepath);
+		assert file.isFile() : "No "+filepath+" -> "+file;
+		BufferedReader br = FileUtils.getReader(file);
+		String input;
+		while ((input = br.readLine()) != null) {
+			String parsed[] = input.toLowerCase().split(" ");
+			String word = parsed[0];
+			int syllables = 1;
+			for (int i=1;i<parsed.length;i++){
+				if (parsed[i].length() > 0 && parsed[i].charAt(0) == '-'){
+					syllables++;
 				}
-				
-				if (word.matches("[a-zA-Z]+") == false)
-					continue;
-				
-				//if unused
-				if (unusedWords.contains(word))
-					continue;
-				
-				if (!dictionary.contains(word))
-					continue;
-				
-				WordInfo w = new WordInfo(word, syllables,null);
-				wordDatabase.put(word, w);
-				
-				ArrayList<String> tags = HaikuPOSTagger.possibleTags(word, 1);
-				
-				//updates wordlist by syllables
-	            for (int i=0;i<tags.size();i++) {
-	            	HashSet<String> wordset = wordlist[w.syllables].get(tags.get(i));
-	            	if (wordset == null) {
-	            		wordset = new HashSet<String>();
-	            		wordlist[w.syllables].put(tags.get(i), wordset);
-	            	}
-	            	wordset.add(word);
-
-	            }
 			}
 			
-			br.close();
+			if ( ! word.matches("[a-zA-Z]+")) {
+				continue;
+			}
 			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//if unused
+			if (unusedWords.contains(word))
+				continue;
+			
+			if ( ! dictionary.contains(word))
+				continue;
+			
+			WordInfo w = new WordInfo(word, syllables,null);
+			wordDatabase.put(word, w);
+			
+			List<String> tags = PosTagByOpenNLP.getPossibleTags(word);
+			
+			//updates wordlist by syllables
+            for (String posTag  : tags) {
+            	WordInfo wi = new WordInfo(word, syllables, null);
+            	wi.setPOS(posTag);
+            	allVocab.addWord(wi);
+            }
 		}
+		
+		br.close();
 	}
 	
 	
@@ -220,17 +206,17 @@ public class LanguageModel {
 		int N = data.size();
 		for (int i=0;i<N;i++){
 			int M = data.get(i).size();
-			String prev = "/s";
+			String prev = Tkn.START_TOKEN.getText();
 			for (int j=0;j<M;j++) {
-				if (data.get(i).get(j).equals("/s"))
-					data.get(i).set(j, "/s");
+				if (data.get(i).get(j).equals(Tkn.START_TOKEN.getText()))
+					data.get(i).set(j, Tkn.START_TOKEN.getText());
 				if (wordDatabase.get(data.get(i).get(j)) != null && wordDatabase.get(prev) != null)
 					markov.add(prev,data.get(i).get(j));
 				prev = data.get(i).get(j);
 				
 			}
 			if (wordDatabase.get(prev) != null)
-				markov.add(prev,"/s");
+				markov.add(prev,Tkn.START_TOKEN.getText());
 			/*
 			//updates list of possible words
 			String tags[] = HaikuPOSTagger.tag(data.get(i));
@@ -261,20 +247,9 @@ public class LanguageModel {
 		
 	}
 	
-	/**
-	 * 
-	 * @param tag : Penn Treebank Tag
-	 * @param syllables : number or syllables
-	 * @return Array of String, a list of all possible words with given tag and syllables
-	 */
-	public String[] getWordlist(String tag, int syllables) {
-		assert syllables > 0;
-		HashSet<String> wordSet = wordlist[syllables].get(tag);
-		if (wordSet == null) 
-			return null;
-		
-		return wordSet.toArray(new String[wordSet.size()]);	
-	}
+	
+	
+	final PoemVocab allVocab = new PoemVocab();
 		
 	/**
 	 * 
@@ -283,25 +258,6 @@ public class LanguageModel {
 	 */
 	public WordInfo getWordInfo(String word) {
 		return wordDatabase.get(word);
-	}
-
-	/**
-	 * Given a tag, return all possible number of syllables available within the tag
-	 * @param tag
-	 * @return sequence of int
-	 */
-	public ArrayList<Integer> getPossibleSyllables(String tag) {
-		ArrayList<Integer> res = new ArrayList<Integer>();
-		if (tag.length() < 2){
-			res.add(0);
-			return res;
-		}			
-		for (int i=0;i<10;i++){
-			if (wordlist[i].get(tag) != null) { 
-				res.add(i);
-			}
-		}		
-		return res;
 	}
 
 	/**
@@ -540,7 +496,11 @@ public class LanguageModel {
 		languageModel.loadStopWords("stop-words_english_6_en.txt");
 				
 		//loading word dictionary
-		languageModel.loadSyllableDictionary("cmudict");
+		try {
+			languageModel.loadSyllableDictionary("cmudict");
+		} catch (IOException e) {
+			throw Utils.runtime(e);
+		}
 
 		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
 		brownOpen(languageModel,44,"ca");

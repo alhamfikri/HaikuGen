@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.coinvent.haiku.Haiku;
-import org.coinvent.haiku.HaikuGenerator;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 import org.junit.Test;
@@ -27,14 +26,14 @@ public class TestRecursion {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
 		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
-		HaikuGenerator generator = new HaikuGenerator(languageModel, haikus, constraint);
+		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 		if (Utils.isBlank(topic)) {
 			topic = languageModel.getRandomTopic();
 		}
 
 		System.out.print("Creating Haiku");
 		for (int i=0;i<=10;i++){			
-			Haiku res = generator.generate(topic);			
+			Poem res = generator.generate(topic);			
 			res.setTopics(topic);
 			System.out.println(res+"\n");
 			topic = res.toString();

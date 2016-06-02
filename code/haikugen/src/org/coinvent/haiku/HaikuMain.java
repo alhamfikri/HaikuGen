@@ -42,12 +42,10 @@ public class HaikuMain {
 				constraint[2] = Integer.parseInt(parsed[3]);
 				
 			}
-			if (input.equalsIgnoreCase("Haiku")) {
-
-				
-				HaikuGenerator generator = new HaikuGenerator(languageModel, haikus, constraint);
+			if (input.equalsIgnoreCase("Haiku")) {				
+				PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 				String idea = scanner.nextLine().trim();
-				ArrayList<Haiku> candidates = new ArrayList<Haiku>();
+				ArrayList<Poem> candidates = new ArrayList<>();
 				String randomizedIdea = "";
 				if (idea.length() == 0) {
 					randomizedIdea = languageModel.getRandomTopic();
@@ -58,7 +56,7 @@ public class HaikuMain {
 					if (i % 20 == 0)
 						System.out.print(".");
 					
-					Haiku res = generator.generate(idea + randomizedIdea);
+					Poem res = generator.generate(idea, randomizedIdea);
 					
 					if (res!=null){
 						res.setTopics(idea + randomizedIdea);
@@ -71,7 +69,7 @@ public class HaikuMain {
 				System.out.println("TOP 5 HAIKUS: ");
 				for (int i=0;i<Math.min(candidates.size(), 5);i++){
 					System.out.println("\n");
-					candidates.get(i).print();
+					candidates.get(i).toString();
 				}			
 				if (candidates.size() > 0) {
 //					candidates.get(0).print();
