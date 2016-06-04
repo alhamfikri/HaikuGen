@@ -7,7 +7,7 @@ public class WordInfo {
 	
 	public static final WordInfo UNKNOWN = new WordInfo("?", -1);
 	public String word;
-	public int syllables;
+	public int syllables = -1;
 	boolean fixed;
 	boolean punctuation;
 	public String pos;
@@ -71,8 +71,8 @@ public class WordInfo {
 		return this;
 	}
 
-	public Tkn getTkn() {
-		Tkn tkn = new Tkn(word);
+	public Tkn getTkn() {		
+		Tkn tkn = new Tkn(word==null? Tkn.UNKNOWN : word);
 		tkn.put(tkn.POS, pos);
 		return tkn;
 	}

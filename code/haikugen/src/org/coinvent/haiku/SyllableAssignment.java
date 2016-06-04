@@ -48,11 +48,11 @@ public class SyllableAssignment {
 		// kick things off: one option (blank) for 0 words (NB: this rules out starting with punctuation, but oh well).
 		optionsWordsTotalSyllablesLastSyllable[0][0][0] = 1;
 		// run through the other words
-		for(int wi = 1; wi <= numWords; wi++) {
-			// Is this word fixed?
+		for(int wi = 1; wi <= numWords; wi++) {			
+			// Is this word fixed? -- treat 0-syllables as fixed
 			WordInfo wordi = line.words.get(wi-1); // adjust wi back to zero index
 			boolean fixed = wordi!=null && wordi.fixed;
-			if (fixed) {
+			if (fixed || wordi.syllables==0) {
 				assert wordi.syllables >= 0;
 				for(int prevTotal=0; prevTotal <= totalSyllables; prevTotal++) {
 					int totali = prevTotal + wordi.syllables;
@@ -71,8 +71,8 @@ public class SyllableAssignment {
 				// skip if total is too high
 				if (s>totalSyllables) continue;
 				Set<String> words = vocab.getWordlist(wordi.pos, s);
-				assert words!=null;
-				if (words.isEmpty()) continue;
+				// e.g. verb of 7 syllables -- probably none
+				if (words==null || words.isEmpty()) continue;
 				for(int prevTotal=0; prevTotal <= totalSyllables; prevTotal++) {
 					int totali = prevTotal + s;
 					if (totali>totalSyllables) {

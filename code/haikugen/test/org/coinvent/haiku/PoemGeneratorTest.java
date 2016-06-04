@@ -49,10 +49,17 @@ public class PoemGeneratorTest {
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 		PoemVocab vocab = languageModel.allVocab;
 		generator.setVocab(vocab);
-		IDocModel model ;
+		assert vocab.getAllWords().size() > 100;
+		
+		// TODO score the Haiku
+		IDocModel model = null;
 		generator.setDocModel(model);
-		IDiscreteDistribution dist;
+		
+		ObjectDistribution dist = new ObjectDistribution<>();
+		dist.train1(new Tkn("bloody"));
+		dist.train1(new Tkn("a"));
 		ICondDistribution<Tkn, Cntxt> wordGen = new UnConditional(dist);
+		
 		generator.setWordGen(wordGen);
 		
 		Poem haiku = generator.generate("love", "food");

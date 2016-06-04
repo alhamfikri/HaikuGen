@@ -81,6 +81,7 @@ public class PoemGenerator {
 				wi.pos = pos;
 				line.words.add(wi);
 			}
+			// syllable counts
 			
 			// fix the words that will not be removed
 			if (Config.isKeep) {
@@ -101,6 +102,10 @@ public class PoemGenerator {
 				Log.d(LOGTAG, "failed to fill in syllable template for "+StrUtils.str(line));
 				return null;
 			}
+			// sanity check on line
+			for(WordInfo wi : line.words) {
+				assert wi.fixed || wi.syllables>0 : wi;
+			}
 		}
 		
 		// Fill in words
@@ -116,6 +121,8 @@ public class PoemGenerator {
 		int topicCount=0;
 		for(Line line : poem.lines) {
 			for(WordInfo word : line.words) {
+				if (word.fixed) continue;
+				if (word.syllables==0) continue;
 				Tkn picked = generateWord(word, line);
 				word.setWord(picked.getText());
 			}
@@ -250,6 +257,7 @@ public class PoemGenerator {
 		List candidates = new ArrayList();
 		for(int i=0; i<Config.batchSize; i++) {
 			Poem res = generate2();
+			res.score = score(res);
 			if (res==null) continue;
 			assert res.score != -1;
 			candidates.add(res);
@@ -260,6 +268,11 @@ public class PoemGenerator {
 		Collections.sort(candidates);
 		Poem winner = (Poem) candidates.get(0);
 		return winner;
+	}
+
+	private double score(Poem res) {
+		SitnStream ss;
+		return 0;
 	}
 
 	public Poem generate(String topic) {

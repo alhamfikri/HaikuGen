@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
+import winterwell.nlp.corpus.IDocument;
+
 /**
  * The vocab this poem can use, with info on the words. 
  * Does not hold any statistical info.
@@ -18,7 +21,9 @@ public class PoemVocab {
 	int MAX_SYLLABLES = 0;
 	
 	/** list of words, divided by its syllables and POS tag TODO a clearer form */
-	private Map<Integer, Map<String, Set<String>>> wordlistFromPOSFromSyllables = new HashMap();	
+	private Map<Integer, Map<String, Set<String>>> wordlistFromPOSFromSyllables = new HashMap();
+
+	private Set<WordInfo> allwords = new HashSet();	
 	
 	/**
 	 * 
@@ -44,10 +49,11 @@ public class PoemVocab {
 	}
 	
 
-	public void addWord(WordInfo wi) {		
+	public void addWord(WordInfo wi) {				
 		assert wi.syllables >= 0 : wi;
 		assert wi.pos != null : wi;
 		assert wi.word != null : wi;
+		allwords.add(wi);
 		Map<String, Set<String>> rightLength = wordlistFromPOSFromSyllables.get(wi.syllables);
 		if (rightLength==null) {
 			rightLength = new HashMap();
@@ -60,6 +66,11 @@ public class PoemVocab {
 		}
 		list.add(wi.word);
 		MAX_SYLLABLES = Math.max(wi.syllables, MAX_SYLLABLES);
+	}
+
+
+	public Set<WordInfo> getAllWords() {
+		return allwords;
 	}
 
 }
