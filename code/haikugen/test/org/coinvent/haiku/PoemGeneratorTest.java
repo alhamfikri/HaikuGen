@@ -6,9 +6,12 @@ import java.util.List;
 
 import org.junit.Test;
 
+import winterwell.maths.stats.distributions.cond.Cntxt;
+import winterwell.maths.stats.distributions.cond.ICondDistribution;
 import winterwell.maths.stats.distributions.cond.UnConditional;
 import winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
 import winterwell.maths.stats.distributions.discrete.ObjectDistribution;
+import winterwell.nlp.docmodels.IDocModel;
 import winterwell.nlp.io.Tkn;
 
 public class PoemGeneratorTest {
@@ -44,6 +47,14 @@ public class PoemGeneratorTest {
 		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
+		PoemVocab vocab = languageModel.allVocab;
+		generator.setVocab(vocab);
+		IDocModel model ;
+		generator.setDocModel(model);
+		IDiscreteDistribution dist;
+		ICondDistribution<Tkn, Cntxt> wordGen = new UnConditional(dist);
+		generator.setWordGen(wordGen);
+		
 		Poem haiku = generator.generate("love", "food");
 		System.out.println("Love Food");
 		System.out.println(haiku);

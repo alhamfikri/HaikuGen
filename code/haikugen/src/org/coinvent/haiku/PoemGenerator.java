@@ -33,6 +33,10 @@ Lists of season marker words: https://en.wikipedia.org/wiki/Saijiki http://www.2
  */
 public class PoemGenerator {
 
+	public void setDocModel(IDocModel docModel) {
+		this.docModel = docModel;
+	}
+	
 	private static final String LOGTAG = "haiku";
 	private LanguageModel languageModel;
 	private List<Haiku> haikus;
@@ -124,6 +128,10 @@ public class PoemGenerator {
 	IDocModel docModel;
 	
 	ICondDistribution<Tkn, Cntxt> wordGen;
+	
+	public void setWordGen(ICondDistribution<Tkn, Cntxt> wordGen) {
+		this.wordGen = wordGen;
+	}
 	
 	/**
 	 * 
