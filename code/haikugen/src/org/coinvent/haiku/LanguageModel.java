@@ -25,7 +25,9 @@ import no.uib.cipr.matrix.Vector;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import winterwell.nlp.analysis.SyllableCounter;
+import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.Tkn;
+import winterwell.nlp.io.WordAndPunctuationTokeniser;
 import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.nlp.vectornlp.GloveWordVectors;
 import winterwell.utils.Utils;
@@ -41,6 +43,9 @@ import winterwell.utils.reporting.Log;
  * Word list based on Tag : Given a PoS tag/label, all possible words with that label are provided, sorted by their probability.
  */
 public class LanguageModel {
+	
+	ITokenStream brownTokeniser;
+	ITokenStream tweetTokeniser = new WordAndPunctuationTokeniser().setLowerCase(true);
 	
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
@@ -250,6 +255,9 @@ public class LanguageModel {
 	
 	
 	final PoemVocab allVocab = new PoemVocab();
+
+
+	public static String[] sig = new String[]{"w-2","w-1","w+1"};
 		
 	/**
 	 * 

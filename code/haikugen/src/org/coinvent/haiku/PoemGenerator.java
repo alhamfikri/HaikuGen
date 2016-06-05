@@ -154,7 +154,7 @@ public class PoemGenerator {
 		assert wordInfo.syllables > 0 : wordInfo;
 		int wi = line.words.indexOf(wordInfo);
 		assert wi != -1 : wordInfo+" not in "+line;
-		String[] sig = new String[]{Tkn.POS.name,"w-2","w-1","w+1"};
+		String[] sig = LanguageModel.get().sig;
 		SitnStream ss = new SitnStream(null, line, sig);
 		List<Sitn<Tkn>> list = Containers.list(ss);
 		Cntxt context = list.get(wi).context;
@@ -169,7 +169,10 @@ public class PoemGenerator {
 	}
 
 	private boolean keepTemplateWord(String word) {
-		return languageModel.stopWords.contains(word);
+		if (languageModel.stopWords.contains(word)) return true;
+		// punctuation?
+		if (StrUtils.isPunctuation(word)) return true;
+		return false;
 	}
 
 	private void postProcessing(Poem poem) {

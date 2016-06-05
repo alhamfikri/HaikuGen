@@ -25,5 +25,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.bob"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/winterwell.datalog"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/code.sens"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jtwitter"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
