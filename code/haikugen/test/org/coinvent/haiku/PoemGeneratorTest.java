@@ -6,9 +6,15 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.winterwell.utils.io.FileUtils;
+
+import creole.data.XId;
+import winterwell.jtwitter.Status;
+import winterwell.jtwitter.TwitterTest;
 import winterwell.maths.stats.distributions.cond.Cntxt;
 import winterwell.maths.stats.distributions.cond.ICondDistribution;
 import winterwell.maths.stats.distributions.cond.UnConditional;
+import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
 import winterwell.maths.stats.distributions.discrete.ObjectDistribution;
 import winterwell.nlp.docmodels.IDocModel;
@@ -42,7 +48,7 @@ public class PoemGeneratorTest {
 	}
 
 	@Test
-	public void testGenerate() {
+	public void testGenerateSmokeTest() {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
 		LanguageModel languageModel = LanguageModel.get();
 		int constraint[] = {5,7,5};
@@ -60,6 +66,34 @@ public class PoemGeneratorTest {
 		dist.train1(new Tkn("a"));
 		ICondDistribution<Tkn, Cntxt> wordGen = new UnConditional(dist);
 		
+		generator.setWordGen(wordGen);
+		
+		Poem haiku = generator.generate("love", "food");
+		System.out.println("Love Food");
+		System.out.println(haiku);
+	}
+
+	
+	@Test
+	public void testGenerateFromTweets() {
+		List<Haiku> haikus = HaikuMain.loadHaikus();
+		LanguageModel languageModel = LanguageModel.get();
+		int constraint[] = {5,7,5};
+		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
+
+		VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(TwitterTest.newTestTwitter(), new XId("winterstein@twitter"));
+		List<Status> tweets = FileUtils.load(VocabFromTwitterProfileTest.TWEET_FILE);
+		vftp.train(tweets);		
+		
+		PoemVocab vocab = vftp.getVocab();
+		generator.setVocab(vocab);
+		assert vocab.getAllWords().size() > 100;
+		
+		// TODO score the Haiku
+		IDocModel model = null;
+		generator.setDocModel(model);
+		
+		WWModel<Tkn> wordGen = vftp.getWordModel();
 		generator.setWordGen(wordGen);
 		
 		Poem haiku = generator.generate("love", "food");

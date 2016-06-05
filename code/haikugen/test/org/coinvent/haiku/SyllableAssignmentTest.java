@@ -9,6 +9,12 @@ import com.winterwell.utils.Printer;
 
 public class SyllableAssignmentTest {
 
+	
+	@Test
+	public void testTemplateLine() {
+		String line = "the null has null --";
+	}
+	
 	@Test
 	public void testRandomizeSyllableBlankLine() {
 		Line line = new Line(5);

@@ -50,14 +50,14 @@ public class PoemVocab {
 	
 
 	public void addWord(WordInfo wi) {				
-		assert wi.syllables >= 0 : wi;
+		assert wi.syllables() >= 0 : wi;
 		assert wi.pos != null : wi;
 		assert wi.word != null : wi;
 		allwords.add(wi);
-		Map<String, Set<String>> rightLength = wordlistFromPOSFromSyllables.get(wi.syllables);
+		Map<String, Set<String>> rightLength = wordlistFromPOSFromSyllables.get(wi.syllables());
 		if (rightLength==null) {
 			rightLength = new HashMap();
-			wordlistFromPOSFromSyllables.put(wi.syllables, rightLength);
+			wordlistFromPOSFromSyllables.put(wi.syllables(), rightLength);
 		}
 		Set<String> list = rightLength.get(wi.pos);
 		if (list==null) {
@@ -65,7 +65,7 @@ public class PoemVocab {
 			rightLength.put(wi.pos, list);			
 		}
 		list.add(wi.word);
-		MAX_SYLLABLES = Math.max(wi.syllables, MAX_SYLLABLES);
+		MAX_SYLLABLES = Math.max(wi.syllables(), MAX_SYLLABLES);
 	}
 
 

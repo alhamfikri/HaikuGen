@@ -24,6 +24,7 @@ import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.nlp.analysis.SyllableCounter;
 import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.Tkn;
@@ -69,11 +70,7 @@ public class LanguageModel {
 	HashSet<String> stopWords;
 	
 	
-	//markov chain model
-	MarkovModel markov;
-	
 	private LanguageModel() {
-		markov = new MarkovModel();
 		dictionary = new HashSet<String>();
 		unusedWords = new HashSet<String>();
 		stopWords = new HashSet<String>();
@@ -207,54 +204,9 @@ public class LanguageModel {
 	}
 	
 	
-	public void trainMarkov(ArrayList<ArrayList<String>> data) {
-		int N = data.size();
-		for (int i=0;i<N;i++){
-			int M = data.get(i).size();
-			String prev = Tkn.START_TOKEN.getText();
-			for (int j=0;j<M;j++) {
-				if (data.get(i).get(j).equals(Tkn.START_TOKEN.getText()))
-					data.get(i).set(j, Tkn.START_TOKEN.getText());
-				if (wordDatabase.get(data.get(i).get(j)) != null && wordDatabase.get(prev) != null)
-					markov.add(prev,data.get(i).get(j));
-				prev = data.get(i).get(j);
-				
-			}
-			if (wordDatabase.get(prev) != null)
-				markov.add(prev,Tkn.START_TOKEN.getText());
-			/*
-			//updates list of possible words
-			String tags[] = HaikuPOSTagger.tag(data.get(i));
-			for (int j=0;j<tags.length;j++){
-            	String word = data.get(i).get(j);
-            	WordInfo wordInfo = wordDatabase.get(word);
-            	if (wordInfo == null) 
-            		continue;
-            	
-            	//updates wordlist by syllables
-            	HashSet<String> wordset = wordlist[wordInfo.syllables].get(tags[j]);
-            	if (wordset == null) {
-            		wordset = new HashSet<String>();
-            		wordlist[wordInfo.syllables].put(tags[j], wordset);
-            	}
-            	wordset.add(word);
-            	
-            	//updates global wordlist 
-            	HashSet<String> wordset2 = allWordlist.get(tags[j]);
-            	if (wordset2 == null) {
-            		wordset2 = new HashSet<String>();
-            		allWordlist.put(tags[j], wordset2);
-            	}
-            	wordset2.add(word);
-            }*/
-			
-		}
-		
-	}
-	
-	
 	
 	final PoemVocab allVocab = new PoemVocab();
+	WWModel<Tkn> allWordModel;
 
 
 	public static String[] sig = new String[]{"w-2","w-1","w+1"};
@@ -275,69 +227,10 @@ public class LanguageModel {
 	 */
 	public int getSyllable(String word){
 		WordInfo w = wordDatabase.get(word);
-		if (w != null && w.syllables > 0) return w.syllables;
+		if (w != null && w.syllables() > 0) return w.syllables();
 		return SyllableCounter.syllableCount(word);
 	}
-	
-	public int getMarkovCount(String string, String word2) {
-		return markov.getCount(string,word2);
-	}
-	
-	
-	public void loadMarkovModel(String filepath) {
 		
-	}
-	
-	/**
-	 * Save current trained model, so you don't have to re-train the whole markov again
-	 * @param filepath
-	 */
-	public void saveMarkovModel(String filename) {
-		String currentDirectory = System.getProperty("user.dir");
-		System.err.println("Saving model... ");
-		File file = new File(currentDirectory + "/res/model/" + filename);
-		BufferedWriter bw = null;
-		// if file doesnt exists, then create it
-	
-		try {
-			if (!file.exists())
-				file.createNewFile();
-			
-			FileWriter fw = new FileWriter(file.getAbsoluteFile());
-			bw = new BufferedWriter(fw);
-			
-			for (String key : wordDatabase.keySet()) {
-
-			    ArrayList<String> nexts = markov.getAllPossiblePairs(key);
-			    if (nexts == null)
-			    	continue;
-			    
-			    for (int i=0;i<nexts.size();i++)
-			    	bw.write(key+" "+nexts.get(i)+" "+markov.getCount(key,nexts.get(i)) + "\n");
-			    
-			}
-			
-			//bw.close();
-			System.err.println("Done ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-	
-			System.err.println("FAILED TO SAVE THE MODEL :(");
-		}
-	}
-
-	public double getMarkovProbability(String prev, String next) {
-		double p = markov.getProbability(prev,next) + 0.0000001;		
-		assert MathUtils.isProb(p) && p!=0 : prev+" -> "+next;
-		return p;
-	}
-
-	public int getUnigramCount(String string) {
-		
-		return markov.getCount(string);
-	}
-	
 	public double getDistance(String s1, String s2) {		
 		Vector v1 = glove.getVector(s1);
 		Vector v2 = glove.getVector(s2); 
@@ -510,32 +403,9 @@ public class LanguageModel {
 			throw Utils.runtime(e);
 		}
 
-		//languageModel.trainMarkov(CorpusReader.readWikipedia("englishText_10000_20000"));
-		brownOpen(languageModel,44,"ca");
-		brownOpen(languageModel,75,"cg");
-		brownOpen(languageModel,80,"cj");
-		brownOpen(languageModel,24,"ch");
-		brownOpen(languageModel,20,"ck");
-		brownOpen(languageModel,9,"cr");
-				
 		dflt = languageModel;
 		Log.d("haiku", "...prepared LanguageModel");
 		return dflt;
 	}
-	
 
-	private static void brownOpen(LanguageModel languageModel,int N,String code) {
-		ArrayList<ArrayList<String>> data;
-		
-		//adding corpus 
-		for (int i=1;i<N;i++) {
-			//System.out.println("Loading corpus: );
-			if (i < 10)
-				data = CorpusReader.readBrown(code+"0"+i);
-			else
-				data = CorpusReader.readBrown(code+i);
-		
-			languageModel.trainMarkov(data);
-		}		
-	}
 }

@@ -20,7 +20,7 @@ import com.winterwell.utils.io.FileUtils;
 
 public class VocabFromTwitterProfileTest {
 
-	private static final File TWEET_FILE = new File("test-data/tweets.xml");
+	static final File TWEET_FILE = new File("test-data/tweets.xml");
 
 	@Test
 	public void testRun() {

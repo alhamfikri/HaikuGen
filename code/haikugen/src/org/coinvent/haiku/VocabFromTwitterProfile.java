@@ -49,7 +49,7 @@ public class VocabFromTwitterProfile {
 	
 	void train(List<Status> tweets) {
 		vocab = new PoemVocab();
-		List<String> sig = Arrays.asList(LanguageModel.get().sig);
+		List<String> sig = Arrays.asList(LanguageModel.sig);
 		WWModelFactory wwmf = new WWModelFactory();
 		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(1000, 2, 100, 2);
 		wordModel = wwmf.fullFromSig(sig, null, 
@@ -64,7 +64,7 @@ public class VocabFromTwitterProfile {
 
 	void train(IDocument doc) {
 		ITokenStream tokens = tokeniser.factory(doc.getContents());		
-		SitnStream ss = new SitnStream(doc, tokens, LanguageModel.get().sig);
+		SitnStream ss = new SitnStream(doc, tokens, LanguageModel.sig);
 		for (Sitn<Tkn> sitn : ss) {
 			// stats-model
 			wordModel.train1(sitn.context, sitn.outcome);

@@ -1,13 +1,16 @@
 package org.coinvent.haiku;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
 
 import com.winterwell.utils.MathUtils;
 
 import winterwell.maths.stats.distributions.IntDistribution;
-import winterwell.utils.Utils;
+import winterwell.nlp.corpus.brown.BrownCorpusTags;
+import com.winterwell.utils.StrUtils;
+import com.winterwell.utils.Utils;
 
 /**
  * Pick per-word syllable counts to fit a line-length constraint.
@@ -42,26 +45,32 @@ public class SyllableAssignment {
 		int totalSyllables = line.syllables;
 		assert totalSyllables > 0;
 
-		int[][][] optionsWordsTotalSyllablesLastSyllable = new int[numWords+1][totalSyllables+1][vocab.MAX_SYLLABLES + 1];
-		// e.g. optionsWordsSyllables[2][3][1] = number of ways we can make the 
+		double[][][] weightWordsTotalSyllablesLastSyllable = new double[numWords+1][totalSyllables+1][vocab.MAX_SYLLABLES + 1];
+		// e.g. weightWordsSyllables[2][3][1] =~ number of ways we can make the 
 		// first 2 words with a total length of 3 syllables, and the last word uses 1 syllable
 		// kick things off: one option (blank) for 0 words (NB: this rules out starting with punctuation, but oh well).
-		optionsWordsTotalSyllablesLastSyllable[0][0][0] = 1;
+//		for(int i=0; i<log_weightWordsTotalSyllablesLastSyllable.length; i++) {
+//			for(int j=0; j<log_weightWordsTotalSyllablesLastSyllable[i].length; j++) {
+//				double[] arr = log_weightWordsTotalSyllablesLastSyllable[i][j];
+//				Arrays.fill(arr, Double.NEGATIVE_INFINITY);
+//			}
+//		}
+		weightWordsTotalSyllablesLastSyllable[0][0][0] = 1; // i.e. log(1)
 		// run through the other words
 		for(int wi = 1; wi <= numWords; wi++) {			
 			// Is this word fixed? -- treat 0-syllables as fixed
 			WordInfo wordi = line.words.get(wi-1); // adjust wi back to zero index
 			boolean fixed = wordi!=null && wordi.fixed;
-			if (fixed || wordi.syllables==0) {
-				assert wordi.syllables >= 0;
+			if (fixed || wordi.syllables()==0) {
+				assert wordi.syllables() >= 0;
 				for(int prevTotal=0; prevTotal <= totalSyllables; prevTotal++) {
-					int totali = prevTotal + wordi.syllables;
+					int totali = prevTotal + wordi.syllables();
 					if (totali>totalSyllables) {
 						continue; // too long
 					}
-					int optionsToHere = MathUtils.sum(optionsWordsTotalSyllablesLastSyllable[wi-1][prevTotal]);
+					double optionsToHere = MathUtils.sum(weightWordsTotalSyllablesLastSyllable[wi-1][prevTotal]);
 					// options are the routes to here * choices here (which is 1)
-					optionsWordsTotalSyllablesLastSyllable[wi][totali][wordi.syllables] 
+					weightWordsTotalSyllablesLastSyllable[wi][totali][wordi.syllables()] 
 							= optionsToHere;
 				}
 				continue;
@@ -78,11 +87,14 @@ public class SyllableAssignment {
 					if (totali>totalSyllables) {
 						continue; // too long
 					}
-					int optionsToHere = MathUtils.sum(optionsWordsTotalSyllablesLastSyllable[wi-1][prevTotal]);
+					double optionsToHere = MathUtils.sum(weightWordsTotalSyllablesLastSyllable[wi-1][prevTotal]);
+					assert optionsToHere >= 0 : optionsToHere;
 					// options are the routes to here * choices here
 					// ??should we use logs here??
-					optionsWordsTotalSyllablesLastSyllable[wi][totali][s] 
-							= optionsToHere * words.size();
+					double options = optionsToHere * words.size();
+					if (options > MathUtils.TOO_BIG) options = MathUtils.TOO_BIG;
+					assert options >= 0 : options+" = "+optionsToHere+" * "+words.size();
+					weightWordsTotalSyllablesLastSyllable[wi][totali][s] = options;
 				}
 			}
 		}
@@ -93,16 +105,23 @@ public class SyllableAssignment {
 		int res[] = new int[numWords];
 		int syllablesLeft = totalSyllables;
 		for(int wi=numWords; wi>0; wi--) {
-			int[] options = optionsWordsTotalSyllablesLastSyllable[wi][syllablesLeft];
+			double[] options = weightWordsTotalSyllablesLastSyllable[wi][syllablesLeft];
 			IntDistribution poptions = new IntDistribution(options);
 			double s = poptions.sample();
+			// sanity check
+			if (s==0) {				
+				WordInfo w = line.words.get(wi-1);
+				assert ! StrUtils.isWord(w.pos) : w.pos+" "+w+" "+s;
+			}
 			res[wi-1] = (int) s;			
 			syllablesLeft -= s;
 		}
 		
 		// set the answers
 		for(int i=0; i<line.words.size(); i++) {
-			line.words.get(i).syllables = res[i];
+			assert res[i] >= 0;
+			WordInfo wi = line.words.get(i);
+			wi.setSyllables(res[i]);
 		}
 		return res;
 	}

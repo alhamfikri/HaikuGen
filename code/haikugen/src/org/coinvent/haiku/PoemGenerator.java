@@ -3,8 +3,10 @@ package org.coinvent.haiku;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import com.winterwell.maths.stats.distributions.IDistributionBase;
 import com.winterwell.utils.MathUtils;
@@ -18,11 +20,15 @@ import winterwell.maths.stats.distributions.cond.Cntxt;
 import winterwell.maths.stats.distributions.cond.ICondDistribution;
 import winterwell.maths.stats.distributions.cond.Sitn;
 import winterwell.maths.stats.distributions.discrete.IFiniteDistribution;
+import winterwell.maths.timeseries.DataUtils;
+import winterwell.maths.vector.VectorUtilsTest;
+import winterwell.nlp.NLPWorkshop;
 import winterwell.nlp.docmodels.IDocModel;
 import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.utils.FailureException;
 import winterwell.utils.Utils;
+import winterwell.utils.web.XStreamUtils;
 
 /**
  * What is and isn’t haiku: http://www.litkicks.com/EssentialElementsofHaiku
@@ -70,7 +76,7 @@ public class PoemGenerator {
 				
 		// Make a POS skeleton
 		for (int i=0; i<poem.lines.length; i++) {
-			Line line = poem.lines[i];
+			final Line line = poem.lines[i];
 			// pick a haiku to provide the template for this line
 			int id = random.nextInt(haikus.size());
 			Haiku haikuTemplate = haikus.get(id);
@@ -81,7 +87,6 @@ public class PoemGenerator {
 				wi.pos = pos;
 				line.words.add(wi);
 			}
-			// syllable counts
 			
 			// fix the words that will not be removed
 			if (Config.isKeep) {
@@ -101,15 +106,23 @@ public class PoemGenerator {
 			if(syllables == null) {
 				Log.d(LOGTAG, "failed to fill in syllable template for "+StrUtils.str(line));
 				return null;
-			}
-			// sanity check on line
+			}			
+			
+			// sanity check: syllables set
 			for(WordInfo wi : line.words) {
-				assert wi.fixed || wi.syllables>0 : wi;
+				assert wi.syllables() >= 0;
 			}
 		}
 		
 		// Fill in words
 		generate3_fillInWords(poem);
+		
+		// sanity check: words filled in
+		for(Line line : poem.lines) {
+			for(WordInfo wi : line.words) {
+				assert ! Utils.isBlank(wi.word) : line;
+			}
+		}
 		
 		//post-processing the Haiku, fixes some inconsistencies
 		postProcessing(poem);
@@ -121,12 +134,25 @@ public class PoemGenerator {
 		int topicCount=0;
 		for(Line line : poem.lines) {
 			for(WordInfo word : line.words) {
-				if (word.fixed) continue;
-				if (word.syllables==0) continue;
+				if (word.fixed) {
+					assert ! word.word.isEmpty();
+					assert keepTemplateWord(word.word) : word;
+					assert ! Utils.isBlank(word.word) : line;
+					continue;
+				}
+				if (word.syllables()==0) {
+					// punctuation -- should have been filled in from the punctuation
+					assert ! Utils.isBlank(word.word) : line;
+					continue;
+				}
 				Tkn picked = generateWord(word, line);
 				word.setWord(picked.getText());
+				assert ! Utils.isBlank(picked.getText());
 			}
-		}
+			for(WordInfo wi : line.words) {
+				assert ! Utils.isBlank(wi.word) : line;
+			}
+		} // end for-each-line
 	}
 	
 	/**
@@ -135,6 +161,10 @@ public class PoemGenerator {
 	IDocModel docModel;
 	
 	ICondDistribution<Tkn, Cntxt> wordGen;
+
+	double topicScoreWeight = 1;
+	double senseScoreWeight = 1;
+	double focusScoreWeight = 1;
 	
 	public void setWordGen(ICondDistribution<Tkn, Cntxt> wordGen) {
 		this.wordGen = wordGen;
@@ -151,7 +181,7 @@ public class PoemGenerator {
 		// context
 		String posTag = wordInfo.pos;
 		assert posTag != null;		
-		assert wordInfo.syllables > 0 : wordInfo;
+		assert wordInfo.syllables() > 0 : wordInfo;
 		int wi = line.words.indexOf(wordInfo);
 		assert wi != -1 : wordInfo+" not in "+line;
 		String[] sig = LanguageModel.get().sig;
@@ -190,48 +220,6 @@ public class PoemGenerator {
 		}
 	}
 	
-
-	private double getModelScore(String[][] result, String[][] tag) {
-		double score = 0.0;
-		String lastWord = "";
-		double ct = 0;
-		String[] separator = {"","","...",",","--"};
-		for (int i=0;i<result.length;i++){
-			String prev = Tkn.START_TOKEN.getText();
-			if (i > 0 && lastWord.length() > 0) {
-				double logLikelihoodEnd = Math.log(languageModel.getMarkovProbability(lastWord, Tkn.END_TOKEN.getText()));
-				double logLikelihoodContinue = Math.log(languageModel.getMarkovProbability(lastWord, result[i][0]));
-				ct++;
-				score = score + Math.max(logLikelihoodEnd,logLikelihoodContinue);
-				assert MathUtils.isFinite(score);
-				if (logLikelihoodContinue < logLikelihoodEnd) //is -Infinity
-					result[i-1][result[i-1].length - 1] = result[i-1][result[i-1].length - 1] + separator[new Random().nextInt(5)];
-					
-			}
-			for (int j=0;j<result[i].length;j++){
-				if (tag[i][j].length() < 2){
-					prev = Tkn.START_TOKEN.getText();
-					lastWord = "";
-					continue;
-				}
-				lastWord = result[i][j];
-				//ct += 1.0;
-				double logLikelihood = Math.log(languageModel.getMarkovProbability(prev, result[i][j]));
-				//logLikelihood = -Math.log10(8);
-				prev = result[i][j];
-				if ( ! (prev.equals(Tkn.START_TOKEN.getText()) || languageModel.stopWords.contains(prev)) || !languageModel.stopWords.contains(result[i][j])){
-					score = score + logLikelihood;
-					assert MathUtils.isFinite(score);
-					if (logLikelihood < -10000)
-						result[i][j] = result[i][j];
-					ct++;
-				}
-			}
-		}
-		assert MathUtils.isFinite(score);
-		assert ct > 0;
-		return (score*0.01)/ct;
-	}
 
 	
 
@@ -274,8 +262,63 @@ public class PoemGenerator {
 	}
 
 	private double score(Poem res) {
-		SitnStream ss;
-		return 0;
+		// TODO
+		// topic: overall topic-vector score
+		double topicScore = 0;
+		Vector poemTopic = null;
+		for(Line line : res.lines) {
+			for(WordInfo wi : line.words) {
+				Vector vector = LanguageModel.get().getVector(wi.word);
+				if (vector == null) continue;
+				if (poemTopic==null) poemTopic = vector;
+				else poemTopic = poemTopic.add(vector);
+			}
+		}
+		DataUtils.normalise(poemTopic);
+		if (poemTopic!=null && topicVector!=null) {
+			DataUtils.normalise(topicVector);
+			topicScore = Math.abs(poemTopic.dot(topicVector));
+		}
+		
+		// aesthetics: similar-words without repetition
+		int repeats=0;
+		HashSet<String> seen = new HashSet();
+		Set<String> stopwords = NLPWorkshop.get().getStopwords();
+		double focusScore = 0;
+		for(Line line : res.lines) {
+			for(WordInfo wi : line.words) {
+				if (StrUtils.isWord(wi.word) && ! stopwords.contains(wi.word)) {
+					if (seen.contains(wi.word)) {
+						repeats ++;
+					}
+					seen.add(wi.word);
+				}
+				Vector vector = LanguageModel.glove.getVector(wi.word);
+				if (vector == null) continue;
+				DataUtils.normalise(vector);
+				focusScore += Math.abs(poemTopic.dot(vector));
+			}
+		}
+		if (repeats!=0) {
+			focusScore = focusScore / (100*repeats);
+		}
+		
+		// sense: multiply per-word scores
+		double senseScore = 1;
+		for(Line line : res.lines) {
+			double logProb = 0;
+			SitnStream ss = new SitnStream(null, line, LanguageModel.sig);
+//			for (Sitn<Tkn> sitn : ss) {
+//				double lp = languageModel.allWordModel.logProb(sitn.outcome, sitn.context);
+//				logProb += lp;
+//			}
+		}		
+		// weight them (add a bit in to avoid 0s)
+		double ts = 0.0000000001 + topicScore*topicScoreWeight;
+		double ss = 0.0000000001 + senseScore*senseScoreWeight;
+		double fs = 0.0000000001 + focusScore*focusScoreWeight;
+		// balance them, F-Score style
+		return 3*ts*ss*fs / (ts+ss+fs);
 	}
 
 	public Poem generate(String topic) {

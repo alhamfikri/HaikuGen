@@ -1,5 +1,7 @@
 package org.coinvent.haiku;
 
+import com.winterwell.utils.StrUtils;
+
 import winterwell.nlp.io.Tkn;
 
 
@@ -7,7 +9,17 @@ public class WordInfo {
 	
 	public static final WordInfo UNKNOWN = new WordInfo("?", -1);
 	public String word;
-	public int syllables = -1;
+	private int syllables = -1;
+	
+	public int syllables() {
+		return syllables;
+	}
+	
+	public void setSyllables(int syllables) {
+		this.syllables = syllables;
+		assert syllables > 0 || ! StrUtils.isWord(pos) : pos+" "+this;
+	}
+	
 	boolean fixed;
 	boolean punctuation;
 	public String pos;
