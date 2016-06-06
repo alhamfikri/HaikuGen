@@ -2,6 +2,7 @@ package org.coinvent.haiku;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.Set;
 
@@ -9,6 +10,8 @@ import com.winterwell.utils.MathUtils;
 
 import winterwell.maths.stats.distributions.IntDistribution;
 import winterwell.nlp.corpus.brown.BrownCorpusTags;
+import winterwell.utils.reporting.Log;
+
 import com.winterwell.utils.StrUtils;
 import com.winterwell.utils.Utils;
 
@@ -31,6 +34,8 @@ public class SyllableAssignment {
 	}
 	
 	LanguageModel languageModel = LanguageModel.get();
+
+	private PoemVocab fallbackVocab;
 	
 	/**
 	 * Uniformly randomize the syllable distribution with dynamic programming
@@ -80,8 +85,11 @@ public class SyllableAssignment {
 				// skip if total is too high
 				if (s>totalSyllables) continue;
 				Set<String> words = vocab.getWordlist(wordi.pos, s);
+				Set<String> fallbackWords = fallbackVocab==null? Collections.EMPTY_SET : fallbackVocab.getWordlist(wordi.pos, s);
 				// e.g. verb of 7 syllables -- probably none
-				if (words==null || words.isEmpty()) continue;
+				if (words.isEmpty() && fallbackWords.isEmpty()) {
+					continue;
+				}
 				for(int prevTotal=0; prevTotal <= totalSyllables; prevTotal++) {
 					int totali = prevTotal + s;
 					if (totali>totalSyllables) {
@@ -91,9 +99,10 @@ public class SyllableAssignment {
 					assert optionsToHere >= 0 : optionsToHere;
 					// options are the routes to here * choices here
 					// ??should we use logs here??
-					double options = optionsToHere * words.size();
+					double wordsSize = words.size() + Config.DOWNVOTE_USEALLVOCAB*fallbackWords.size();
+					double options = optionsToHere * wordsSize;
 					if (options > MathUtils.TOO_BIG) options = MathUtils.TOO_BIG;
-					assert options >= 0 : options+" = "+optionsToHere+" * "+words.size();
+					assert options >= 0 : options+" = "+optionsToHere+" * "+wordsSize;
 					weightWordsTotalSyllablesLastSyllable[wi][totali][s] = options;
 				}
 			}
@@ -107,11 +116,15 @@ public class SyllableAssignment {
 		for(int wi=numWords; wi>0; wi--) {
 			double[] options = weightWordsTotalSyllablesLastSyllable[wi][syllablesLeft];
 			IntDistribution poptions = new IntDistribution(options);
+			if (poptions.getTotalWeight()==0) {
+				Log.d("poem", "Cannot assign syylables for "+line+" = "+totalSyllables);
+				return null;
+			}
 			double s = poptions.sample();
-			// sanity check
+			// sanity check: 0 syllables => punctuation
 			if (s==0) {				
 				WordInfo w = line.words.get(wi-1);
-				assert ! StrUtils.isWord(w.pos) : w.pos+" "+w+" "+s;
+				assert BrownCorpusTags.isPunctuation(w.pos) : w.pos+" "+w+" "+s;
 			}
 			res[wi-1] = (int) s;			
 			syllablesLeft -= s;
@@ -124,5 +137,9 @@ public class SyllableAssignment {
 			wi.setSyllables(res[i]);
 		}
 		return res;
+	}
+
+	public void setFallbackVocab(PoemVocab allVocab) {
+		fallbackVocab = allVocab;
 	}
 }

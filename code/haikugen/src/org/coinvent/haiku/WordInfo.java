@@ -1,5 +1,7 @@
 package org.coinvent.haiku;
 
+import java.util.regex.Pattern;
+
 import com.winterwell.utils.StrUtils;
 
 import winterwell.nlp.io.Tkn;
@@ -57,7 +59,9 @@ public class WordInfo {
 
 	public WordInfo(String word, int syllables) {		
 		this.word = word;
-		this.syllables = syllables;		
+		this.syllables = syllables;
+		// only punctuation has 0 syllables
+		assert syllables!=0 || word==null || StrUtils.isPunctuation(word) || word.startsWith("<") || word.isEmpty() : word;
 	}
 	
 	public WordInfo setFixed(boolean fixed) {
@@ -76,6 +80,10 @@ public class WordInfo {
 	public void setWord(String word) {
 		this.word = word;		
 		this.syllables = word==null? -1 : LanguageModel.get().getSyllable(word);
+		// punctuation has 0 syllables
+		if ( ! Pattern.compile("[a-zA-Z0-9]").matcher(word).find()) {
+			assert syllables==0 : this;
+		}
 	}
 
 	public WordInfo setPOS(String posTag) {

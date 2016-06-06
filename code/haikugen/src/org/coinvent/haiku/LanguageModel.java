@@ -40,6 +40,7 @@ import winterwell.nlp.analysis.SyllableCounter;
 import winterwell.nlp.corpus.IDocument;
 import winterwell.nlp.corpus.brown.BrownCorpus;
 import winterwell.nlp.corpus.brown.BrownDocument;
+import winterwell.nlp.dict.CMUDict;
 import winterwell.nlp.io.ApplyFnToTokenStream;
 import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.SitnStream;
@@ -172,33 +173,23 @@ public class LanguageModel {
 	 * @param filepath location of CMUDict
 	 * @throws IOException 
 	 */
-	public void loadSyllableDictionary(String filepath) throws IOException {
-		String currentDirectory = System.getProperty("user.dir");
-		File file = new File(currentDirectory + "/res/model/" + filepath);
-		assert file.isFile() : "No "+filepath+" -> "+file;
-		BufferedReader br = FileUtils.getReader(file);
-		String input;
-		while ((input = br.readLine()) != null) {
-			String parsed[] = input.toLowerCase().split(" ");
-			String word = parsed[0];
-			int syllables = 1;
-			for (int i=1;i<parsed.length;i++){
-				if (parsed[i].length() > 0 && parsed[i].charAt(0) == '-'){
-					syllables++;
-				}
-			}
-			
-			if ( ! word.matches("[a-zA-Z]+")) {
+	public void loadSyllableDictionary() {
+		CMUDict cmud = new CMUDict();
+		cmud.load();
+		for(String word : cmud.getAllWords()) {
+			if ( ! StrUtils.isWord(word)) {
 				continue;
-			}
-			
+			}			
 			//if unused
-			if (unusedWords.contains(word))
+			if (unusedWords.contains(word)) {
 				continue;
+			}
 			
-			if ( ! dictionary.contains(word))
+			if ( ! dictionary.contains(word)) {
 				continue;
+			}
 			
+			int syllables = cmud.getSyllableCount(word);
 			WordInfo w = new WordInfo(word, syllables);
 			wordDatabase.put(word, w);
 			
@@ -210,9 +201,8 @@ public class LanguageModel {
             	wi.setPOS(posTag);
             	allVocab.addWord(wi);
             }
+
 		}
-		
-		br.close();
 	}
 	
 		
@@ -337,11 +327,7 @@ public class LanguageModel {
 		languageModel.loadStopWords("stop-words_english_6_en.txt");
 				
 		//loading word dictionary
-		try {
-			languageModel.loadSyllableDictionary("cmudict");
-		} catch (IOException e) {
-			throw Utils.runtime(e);
-		}
+		languageModel.loadSyllableDictionary();		
 
 		dflt = languageModel;
 		Log.d("haiku", "...prepared LanguageModel");

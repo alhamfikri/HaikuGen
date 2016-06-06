@@ -85,7 +85,7 @@ public class PoemGenerator {
 				
 		// Make a POS skeleton
 		for (int i=0; i<poem.lines.length; i++) {
-			final Line line = poem.lines[i];
+			final Line line = poem.lines[i];			
 			// pick a haiku to provide the template for this line
 			int id = random.nextInt(haikus.size());
 			Haiku haikuTemplate = haikus.get(id);
@@ -95,20 +95,19 @@ public class PoemGenerator {
 				WordInfo wi = new WordInfo();
 				wi.pos = pos;
 				line.words.add(wi);
+				assert wi.syllables() == -1 : wi;
 			}
 			
-			// fix the words that will not be removed
-			if (Config.isKeep) {
-				String[] linei = haikuTemplate.getWord()[i];
-				for(int j=0; j<linei.length; j++){
-					String word = linei[j];
-					if (keepTemplateWord(word)) {
-						WordInfo wi = line.words.get(j);
-						wi.setWord(word);
-						wi.fixed = true;
-					}
+			// fix the words that will not be removed			
+			String[] linei = haikuTemplate.getWord()[i];
+			for(int j=0; j<linei.length; j++){
+				String word = linei[j];
+				if (keepTemplateWord(word)) {
+					WordInfo wi = line.words.get(j);
+					wi.setWord(word);
+					wi.fixed = true;
 				}
-			}
+			}			
 			
 			SyllableAssignment sa = new SyllableAssignment(line, vocab);
 			int[] syllables = sa.randomizeSyllable();
@@ -198,7 +197,7 @@ public class PoemGenerator {
 		assert posTag != null;		
 		SitnStream ss = LanguageModel.get().getSitnStream(line);
 		List<Sitn<Tkn>> list = Containers.list(ss);
-		// work out which element og list we want (sorry - this is ugly due to dropped punctuation)
+		// work out which element of list we want (sorry - this is ugly due to dropped punctuation)
 		int inst=0;
 		for(WordInfo wi : line.words) {
 			if (Utils.equals(wordInfo.word, wi.word)) {
@@ -223,12 +222,14 @@ public class PoemGenerator {
 		assert context != null : wordInfo+" "+inst+" not in "+list;
 		
 		// sample
+		// ...score each option
 		ObjectDistribution<Tkn> wordChoices = new ObjectDistribution<>();
 		Set<String> wordList = vocab.getWordlist(wordInfo.pos, wordInfo.syllables());
 		for(String w : wordList) {
-			Tkn outcome = new Tkn(w);			
-			double p = wordGen.prob(outcome, context);
-			wordChoices.setProb(outcome, p);
+			Tkn outcome = new Tkn(w);
+			double s = scoreWord(outcome, context, wordInfo, line);
+//			assert MathUtils.isProb(s) : s+" "+outcome;
+			wordChoices.setProb(outcome, s);
 		}
 		// include the wider vocab?
 		if (wordList.size() < 5) {
@@ -237,7 +238,7 @@ public class PoemGenerator {
 				Tkn outcome = new Tkn(w);
 				WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
 				double p = wm.prob(outcome, context);
-				wordChoices.setProb(outcome, p*0.01);
+				wordChoices.setProb(outcome, p*Config.DOWNVOTE_USEALLVOCAB);
 			}	
 		}
 		if (wordChoices.isEmpty()) {
@@ -254,10 +255,23 @@ public class PoemGenerator {
 		return sampled;
 	}
 
+	private double scoreWord(Tkn outcome, Cntxt context, WordInfo wordInfo, Line line) {
+		double p = wordGen.prob(outcome, context);
+		if (topicVector==null) {
+			return p;
+		}
+		Vector vec = LanguageModel.glove.getVector(outcome.getText());
+		double ts = vec==null? 0.0001 : Math.abs(topicVector.dot(vec));
+		return (p + ts*0.001) / 2;
+	}
+
 	private boolean keepTemplateWord(String word) {
-		if (languageModel.stopWords.contains(word)) return true;
 		// punctuation?
 		if (StrUtils.isPunctuation(word)) return true;
+		if ( ! Config.isKeep) {
+			return false;
+		}
+		if (languageModel.stopWords.contains(word)) return true;
 		return false;
 	}
 
@@ -285,7 +299,29 @@ public class PoemGenerator {
 	 * @param topic2 Can be null
 	 * @return
 	 */
-	public Poem generate(String topic1, String topic2) {		
+	public Poem generate(String topic1, String topic2) {
+		setTopic(topic1, topic2);
+
+		List candidates = new ArrayList();
+		for(int i=0; i<Config.batchSize; i++) {
+			Poem res = generate2();
+			if (res==null) {
+				Log.d(LOGTAG, "generate "+i+" failed :(");
+				continue;
+			}
+			res.score = score(res);			
+			assert res.score != -1;
+			candidates.add(res);
+		}
+		if (candidates.isEmpty()) {
+			throw new FailureException("no poem found :(");
+		}
+		Collections.sort(candidates);
+		Poem winner = (Poem) candidates.get(0);
+		return winner;
+	}
+
+	private void setTopic(String topic1, String topic2) {
 		assert ! Utils.isBlank(topic1);
 		String keywords = topic1;
 		if (topic2!=null) keywords += " "+topic2;
@@ -300,29 +336,16 @@ public class PoemGenerator {
 			if (topicVector==null) topicVector = v.copy();
 			else topicVector = topicVector.add(v);	
 		}
-
-		List candidates = new ArrayList();
-		for(int i=0; i<Config.batchSize; i++) {
-			Poem res = generate2();
-			res.score = score(res);
-			if (res==null) continue;
-			assert res.score != -1;
-			candidates.add(res);
-		}
-		if (candidates.isEmpty()) {
-			throw new FailureException("no poem found :(");
-		}
-		Collections.sort(candidates);
-		Poem winner = (Poem) candidates.get(0);
-		return winner;
 	}
 
 	private double score(Poem res) {
+		assert res.lines != null;
 		// TODO
 		// topic: overall topic-vector score
 		double topicScore = 0;
 		Vector poemTopic = null;
 		for(Line line : res.lines) {
+			assert line!=null;
 			for(WordInfo wi : line.words) {
 				Vector vector = LanguageModel.get().getVector(wi.word);
 				if (vector == null) continue;
@@ -359,7 +382,7 @@ public class PoemGenerator {
 		}
 		focusScore = focusScore / focaln;
 		if (repeats!=0) {
-			focusScore = focusScore / (100*repeats);
+			focusScore = focusScore / (20*repeats);
 		}
 		
 		// sense: multiply per-word scores
