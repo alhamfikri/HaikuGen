@@ -1,6 +1,7 @@
 package org.coinvent.haiku;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,12 +30,13 @@ public class PoemVocab {
 	 * 
 	 * @param tag : Penn Treebank Tag
 	 * @param syllables : number or syllables
-	 * @return Array of String, a list of all possible words with given tag and syllables
+	 * @return a list of all possible words with given tag and syllables.
+	 * Can be empty, never null.
 	 */
 	public Set<String> getWordlist(String tag, int syllables) {
 		assert syllables > 0;
 		Map<String, Set<String>> rightLength = wordlistFromPOSFromSyllables.get(syllables);
-		if (rightLength==null) return null;
+		if (rightLength==null) return Collections.EMPTY_SET;
 		if (tag==null) {
 			// bummer -- join
 			HashSet join = new HashSet();
@@ -44,12 +46,12 @@ public class PoemVocab {
 			return join;
 		}
 		Set<String> list = rightLength.get(tag);
-		if (list==null) return null;
+		if (list==null) return Collections.EMPTY_SET;
 		return list;
 	}
 	
 
-	public void addWord(WordInfo wi) {				
+	public synchronized void addWord(WordInfo wi) {				
 		assert wi.syllables() >= 0 : wi;
 		assert wi.pos != null : wi;
 		assert wi.word != null : wi;

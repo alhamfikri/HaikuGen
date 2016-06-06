@@ -1,12 +1,14 @@
 package org.coinvent.haiku;
 
 import com.winterwell.utils.StrUtils;
+import com.winterwell.utils.containers.ArrayMap;
 
 public class Poem implements Comparable<Poem> {
 
 	String topics;
 	Line[] lines;
 	public double score = -1;
+	ArrayMap scoreInfo;
 	
 	
 	/**

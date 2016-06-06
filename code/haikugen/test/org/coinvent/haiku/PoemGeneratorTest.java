@@ -83,6 +83,7 @@ public class PoemGeneratorTest {
 
 		VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(TwitterTest.newTestTwitter(), new XId("winterstein@twitter"));
 		List<Status> tweets = FileUtils.load(VocabFromTwitterProfileTest.TWEET_FILE);
+		assert tweets != null;
 		vftp.train(tweets);		
 		
 		PoemVocab vocab = vftp.getVocab();

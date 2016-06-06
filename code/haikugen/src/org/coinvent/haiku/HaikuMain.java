@@ -77,26 +77,7 @@ public class HaikuMain {
 					System.out.println("Ooops, we failed to create the Haiku :(");
 				}
 				
-			}
-			if (input.equalsIgnoreCase("equation")) {
-				
-			}
-			if (input.equalsIgnoreCase("same")) {
-				String idea = scanner.nextLine().trim();
-				String res[] = languageModel.getClosestWords(idea, 20);
-				System.out.println(Arrays.toString(res));
-			}
-			
-			if (input.equalsIgnoreCase("predict")) {
-				String text = scanner.nextLine().trim();
-				System.out.println(Arrays.toString(languageModel.getClosestTopic(text)));
-			}
-			
-			if (input.equalsIgnoreCase("predict_exclude")) {
-				String text = scanner.nextLine().trim();
-				System.out.println(languageModel.getClosestExcludedTopic(text));
-			}
-			
+			}			
 		}
 	}
 	

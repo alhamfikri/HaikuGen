@@ -16,23 +16,42 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import com.winterwell.depot.Depot;
+import com.winterwell.depot.Desc;
 import com.winterwell.utils.MathUtils;
+import com.winterwell.utils.ReflectionUtils;
+import com.winterwell.utils.StrUtils;
 import com.winterwell.utils.io.FileUtils;
+import com.winterwell.utils.threads.SafeExecutor;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import winterwell.maths.stats.distributions.cond.WWModel;
+import winterwell.maths.stats.distributions.cond.WWModelFactory;
 import winterwell.nlp.analysis.SyllableCounter;
+import winterwell.nlp.corpus.IDocument;
+import winterwell.nlp.corpus.brown.BrownCorpus;
+import winterwell.nlp.corpus.brown.BrownDocument;
+import winterwell.nlp.io.ApplyFnToTokenStream;
 import winterwell.nlp.io.ITokenStream;
+import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.nlp.io.WordAndPunctuationTokeniser;
 import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.nlp.vectornlp.GloveWordVectors;
+import winterwell.utils.IFn;
+import winterwell.utils.Mutable.Ref;
 import winterwell.utils.Utils;
 import winterwell.utils.reporting.Log;
+import winterwell.utils.reporting.Log.KErrorPolicy;
 
 /**
  * 
@@ -44,9 +63,12 @@ import winterwell.utils.reporting.Log;
  * Word list based on Tag : Given a PoS tag/label, all possible words with that label are provided, sorted by their probability.
  */
 public class LanguageModel {
-	
-	ITokenStream brownTokeniser;
-	ITokenStream tweetTokeniser = new WordAndPunctuationTokeniser().setLowerCase(true);
+		
+	ITokenStream tweetTokeniser = new WordAndPunctuationTokeniser()
+										.setLowerCase(true)
+										.setNormaliseToAscii(KErrorPolicy.ACCEPT)
+										.setUrlsAsWords(true)
+										.setSwallowPunctuation(true);
 	
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
@@ -76,9 +98,7 @@ public class LanguageModel {
 		stopWords = new HashSet<String>();
 		
 		wordDatabase = new HashMap<String,WordInfo>();		
-		wordDatabase.put(Tkn.START_TOKEN.getText(), new WordInfo(Tkn.START_TOKEN.getText(), 0) );
-
-		
+		wordDatabase.put(Tkn.START_TOKEN.getText(), new WordInfo(Tkn.START_TOKEN.getText(), 0) );		
 		
 		addSpecialSeparator("...",":");
 		addSpecialSeparator("..",":");
@@ -101,9 +121,7 @@ public class LanguageModel {
 	 * Open forbidden words dictionary
 	 */
 	public void loadForbiddenDictionary(String filepath) {
-		String currentDirectory = System.getProperty("user.dir");
-		String line = null;
-		
+		String currentDirectory = System.getProperty("user.dir");		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/name/" + filepath));
 			String input;
@@ -111,19 +129,15 @@ public class LanguageModel {
 				unusedWords.add(input);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		
+			throw Utils.runtime(e);
+		}			
 	}
 	
 	/**
 	 * Open and load stop-words list
 	 */
 	public void loadStopWords(String filepath) {
-		String currentDirectory = System.getProperty("user.dir");
-		String line = null;
-		
+		String currentDirectory = System.getProperty("user.dir");		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/stop-words/" + filepath));
 			String input;
@@ -131,8 +145,7 @@ public class LanguageModel {
 				stopWords.add(input);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw Utils.runtime(e);
 		}	
 	}
 	
@@ -161,7 +174,6 @@ public class LanguageModel {
 	 */
 	public void loadSyllableDictionary(String filepath) throws IOException {
 		String currentDirectory = System.getProperty("user.dir");
-		String line = null;
 		File file = new File(currentDirectory + "/res/model/" + filepath);
 		assert file.isFile() : "No "+filepath+" -> "+file;
 		BufferedReader br = FileUtils.getReader(file);
@@ -203,13 +215,53 @@ public class LanguageModel {
 		br.close();
 	}
 	
-	
-	
+		
 	final PoemVocab allVocab = new PoemVocab();
-	WWModel<Tkn> allWordModel;
+	private WWModel<Tkn> allWordModel;
 
+	
+	public synchronized WWModel<Tkn> getAllWordModel() {
+		if (allWordModel!=null) return allWordModel;
+		Desc<Ref> desc = new Desc<>("allWordModel", Ref.class).setTag("poem");
+		desc.put("sig", sig);
+		desc.put("training", "brown");
+		desc.put("punc", false); // no punctuation
+		final VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(null, null);
+		// also stash the internal model settings, e.g. TPW
+		Desc<WWModel> wmdesc = vftp.getWordModel().getDesc();
+		desc.addDependency("model", wmdesc);
+		Ref<WWModel> modelref = Depot.getDefault().get(desc);
+		if (modelref!=null && modelref.value!=null) {
+			allWordModel = modelref.value;
+			return allWordModel;
+		}
+		Log.d("lang", "WordModel: Processing Brown Corpus...");
+		BrownCorpus bc = new BrownCorpus();		
+		final AtomicInteger cnt = new AtomicInteger();
+//		SafeExecutor exec = new SafeExecutor(Executors.newFixedThreadPool(8));		
+		for (final IDocument doc : bc) {
+			BrownDocument bdoc = (BrownDocument) doc;
+			bdoc.setSwallowPunctuation(true);
+//			exec.submit(new Callable<Object>(){
+//				@Override
+//				public Object call() throws Exception {
+					vftp.train(bdoc);
+					int c = cnt.incrementAndGet();
+					if (c % 10 == 0) Log.d("lang", "WordModel: Processing Brown Corpus: docs:"+cnt+" "+(c/5)+"%\twords:"+vftp.getWordModel().getTrainingCnt() +"...");
+//					return null;
+//				}				
+//			});			
+		}
+//		exec.shutdown();
+//		exec.awaitTermination();
+		
+		allWordModel = vftp.getWordModel();
+		Depot.getDefault().put(desc, new Ref(allWordModel));
+		Log.d("lang", "WordModel: ...Processed Brown Corpus.");
+		return allWordModel;
+	}
 
-	public static String[] sig = new String[]{"w-2","w-1","w+1"};
+	public static String[] sig = new String[]{"w-3", "w-2", "w-1"};
 		
 	/**
 	 * 
@@ -238,9 +290,6 @@ public class LanguageModel {
 		if (v1 == null || v2 == null)
 			return 9999;
 		return -WordVector.cosineSimilarity(v1,v2);
-		
-		//return WordVector.dotProduct(v1,v2);
-		//return WordVector.euclidian(v1,v2);
 	}
 
 
@@ -256,61 +305,7 @@ public class LanguageModel {
 		//return WordVector.euclidian(v1,v2);
 	}
 	
-	public String[] getClosestWords(String word, int K) {
-		String[] res = new String[K];
-		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
-		
-		//construct vector representation of the keyword
-		Vector topicVector = new DenseVector(300);
-		
-		String[] words = word.split(" ");
-		for (int i=0;i<words.length;i++) {
-			Vector v = getVector(words[i]);
-			if (v != null)
-				topicVector = topicVector.add(v);	
-		}
-		
-		for (String key : wordDatabase.keySet()) {
-			double dist = getDistance(topicVector, key);
-			candidates.add(new StringDouble(key,dist));
-		}
-		Collections.sort(candidates);
-		for (int i=0;i<K;i++)
-			res[i] = candidates.get(i).s;
-		
-		return res;
-	}
 	
-	public String[] getClosestWords(Vector v, int K) {
-		String[] res = new String[K];
-		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
-		for (String key : wordDatabase.keySet()) {
-			double dist = getDistance(v, key);
-			candidates.add(new StringDouble(key,dist));
-		}
-		Collections.sort(candidates);
-		for (int i=0;i<K;i++)
-			res[i] = candidates.get(i).s;
-		
-		return res;
-	}
-
-	public String[] getClosestPattern(String x, String y, String z, int K) {
-		//pattern: y - x = result - z
-		//ex: men to women is like king to [queen]
-		Vector vx = getVector(x);
-		Vector vy = getVector(y); 
-		Vector vz = getVector(z); 
-		
-		if (vx == null || vy == null || vz == null)
-			return null;
-		
-		Vector vyx = vy.copy().add(-1, vx);
-//		ArrayList<Double> distanceVector = WordVector.subtract(vy, vx);
-		Vector distanceVector = vyx.add(vz); // WordVector.add(distanceVector,vz);
-		return getClosestWords(distanceVector,K);
-	}
-
 	public boolean isTopicTag(String topic) {
 		return topicTagSet.contains(topic);
 	}
@@ -321,64 +316,9 @@ public class LanguageModel {
 
 	public String getRandomTopic(){
 		return Utils.getRandomMember(glove.getWords());
-//		List<String> keysAsArray = new ArrayList<String>(wordVector.keySet());
-//		Random r = new Random();
-//
-//		return keysAsArray.get(r.nextInt(keysAsArray.size()));
 	}
 	
-	public String[] getClosestTopic(String text){
-		String words[] = text.split(" ");
-		String res[] = new String[20];
-		ArrayList<StringDouble> candidates = new ArrayList<StringDouble>();
-		
-		
-		for (String key : wordDatabase.keySet()) {
-			double dist = 0.0;
-			double n = 0.0;
-			for (int i=0;i<words.length;i++){
-				double tmp = getDistance(key,words[i]);
-				if (tmp < 9999){
-					dist += tmp*tmp;
-					n++;
-					}
-			}
-			dist /= n;
-			if (n > 0)
-				candidates.add(new StringDouble(key, -dist));
-		}
-		Collections.sort(candidates);
-		for (int i=0;i<20;i++)
-			res[i] = candidates.get(i).s;
-		
-		return res;
-	}
 
-	public String getClosestExcludedTopic(String text) {
-		String words[] = text.split(" ");
-		String res = "";
-		double best = 0;
-		for (String key : wordDatabase.keySet()) {
-			double dist = 0.0;
-			double n = 0.0;
-			for (int i=0;i<words.length;i++){
-				double tmp = getDistance(key,words[i]);
-				if (tmp < 9999){
-					dist += tmp*tmp;
-					n++;
-					}
-				//excluded topic penalty
-				if (key.equalsIgnoreCase(words[i]))
-					dist -= 99999999;
-			}
-			dist /= n;
-			if (best < dist) {
-				best = dist;
-				res = key;
-			}
-		}
-		return res;
-	}
 
 	public synchronized static LanguageModel get() {
 		if (dflt!=null) return dflt;
@@ -406,6 +346,36 @@ public class LanguageModel {
 		dflt = languageModel;
 		Log.d("haiku", "...prepared LanguageModel");
 		return dflt;
+	}
+
+	static WWModel<Tkn> newWordModel() {
+		List<String> sig = Arrays.asList(LanguageModel.sig);
+		WWModelFactory wwmf = new WWModelFactory();
+		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(1000, 2, 100, 2);
+		WWModel<Tkn> wordModel = wwmf.fullFromSig(sig, null, 
+				trackedFormula, 
+				1, 100, new HashMap()
+				);
+		return wordModel;
+	}
+
+	public PoemVocab getAllVocab() {
+		return allVocab;
+	}
+
+	public SitnStream getSitnStream(Line line) {
+		ITokenStream zeroPunctuation = new ApplyFnToTokenStream(line, new IFn<Tkn, Tkn>() {			
+			@Override
+			public Tkn apply(Tkn value) {
+				if (Tkn.UNKNOWN.equals(value.getText())) return value;
+				if (StrUtils.AZ.matcher(value.getText()).find()) {
+					return value;
+				}
+				return null;
+			}
+		});
+		SitnStream ss = new SitnStream(null, zeroPunctuation, sig);
+		return ss;
 	}
 
 }

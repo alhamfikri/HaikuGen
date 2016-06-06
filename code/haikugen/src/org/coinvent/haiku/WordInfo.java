@@ -70,7 +70,7 @@ public class WordInfo {
 
 	@Override
 	public String toString() {
-		return word;
+		return word+"/"+pos+":"+syllables;
 	}
 
 	public void setWord(String word) {

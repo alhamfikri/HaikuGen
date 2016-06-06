@@ -12,9 +12,16 @@ import org.coinvent.haiku.PoemGenerator;
 import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 import org.coinvent.haiku.Poem;
+import org.coinvent.haiku.PoemVocab;
+import org.coinvent.haiku.VocabFromTwitterProfile;
 
 import com.winterwell.utils.Proc;
 
+import winterwell.jtwitter.Twitter;
+import winterwell.jtwitter.TwitterTest;
+import winterwell.maths.stats.distributions.cond.WWModel;
+import winterwell.nlp.docmodels.IDocModel;
+import winterwell.nlp.io.Tkn;
 import winterwell.utils.Utils;
 
 import com.winterwell.utils.io.FileUtils;
@@ -27,6 +34,8 @@ import winterwell.web.app.WebRequest;
 
 import com.winterwell.utils.web.WebUtils2;
 import com.winterwell.web.ajax.JsonResponse;
+
+import creole.data.XId;
 
 /**
   @author daniel
@@ -61,6 +70,30 @@ public class HaikuServlet implements IServlet {
 		int constraint[] = {5,7,5};
 
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
+
+		// TODO for a Twitter profile?
+		String tweep = webRequest.get("tweep");
+		if (tweep!=null) {
+			tweep = tweep.trim();
+			if (tweep.startsWith("@")) {
+				tweep = tweep.substring(1);
+			}
+			XId xid = new XId(tweep.toLowerCase(), "twitter");
+			Twitter jtwit = Utils.getRandomChoice(0.5)? TwitterTest.newTestTwitter() : TwitterTest.newTestTwitter2();
+			VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(jtwit, xid);
+			vftp.run();
+			PoemVocab vocab = vftp.getVocab();
+			generator.setVocab(vocab);
+			WWModel<Tkn> wordGen = vftp.getWordModel();
+			generator.setWordGen(wordGen);
+		} else {
+			PoemVocab vocab = LanguageModel.get().getAllVocab();
+			generator.setVocab(vocab);
+			WWModel<Tkn> wordGen = LanguageModel.get().getAllWordModel();
+			generator.setWordGen(wordGen);
+		}
+
+		
 		ArrayList<Poem> candidates = new ArrayList<>();
 		if (Utils.isBlank(topic)) {
 			topic = languageModel.getRandomTopic();

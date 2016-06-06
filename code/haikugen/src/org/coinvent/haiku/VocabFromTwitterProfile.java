@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import com.sun.xml.internal.ws.api.ComponentFeature.Target;
-
 import creole.data.XId;
 import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
@@ -17,16 +15,20 @@ import winterwell.nlp.corpus.SimpleDocument;
 import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
-import winterwell.nlp.io.WordAndPunctuationTokeniser;
 import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.utils.IFn;
 
+/**
+ * @testedby {@link VocabFromTwitterProfileTest}
+ * @author daniel
+ *
+ */
 public class VocabFromTwitterProfile {
 
 	private Twitter jtwit;
 	private XId txid;
-	private PoemVocab vocab;
-	private WWModel<Tkn> wordModel;
+	private PoemVocab vocab = new PoemVocab();
+	private WWModel<Tkn> wordModel = LanguageModel.newWordModel();
 
 	public PoemVocab getVocab() {
 		return vocab;
@@ -35,6 +37,11 @@ public class VocabFromTwitterProfile {
 		return wordModel;
 	}
 	
+	/**
+	 * 
+	 * @param jtwit Can be null provided you don't use a fetch
+	 * @param target Can be null provided you don't use a fetch
+	 */
 	public VocabFromTwitterProfile(Twitter jtwit, XId target) {
 		this.jtwit = jtwit;
 		this.txid = target;
@@ -42,20 +49,21 @@ public class VocabFromTwitterProfile {
 	
 	ITokenStream tokeniser = LanguageModel.get().tweetTokeniser;
 	
-	void run() {
+	public void run() {
 		List<Status> tweets = fetchTweets();
 		train(tweets);
+		// and the bio
+		if ( ! tweets.isEmpty()) {
+			Status t = tweets.get(0);
+			String desc = t.getUser().getDescription();
+			if (desc!=null) {
+				IDocument doc = new SimpleDocument(null, desc, t.getUser().screenName);			
+				train(doc);
+			}
+		}
 	}
 	
-	void train(List<Status> tweets) {
-		vocab = new PoemVocab();
-		List<String> sig = Arrays.asList(LanguageModel.sig);
-		WWModelFactory wwmf = new WWModelFactory();
-		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(1000, 2, 100, 2);
-		wordModel = wwmf.fullFromSig(sig, null, 
-				trackedFormula, 
-				1, 100, new HashMap()
-				);
+	void train(List<Status> tweets) {		
 		for (Status status : tweets) {
 			IDocument doc = new SimpleDocument(null, status.text, status.getUser().screenName);
 			train(doc);

@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.sun.org.apache.bcel.internal.generic.FNEG;
 import com.winterwell.maths.stats.distributions.IDistributionBase;
 import com.winterwell.utils.MathUtils;
 import com.winterwell.utils.StrUtils;
+import com.winterwell.utils.containers.ArrayMap;
 import com.winterwell.utils.containers.Containers;
 import com.winterwell.utils.log.Log;
 
@@ -19,14 +21,21 @@ import no.uib.cipr.matrix.Vector;
 import winterwell.maths.stats.distributions.cond.Cntxt;
 import winterwell.maths.stats.distributions.cond.ICondDistribution;
 import winterwell.maths.stats.distributions.cond.Sitn;
+import winterwell.maths.stats.distributions.cond.WWModel;
+import winterwell.maths.stats.distributions.d1.MeanVar1D;
 import winterwell.maths.stats.distributions.discrete.IFiniteDistribution;
+import winterwell.maths.stats.distributions.discrete.ObjectDistribution;
 import winterwell.maths.timeseries.DataUtils;
 import winterwell.maths.vector.VectorUtilsTest;
 import winterwell.nlp.NLPWorkshop;
 import winterwell.nlp.docmodels.IDocModel;
+import winterwell.nlp.io.ApplyFnToTokenStream;
+import winterwell.nlp.io.FilteredTokenStream;
+import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.utils.FailureException;
+import winterwell.utils.IFn;
 import winterwell.utils.Utils;
 import winterwell.utils.web.XStreamUtils;
 
@@ -146,6 +155,11 @@ public class PoemGenerator {
 					continue;
 				}
 				Tkn picked = generateWord(word, line);
+				if (picked==null) {
+					// Fail
+					Log.e(LOGTAG, "Failed to pick a word for "+word+" in "+line);
+					continue;
+				}
 				word.setWord(picked.getText());
 				assert ! Utils.isBlank(picked.getText());
 			}
@@ -177,23 +191,65 @@ public class PoemGenerator {
 	 * @return
 	 */
 	Tkn generateWord(WordInfo wordInfo, Line line) {
+		assert ! wordInfo.fixed && wordInfo.syllables() > 0 : wordInfo;		
 		assert wordInfo!=null;
 		// context
 		String posTag = wordInfo.pos;
 		assert posTag != null;		
-		assert wordInfo.syllables() > 0 : wordInfo;
-		int wi = line.words.indexOf(wordInfo);
-		assert wi != -1 : wordInfo+" not in "+line;
-		String[] sig = LanguageModel.get().sig;
-		SitnStream ss = new SitnStream(null, line, sig);
+		SitnStream ss = LanguageModel.get().getSitnStream(line);
 		List<Sitn<Tkn>> list = Containers.list(ss);
-		Cntxt context = list.get(wi).context;
+		// work out which element og list we want (sorry - this is ugly due to dropped punctuation)
+		int inst=0;
+		for(WordInfo wi : line.words) {
+			if (Utils.equals(wordInfo.word, wi.word)) {
+				inst++;
+			}
+			if (wordInfo == wi) {
+				break;
+			}			
+		}
+		int matchInst = 0;
+		Cntxt context = null;
+		for(Sitn<Tkn> si : list) {
+			if (Utils.equals(wordInfo.word, si.outcome.getText()) 
+					|| (wordInfo.word==null && si.outcome.getText().equals(Tkn.UNKNOWN))) {				
+				matchInst++;
+				if (matchInst==inst) {
+					context = si.context;
+					break;
+				}
+			}
+		}
+		assert context != null : wordInfo+" "+inst+" not in "+list;
 		
 		// sample
-		Tkn sampled = wordGen.sample(context);
+		ObjectDistribution<Tkn> wordChoices = new ObjectDistribution<>();
+		Set<String> wordList = vocab.getWordlist(wordInfo.pos, wordInfo.syllables());
+		for(String w : wordList) {
+			Tkn outcome = new Tkn(w);			
+			double p = wordGen.prob(outcome, context);
+			wordChoices.setProb(outcome, p);
+		}
+		// include the wider vocab?
+		if (wordList.size() < 5) {
+			Set<String> wordList2 = LanguageModel.get().allVocab.getWordlist(wordInfo.pos, wordInfo.syllables());
+			for(String w : wordList2) {
+				Tkn outcome = new Tkn(w);
+				WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
+				double p = wm.prob(outcome, context);
+				wordChoices.setProb(outcome, p*0.01);
+			}	
+		}
+		if (wordChoices.isEmpty()) {
+			Log.w("poem", "No word for "+wordInfo.pos+" "+wordInfo.syllables());
+			return null;
+		}
 		
-		IFiniteDistribution<Tkn> marginal = (IFiniteDistribution<Tkn>) wordGen.getMarginal(context);
-		Tkn mle = marginal.getMostLikely();
+		
+		Tkn sampled = wordChoices.sample(); //wordGen.sample(context);
+		
+//		IFiniteDistribution<Tkn> marginal = (IFiniteDistribution<Tkn>) wordGen.getMarginal(context);
+//		Tkn mle = marginal.getMostLikely();
 						
 		return sampled;
 	}
@@ -285,6 +341,7 @@ public class PoemGenerator {
 		HashSet<String> seen = new HashSet();
 		Set<String> stopwords = NLPWorkshop.get().getStopwords();
 		double focusScore = 0;
+		int focaln = 0;
 		for(Line line : res.lines) {
 			for(WordInfo wi : line.words) {
 				if (StrUtils.isWord(wi.word) && ! stopwords.contains(wi.word)) {
@@ -297,28 +354,38 @@ public class PoemGenerator {
 				if (vector == null) continue;
 				DataUtils.normalise(vector);
 				focusScore += Math.abs(poemTopic.dot(vector));
+				focaln++;
 			}
 		}
+		focusScore = focusScore / focaln;
 		if (repeats!=0) {
 			focusScore = focusScore / (100*repeats);
 		}
 		
 		// sense: multiply per-word scores
 		double senseScore = 1;
-		for(Line line : res.lines) {
-			double logProb = 0;
-			SitnStream ss = new SitnStream(null, line, LanguageModel.sig);
-//			for (Sitn<Tkn> sitn : ss) {
-//				double lp = languageModel.allWordModel.logProb(sitn.outcome, sitn.context);
-//				logProb += lp;
-//			}
-		}		
+		MeanVar1D mv = new MeanVar1D();
+		for(Line line : res.lines) {			
+			WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
+			SitnStream ss = LanguageModel.get().getSitnStream(line);			
+			for (Sitn<Tkn> sitn : ss) {
+				double p = wm.prob(sitn.outcome, sitn.context);
+				mv.train1(p);
+			}			
+		}	
+		senseScore = mv.getMean()*1000; // these numbers tend to be very low
 		// weight them (add a bit in to avoid 0s)
 		double ts = 0.0000000001 + topicScore*topicScoreWeight;
 		double ss = 0.0000000001 + senseScore*senseScoreWeight;
 		double fs = 0.0000000001 + focusScore*focusScoreWeight;
 		// balance them, F-Score style
-		return 3*ts*ss*fs / (ts+ss+fs);
+		double score = 3*ts*ss*fs / (ts+ss+fs);
+		// store all 
+		res.scoreInfo = new ArrayMap("score", score, 
+									"topicScore", ts,
+									 "senseScore", ss,
+									 "focusScore", fs);
+		return score;
 	}
 
 	public Poem generate(String topic) {
