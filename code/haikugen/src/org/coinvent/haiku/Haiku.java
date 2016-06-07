@@ -5,7 +5,6 @@ import java.util.List;
 import winterwell.nlp.io.DumbTokenStream;
 import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.Tkn;
-import winterwell.nlp.io.pos.PosTagByOpenNLP;
 
 import com.winterwell.utils.MathUtils;
 import com.winterwell.utils.StrUtils;
@@ -47,8 +46,7 @@ public class Haiku implements Comparable<Haiku>{
 				text[i][j] = text[i][j].trim();
 			}
 			ITokenStream linei = new DumbTokenStream(text[i]);
-			PosTagByOpenNLP tagger = new PosTagByOpenNLP(linei);
-			List<Tkn> tkns = tagger.toList();			
+			List<Tkn> tkns = LanguageModel.posTag(linei);			
 			assert tkns.size() == text[i].length;
 			tag[i] = new String[tkns.size()];
 			for (int j = 0; j < tag[i].length; j++) {
@@ -61,17 +59,7 @@ public class Haiku implements Comparable<Haiku>{
 		totalScore = meaningScore + topicScore;
 	}
 	
-	public Haiku(String[][] result, String[][] tag, double topicScore, double meaningScore,
-			int j) {
-		this.text = result;
-		this.tag = tag;
-		this.topicScore = topicScore;
-		this.meaningScore = meaningScore;
-		assert MathUtils.isFinite(meaningScore);
-		assert MathUtils.isFinite(topicScore);
-		this.part = result.length;
-		totalScore = meaningScore + topicScore;
-	}
+	
 
 	/**
 	 * Display the haiku in (hopefully) beautiful format

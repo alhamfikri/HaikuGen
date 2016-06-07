@@ -1,8 +1,10 @@
 import java.io.File;
 
+import jobs.BuildBob;
 import jobs.BuildDepot;
 import jobs.BuildMaths;
 import jobs.BuildNLP;
+import jobs.BuildStat;
 import jobs.BuildUtils;
 import jobs.BuildWeb;
 import jobs.BuildWinterwellProject;
@@ -26,7 +28,10 @@ public class PublishPoetryServer extends BuildTask {
 			new BuildWeb(),
 			new BuildMaths(),
 			new BuildNLP(),
-			new BuildDepot()
+			new BuildDepot(),
+			new BuildBob(),
+			new BuildStat(),
+			new BuildSens()
 		};
 		for (BuildWinterwellProject bwp : projects) {
 			File jar = bwp.getJar();

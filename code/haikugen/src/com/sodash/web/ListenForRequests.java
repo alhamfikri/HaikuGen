@@ -1,20 +1,44 @@
 package com.sodash.web;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.coinvent.haiku.Poem;
 import org.eclipse.jetty.util.ajax.JSON;
 
+import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.Twitter;
+import winterwell.jtwitter.TwitterTest;
 import winterwell.utils.reporting.Log;
+import winterwell.utils.time.Time;
+import winterwell.utils.web.SimpleJson;
+import winterwell.utils.web.XStreamUtils;
 
 import com.winterwell.utils.StrUtils;
+import com.winterwell.utils.Utils;
+import com.winterwell.utils.io.CSVReader;
+import com.winterwell.utils.io.CSVWriter;
+import com.winterwell.utils.io.FileUtils;
 import com.winterwell.utils.threads.Actor;
 import com.winterwell.web.FakeBrowser;
 
 import creole.data.XId;
 
 public class ListenForRequests {
+	
+
+	static final String TOKEN0 = "3831720977-QdWgaVXbum32MDijwcMWGk3u2LoBFgSIDZSKHTr"; 
+	static final String TOKEN1 = "rRxK8e6Om4HTiJvNJR1rhkeFhUj4nrC3VATy4CXuCW9W7";
+	
+	static Twitter jtwit = new Twitter("aihaiku", 
+			new OAuthSignpostClient(
+					OAuthSignpostClient.JTWITTER_OAUTH_KEY,
+					OAuthSignpostClient.JTWITTER_OAUTH_SECRET,
+					TOKEN0, TOKEN1));
 	
 	Actor actor = new ListenActor();
 	
@@ -28,9 +52,22 @@ public class ListenForRequests {
 
 class ListenActor extends Actor<Object> {
 
+	HashSet<String> msgsRepliedTo = new HashSet();
+	File f = new File("msgsRepliedTo.csv");
+	
+	public ListenActor() {
+		// HACK		
+		if (f.isFile()) {
+			CSVReader r = new CSVReader(f, '\t');
+			for (String[] row : r) {
+				msgsRepliedTo.add(row[0].trim());	
+			}	
+			r.close();
+		}
+	}
+	
 	@Override
 	protected void receive(Object msg, Actor sender) {
-		Log.d("listen", "process poem request "+msg);
 		if (msg instanceof Map) {
 			Map m = (Map) msg;
 			String text = (String) m.get("contents");
@@ -38,13 +75,29 @@ class ListenActor extends Actor<Object> {
 				return;
 			}
 			// A poem request!
+			String inxid = (String) m.get("xid");
+			if (msgsRepliedTo.contains(inxid)) {
+				return;
+			}
+			Log.d("listen", "process poem request "+msg);
 			HaikuServlet hs = new HaikuServlet();
 			String topic = text.toLowerCase().replaceAll("@sodash", "");
 			topic = topic.replaceAll("#?poem", "");
 			topic = StrUtils.toCanonical(topic);
+			if (Utils.isBlank(topic)) topic = null;
 			String topic2 = null;
-			XId tweep = null;
-			hs.doWritePoem(topic, topic2, tweep);			
+			XId tweep = XId.xid(SimpleJson.get(m, "owner", "xid"));
+			List<Poem> poems = hs.doWritePoem(topic, topic2, tweep);
+			Poem poem = poems.get(0);
+			if (tweep!=null) {
+				String txt = "#poem for @"+tweep.getName()+":\n"+poem;
+				if (txt.length() > 140) txt = "@"+tweep.getName()+": "+poem;
+				ListenForRequests.jtwit.setStatus(txt);
+				msgsRepliedTo.add(inxid);
+				CSVWriter w = new CSVWriter(f, '\t', true);
+				w.write(inxid, poem, new Time());
+				w.close();
+			}
 		}
 	}
 	

@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 import com.winterwell.utils.StrUtils;
 
+import winterwell.nlp.corpus.brown.BrownCorpusTags;
 import winterwell.nlp.io.Tkn;
 
 
@@ -87,13 +88,13 @@ public class WordInfo {
 	}
 
 	public WordInfo setPOS(String posTag) {
-		this.pos = posTag;
+		this.pos = BrownCorpusTags.toCanon(posTag);
 		return this;
 	}
 
 	public Tkn getTkn() {		
 		Tkn tkn = new Tkn(word==null? Tkn.UNKNOWN : word);
-		tkn.put(tkn.POS, pos);
+		tkn.setPOS(pos);
 		return tkn;
 	}
 }

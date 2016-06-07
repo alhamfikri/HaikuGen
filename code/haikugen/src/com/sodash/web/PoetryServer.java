@@ -94,8 +94,8 @@ public class PoetryServer {
 		// trigger pre-load
 		StopWatch sw = new StopWatch();
 		try {
-			PosTagByOpenNLP.init();
-			Utils.sleep(2000); // OpenNLP sucks
+//			PosTagByOpenNLP.init();
+//			Utils.sleep(2000); // OpenNLP sucks
 			LanguageModel lm = LanguageModel.get();			
 			lm.getVector("poem");
 			lm.getRandomTopic();

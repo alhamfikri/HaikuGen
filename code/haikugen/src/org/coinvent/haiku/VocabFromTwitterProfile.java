@@ -16,11 +16,14 @@ import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.maths.stats.distributions.cond.WWModelFactory;
 import winterwell.nlp.corpus.IDocument;
 import winterwell.nlp.corpus.SimpleDocument;
+import winterwell.nlp.corpus.brown.BrownDocument;
+import winterwell.nlp.io.DumbTokenStream;
 import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.utils.IFn;
+import winterwell.utils.containers.Containers;
 import winterwell.utils.reporting.Log;
 
 /**
@@ -77,22 +80,27 @@ public class VocabFromTwitterProfile {
 	}
 
 	void train(IDocument doc) {
-		ITokenStream tokens = tokeniser.factory(doc.getContents());		
+		ITokenStream tokens = doc instanceof BrownDocument? doc.getTokenStream() : tokeniser.factory(doc.getContents());		
 		SitnStream ss = new SitnStream(doc, tokens, LanguageModel.sig);
-		for (Sitn<Tkn> sitn : ss) {
+		String text = ss.getText();
+		List<Tkn> postags = LanguageModel.posTag(new DumbTokenStream(text));
+		List<Sitn<Tkn>> tkns = Containers.getList(ss);
+		assert postags.size() == tkns.size() : postags+" !~ "+tkns;
+		for (int i=0; i<tkns.size(); i++) {
+			Sitn<Tkn> sitn = tkns.get(i);
 			// stats-model
 			wordModel.train1(sitn.context, sitn.outcome);
 			// vocab
 			int s = LanguageModel.get().getSyllable(sitn.outcome.getText());
 			WordInfo wi = new WordInfo(sitn.outcome.getText(), s);
-			List<String> tags = LanguageModel.getPossiblePOSTags(sitn.outcome.getText());
-			if (tags!=null && ! tags.isEmpty()) {
-				wi.setPOS(tags.get(0));
-			} else {
-				// WTF? Guess NN
-				Log.w("poem.vocab", "No POS for "+wi+"?!");
-				wi.setPOS("NN");
-			}
+			String tag = sitn.outcome.getPOS();
+			if (tag==null) tag = postags.get(i).getPOS();
+			wi.setPOS(tag);
+//			} else {
+//				// WTF? Guess NN
+//				Log.w("poem.vocab", "No POS for "+wi+"?!");
+//				wi.setPOS("NN");
+//			}
 			vocab.addWord(wi);
 		}
 	}

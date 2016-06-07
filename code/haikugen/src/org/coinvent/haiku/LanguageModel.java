@@ -37,6 +37,7 @@ import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.maths.stats.distributions.cond.WWModelFactory;
+import winterwell.nlp.NLPWorkshop;
 import winterwell.nlp.PorterStemmer;
 import winterwell.nlp.analysis.SyllableCounter;
 import winterwell.nlp.corpus.IDocument;
@@ -53,6 +54,7 @@ import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.nlp.vectornlp.GloveWordVectors;
 import winterwell.utils.IFn;
 import winterwell.utils.Mutable.Ref;
+import winterwell.utils.containers.Containers;
 import winterwell.utils.Utils;
 import winterwell.utils.reporting.Log;
 import winterwell.utils.reporting.Log.KErrorPolicy;
@@ -212,7 +214,7 @@ public class LanguageModel {
 			WordInfo w = new WordInfo(word, syllables);
 			wordDatabase.put(word, w);
 			
-			List<String> tags = PosTagByOpenNLP.getPossibleTags(word);
+			List<String> tags = getPossiblePOSTags(word);
 			
 			//updates wordlist by syllables
             for (String posTag  : tags) {
@@ -230,17 +232,27 @@ public class LanguageModel {
 	
 	public synchronized WWModel<Tkn> getAllWordModel() {
 		if (allWordModel!=null) return allWordModel;
-		Desc<Ref> desc = new Desc<>("allWordModel", Ref.class).setTag("poem");
+		final VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(null, null);
+		WWModel<Tkn> model = vftp.getWordModel();
+		Desc<WWModel> desc = model.getDesc();
+		desc.unset();
+		desc.setTag("poem");
 		desc.put("sig", sig);
 		desc.put("training", "brown");
-		desc.put("punc", false); // no punctuation
-		final VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(null, null);
+		desc.put("punc", false); // no punctuation		
 		// also stash the internal model settings, e.g. TPW
-		Desc<WWModel> wmdesc = vftp.getWordModel().getDesc();
-		desc.addDependency("model", wmdesc);
-		Ref<WWModel> modelref = Depot.getDefault().get(desc);
-		if (modelref!=null && modelref.value!=null) {
-			allWordModel = modelref.value;
+		ArrayList allModels = new ArrayList();
+		allModels.add(model);
+		allModels.addAll(model.getAllSimplerModels());
+		for(Object simple : allModels) {
+			Desc<Object> sd = Desc.desc(simple);
+			if (sd==null) continue;			
+			sd.unset();
+			sd.setTag("poem");					
+		}		
+		model = model.sync(Depot.getDefault());
+		if (model.getTrainingCnt() > 1000) {
+			allWordModel = model;
 			return allWordModel;
 		}
 		Log.d("lang", "WordModel: Processing Brown Corpus...");
@@ -250,12 +262,13 @@ public class LanguageModel {
 		for (final IDocument doc : bc) {
 			BrownDocument bdoc = (BrownDocument) doc;
 			bdoc.setSwallowPunctuation(true);
+			bdoc.setLowerCase(true);
 //			exec.submit(new Callable<Object>(){
 //				@Override
 //				public Object call() throws Exception {
 					vftp.train(bdoc);
 					int c = cnt.incrementAndGet();
-					if (c % 10 == 0) Log.d("lang", "WordModel: Processing Brown Corpus: docs:"+cnt+" "+(c/5)+"%\twords:"+vftp.getWordModel().getTrainingCnt() +"...");
+					if (c % 10 == 0) Log.d("lang", "WordModel: Processing Brown Corpus: docs:"+cnt+" "+(c/5)+"%\twords:"+model.getTrainingCnt() +"...");
 //					return null;
 //				}				
 //			});			
@@ -263,8 +276,8 @@ public class LanguageModel {
 //		exec.shutdown();
 //		exec.awaitTermination();
 		
-		allWordModel = vftp.getWordModel();
-		Depot.getDefault().put(desc, new Ref(allWordModel));
+		allWordModel = model;
+		Depot.getDefault().put(desc, allWordModel);
 		Log.d("lang", "WordModel: ...Processed Brown Corpus.");
 		return allWordModel;
 	}
@@ -412,6 +425,11 @@ public class LanguageModel {
 			return true;
 		}
 		return false;
+	}
+
+	public static List<Tkn> posTag(ITokenStream linei) {
+		PosTagByOpenNLP tagger = new PosTagByOpenNLP(linei);
+		return Containers.getList(tagger);
 	}
 
 }
