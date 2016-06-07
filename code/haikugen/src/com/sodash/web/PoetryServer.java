@@ -63,6 +63,7 @@ public class PoetryServer {
 		if (GuiUtils.isInteractive()) {
 			Log.i("init", "Open links in local browser...");
 			WebUtils.display(WebUtils.URI("http://localhost:"+config.port+"/static/haiku/index.html"));
+			WebUtils.display(WebUtils.URI("http://localhost:"+config.port+"/static/haiku/tweetmeapoem.html"));
 		}
 		// prod data loading, by asking "what is love?"
 		LanguageModel lm = LanguageModel.get();
