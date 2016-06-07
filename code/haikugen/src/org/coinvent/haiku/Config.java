@@ -12,5 +12,5 @@ public class Config {
 	 * Used to reduce the score for words picked from all-vocab
 	 */
 	public static final double DOWNVOTE_USEALLVOCAB = 0.01;
-	public static int batchSize = 10;
+	public static int batchSize = 5;
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.coinvent.haiku.Haiku;
@@ -22,6 +23,7 @@ import winterwell.jtwitter.TwitterTest;
 import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.nlp.docmodels.IDocModel;
 import winterwell.nlp.io.Tkn;
+import winterwell.utils.FailureException;
 import winterwell.utils.Utils;
 
 import com.winterwell.utils.io.FileUtils;
@@ -61,31 +63,66 @@ public class HaikuServlet implements IServlet {
 		init();
 	}
 	
+	static List<Poem> recent = new ArrayList();
+	
 	@Override
 	public void doPost(WebRequest webRequest) throws Exception {
+		if ( ! PoetryServer.ready) {
+			throw new FailureException("Not ready yet...");
+		}
+		// send the most recent?
+		if (webRequest.actionIs("recent")) {
+			List<Map> jsoncandidates10 = new ArrayList();
+			for (Poem poem : recent) {
+				jsoncandidates10.add(poem.toJson2());
+			}
+			JsonResponse out = new JsonResponse(webRequest, jsoncandidates10);
+			WebUtils2.sendJson(out, webRequest);
+			return;
+		}
+		
 		assert initFlag : "not init!?";
 		assert languageModel!=null : "no model?!";
 		String topic = webRequest.get("topic");
 		String topic2 = webRequest.get("topic2");
-		int constraint[] = {5,7,5};
-
-		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
-
-		// TODO for a Twitter profile?
 		String tweep = webRequest.get("tweep");
+		XId xid = null;
 		if (tweep!=null) {
 			tweep = tweep.trim();
 			if (tweep.startsWith("@")) {
 				tweep = tweep.substring(1);
 			}
-			XId xid = new XId(tweep.toLowerCase(), "twitter");
+			xid = new XId(tweep.toLowerCase(), "twitter");
+		}
+		List<Poem> poems = doWritePoem(topic, topic2, xid);
+		
+		List<Map> jsoncandidates10 = new ArrayList();
+		for (Poem poem : poems) {
+			jsoncandidates10.add(poem.toJson2());
+		}
+		Log.d("haiku", "Sending top 10 results");
+		JsonResponse out = new JsonResponse(webRequest, jsoncandidates10);
+		WebUtils2.sendJson(out, webRequest);
+	}
+	
+
+	List<Poem> doWritePoem(String topic, String topic2, XId tweep) {
+		int constraint[] = {5,7,5};
+
+		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
+
+		// TODO for a Twitter profile?
+		
+		Map tweepInfo = null; 
+		if (tweep!=null) {			
 			Twitter jtwit = Utils.getRandomChoice(0.5)? TwitterTest.newTestTwitter() : TwitterTest.newTestTwitter2();
-			VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(jtwit, xid);
+			VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(jtwit, tweep);
 			vftp.run();
 			PoemVocab vocab = vftp.getVocab();
 			generator.setVocab(vocab);
 			WWModel<Tkn> wordGen = vftp.getWordModel();
 			generator.setWordGen(wordGen);
+			tweepInfo = vftp.getTweepInfo();
 		} else {
 			PoemVocab vocab = LanguageModel.get().getAllVocab();
 			generator.setVocab(vocab);
@@ -97,11 +134,12 @@ public class HaikuServlet implements IServlet {
 		ArrayList<Poem> candidates = new ArrayList<>();
 		if (Utils.isBlank(topic)) {
 			topic = languageModel.getRandomTopic();
+			assert topic != null : languageModel;
 		}
 //		if (topic2!=null) topic = topic+" "+topic2;
 
 		Log.d("haiku", "Creating Haiku topic:"+topic+" "+topic2);
-		for (int i=0;i<=100;i++){			
+		for (int i=0;i<=10;i++){			
 			Poem res = generator.generate(topic, topic2);			
 			if (res==null) continue;
 			res.setTopics(topic);
@@ -112,9 +150,19 @@ public class HaikuServlet implements IServlet {
 		Collections.sort(candidates);
 		
 		List<Poem> candidates10 = Containers.subList(candidates, 0, 10);
-		Log.d("haiku", "Sending top 10 results");
-		JsonResponse out = new JsonResponse(webRequest, candidates10);
-		WebUtils2.sendJson(out, webRequest);
+		for (Poem poem : candidates10) {
+			poem.setFor(tweepInfo);
+		}		
+		addRecent(candidates10.get(0));
+		return candidates10;
+	}
+
+	synchronized void addRecent(Poem poem) {
+		recent.add(0, poem);
+		// prune
+		while(recent.size() > 20) {
+			recent.remove(recent.size()-1);
+		}
 	}
 
 }

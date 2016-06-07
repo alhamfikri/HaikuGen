@@ -3,10 +3,14 @@ package org.coinvent.haiku;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.winterwell.utils.containers.ArrayMap;
 
 import creole.data.XId;
 import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
+import winterwell.jtwitter.User;
 import winterwell.maths.stats.distributions.cond.Sitn;
 import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.maths.stats.distributions.cond.WWModelFactory;
@@ -17,6 +21,7 @@ import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.utils.IFn;
+import winterwell.utils.reporting.Log;
 
 /**
  * @testedby {@link VocabFromTwitterProfileTest}
@@ -48,6 +53,7 @@ public class VocabFromTwitterProfile {
 	}
 	
 	ITokenStream tokeniser = LanguageModel.get().tweetTokeniser;
+	private ArrayMap tweepInfo;
 	
 	public void run() {
 		List<Status> tweets = fetchTweets();
@@ -79,8 +85,14 @@ public class VocabFromTwitterProfile {
 			// vocab
 			int s = LanguageModel.get().getSyllable(sitn.outcome.getText());
 			WordInfo wi = new WordInfo(sitn.outcome.getText(), s);
-			List<String> tags = PosTagByOpenNLP.getPossibleTags(sitn.outcome.getText());
-			if (tags!=null && ! tags.isEmpty()) wi.setPOS(tags.get(0));
+			List<String> tags = LanguageModel.getPossiblePOSTags(sitn.outcome.getText());
+			if (tags!=null && ! tags.isEmpty()) {
+				wi.setPOS(tags.get(0));
+			} else {
+				// WTF? Guess NN
+				Log.w("poem.vocab", "No POS for "+wi+"?!");
+				wi.setPOS("NN");
+			}
 			vocab.addWord(wi);
 		}
 	}
@@ -88,7 +100,18 @@ public class VocabFromTwitterProfile {
 	List<Status> fetchTweets() {
 		jtwit.setMaxResults(100);
 		List<Status> tweets = jtwit.getUserTimeline(txid.getName());
+		if (tweets.size()!=0) {
+			User user = tweets.get(0).getUser();
+			tweepInfo = new ArrayMap(
+					"screenname", user.screenName,
+					"name", user.name,
+					"img", user.getProfileImageUrl()
+					);
+		}
 		return tweets;
+	}
+	public Map getTweepInfo() {
+		return tweepInfo;
 	}
 	
 }

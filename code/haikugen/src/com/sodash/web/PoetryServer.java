@@ -5,6 +5,7 @@ import java.util.logging.Level;
 
 import org.coinvent.haiku.LanguageModel;
 
+import winterwell.nlp.io.pos.PosTagByOpenNLP;
 import winterwell.utils.gui.GuiUtils;
 import winterwell.utils.reporting.LogFile;
 import winterwell.utils.time.Dt;
@@ -15,6 +16,7 @@ import winterwell.web.app.JettyLauncher;
 import com.winterwell.utils.Utils;
 import com.winterwell.utils.io.ArgsParser;
 import com.winterwell.utils.log.Log;
+import com.winterwell.utils.time.StopWatch;
 import com.winterwell.utils.web.WebUtils;
 
 /**
@@ -30,6 +32,8 @@ public class PoetryServer {
 
 	private ServerConfig config;
 	private JettyLauncher jl;
+	private ListenForRequests listenForRequests;
+	public static volatile boolean ready;
 
 	public PoetryServer(ServerConfig config) {
 		this.config = config;		
@@ -64,9 +68,6 @@ public class PoetryServer {
 			Log.i("init", "Open links in local browser...");
 			WebUtils.display(WebUtils.URI("http://localhost:"+config.port+"/static/haiku/index.html"));
 		}
-		// prod data loading, by asking "what is love?"
-		LanguageModel lm = LanguageModel.get();
-		lm.getVector("love");
 	}
 
 	public void run() {
@@ -81,9 +82,28 @@ public class PoetryServer {
 		jl.addServlet("/static/*", new FileServlet());
 		Log.report("web", "...Launching Jetty web server on port "+config.port, Level.INFO);
 		jl.run();
-		
+
 		// Put in an index file
 		dynamicRouter.putSpecialStaticFile("/", new File("web/index.html"));
+
+		// listen
+		listenForRequests = new ListenForRequests();
+		listenForRequests.start();
+		
+		// trigger pre-load
+		StopWatch sw = new StopWatch();
+		try {
+			PosTagByOpenNLP.init();
+			Utils.sleep(2000); // OpenNLP sucks
+			LanguageModel lm = LanguageModel.get();			
+			lm.getVector("poem");
+			lm.getRandomTopic();
+			lm.getAllWordModel();
+		} catch(Throwable ex) {
+			ex.printStackTrace();
+		}
+		Log.d("init", sw);
+		ready = true;
 	}
 
 	public void stop() {
