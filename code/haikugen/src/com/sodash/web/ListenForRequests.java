@@ -122,7 +122,7 @@ class ListenTask extends TimerTask {
 			for (Object msg : msgs) {
 				actor.send(msg);
 			}
-			Log.d("ListenTask", "ran, found "+msgs.length);							
+//			Log.d("ListenTask", "ran, found "+msgs.length);							
 		} catch(Throwable ex) {
 			Log.e("ListenTask", ex);
 		}

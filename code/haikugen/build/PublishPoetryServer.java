@@ -18,7 +18,12 @@ import com.winterwell.utils.io.FileUtils;
 
 import winterwell.utils.time.Time;
 
+/**
+ * java -cp poetry-server.jar:lib/* com.sodash.web.PoetryServer
 
+ * @author daniel
+ *
+ */
 public class PublishPoetryServer extends BuildTask {
 
 	@Override

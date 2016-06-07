@@ -88,11 +88,13 @@ public class PoetryServer {
 		dynamicRouter.putSpecialStaticFile("/", new File("web/index.html"));
 
 		// listen
+		Log.i("init", "ListenForRequests...");
 		listenForRequests = new ListenForRequests();
 		listenForRequests.start();
 		
 		// trigger pre-load
 		StopWatch sw = new StopWatch();
+		Log.i("init", "pre-load...");
 		try {
 //			PosTagByOpenNLP.init();
 //			Utils.sleep(2000); // OpenNLP sucks
