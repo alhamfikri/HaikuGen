@@ -18,16 +18,32 @@ import winterwell.maths.stats.distributions.cond.Sitn;
 import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.nlp.corpus.IDocument;
 import winterwell.nlp.io.DumbTokenStream;
+import winterwell.nlp.io.ITokenStream;
 import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
+import winterwell.nlp.io.pos.PosTagByOpenNLP;
+import winterwell.utils.StrUtils;
 import winterwell.utils.containers.Containers;
 
+import com.winterwell.utils.Printer;
 import com.winterwell.utils.io.FileUtils;
 
 public class VocabFromTwitterProfileTest {
 
 	static final File TWEET_FILE = new File("test-data/winterstein-tweets.xml");
 
+	@Test
+	public void testPOSTagging() {
+		VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(null,null);
+		String text = "I'd like this tagged, but most can't - or won't - handle it.";
+		ITokenStream tokens =  vftp.tokeniser.factory(text);		
+		SitnStream ss = new SitnStream(null, tokens, LanguageModel.sig);
+		String words = ss.getText();
+		String[] tags = PosTagByOpenNLP.tag(words.split(" "));
+		String[] tagsNoTokenising = PosTagByOpenNLP.tag(text.split(" "));
+		Printer.out(tags);
+	}
+	
 	@Test
 	public void testSampleAll() {
 		WWModel<Tkn> wordGen = LanguageModel.get().getAllWordModel();

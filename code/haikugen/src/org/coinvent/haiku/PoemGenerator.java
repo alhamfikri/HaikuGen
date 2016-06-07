@@ -226,15 +226,35 @@ public class PoemGenerator {
 		ObjectDistribution<Tkn> wordChoices = new ObjectDistribution<>();
 		Set<String> wordList = vocab.getWordlist(wordInfo.pos, wordInfo.syllables());
 		for(String w : wordList) {
+			if (LanguageModel.get().avoidWord(w)) {
+				continue;
+			}
+			if (keepTemplateWord(w)) {
+				continue; // stopwords like this are retained from the template
+			}
+			if (vocab==LanguageModel.get().getAllVocab()) {
+				if ( ! LanguageModel.get().isWord(w)) {
+					continue; // only real words from the wider vocab
+				}
+			}
 			Tkn outcome = new Tkn(w);
 			double s = scoreWord(outcome, context, wordInfo, line);
 //			assert MathUtils.isProb(s) : s+" "+outcome;
 			wordChoices.setProb(outcome, s);
 		}
 		// include the wider vocab?
-		if (wordList.size() < 5) {
+		if (wordChoices.size() < 5) {
 			Set<String> wordList2 = LanguageModel.get().allVocab.getWordlist(wordInfo.pos, wordInfo.syllables());
 			for(String w : wordList2) {
+				if (LanguageModel.get().avoidWord(w)) {
+					continue;
+				}
+				if (keepTemplateWord(w)) {
+					continue; // stopwords like this are retained from the template
+				}
+				if ( ! LanguageModel.get().isWord(w)) {
+					continue; // only real words from the wider vocab
+				}
 				Tkn outcome = new Tkn(w);
 				WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
 				double p = wm.prob(outcome, context);
@@ -285,6 +305,26 @@ public class PoemGenerator {
 					prev.setWord("the");
 				} else if (prev.word.equals("an") && "aeiou".indexOf(word.word.charAt(0)) == -1) {
 					prev.setWord("the");
+				}
+			}
+			// fix i im ive id
+			for (int j=0; j<line.words.size(); j++) {
+				WordInfo word = line.words.get(j);
+				if ("i".equals(word.word)) {
+					word.setWord("I");
+				} else if ("ive".equals(word.word)) {
+					word.setWord("I've");
+				} else if ("im".equals(word.word)) {
+					word.setWord("I'm");
+				} else if ("id".equals(word.word)) {
+					word.setWord("I'd");
+				}
+			}
+			// not a word? hashtag it
+			for (int j=1; j<line.words.size(); j++) {
+				WordInfo word = line.words.get(j);
+				if ( ! LanguageModel.get().isWord(word.word) && StrUtils.isWord(word.word)) {
+					word.setWord("#"+word.word);
 				}
 			}
 		}

@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.sun.org.apache.bcel.internal.generic.FNEG;
 import com.winterwell.depot.Depot;
 import com.winterwell.depot.Desc;
 import com.winterwell.utils.MathUtils;
@@ -36,9 +37,11 @@ import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.maths.stats.distributions.cond.WWModelFactory;
+import winterwell.nlp.PorterStemmer;
 import winterwell.nlp.analysis.SyllableCounter;
 import winterwell.nlp.corpus.IDocument;
 import winterwell.nlp.corpus.brown.BrownCorpus;
+import winterwell.nlp.corpus.brown.BrownCorpusTags;
 import winterwell.nlp.corpus.brown.BrownDocument;
 import winterwell.nlp.dict.CMUDict;
 import winterwell.nlp.io.ApplyFnToTokenStream;
@@ -65,11 +68,7 @@ import winterwell.utils.reporting.Log.KErrorPolicy;
  */
 public class LanguageModel {
 		
-	ITokenStream tweetTokeniser = new WordAndPunctuationTokeniser()
-										.setLowerCase(true)
-										.setNormaliseToAscii(KErrorPolicy.ACCEPT)
-										.setUrlsAsWords(true)
-										.setSwallowPunctuation(true);
+	ITokenStream tweetTokeniser = makeTokeniser();
 	
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
@@ -114,6 +113,22 @@ public class LanguageModel {
 		addSpecialSeparator("..",".");
 	}
 	
+	private ITokenStream makeTokeniser() {
+		WordAndPunctuationTokeniser words = new WordAndPunctuationTokeniser()
+										.setLowerCase(true)
+										.setNormaliseToAscii(KErrorPolicy.ACCEPT)
+										.setUrlsAsWords(true)
+										.setSwallowPunctuation(true);
+		ITokenStream noUrls = new ApplyFnToTokenStream(words, new IFn<Tkn, Tkn>() {			
+			@Override
+			public Tkn apply(Tkn value) {
+				if (value.getPOS() == WordAndPunctuationTokeniser.POS_URL) return null;
+				return value;
+			}
+		});
+		return noUrls;
+	}
+
 	private void addSpecialSeparator(String separator, String tag) {
 		allVocab.addWord(new WordInfo(separator, 0).setPOS(tag));
 	}
@@ -127,8 +142,9 @@ public class LanguageModel {
 			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/name/" + filepath));
 			String input;
 			while ((input = br.readLine()) != null) {
-				unusedWords.add(input);
+				unusedWords.add(input.trim().toLowerCase());
 			}
+			br.close();
 		} catch (Exception e) {
 			throw Utils.runtime(e);
 		}			
@@ -152,17 +168,19 @@ public class LanguageModel {
 	
 	public void loadDictionary(String filepath) {
 		String currentDirectory = System.getProperty("user.dir");
-		String line = null;
-		
+		PorterStemmer stemmer = new PorterStemmer();		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/res/model/" + filepath));
 			String input;
 			while ((input = br.readLine()) != null) {
-				dictionary.add(input);
+				String w = input.trim().toLowerCase();
+				dictionary.add(w);
+				// also the stemmed form
+				dictionary.add(stemmer.stem(w));
 			}
+			br.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw Utils.runtime(e);
 		}	
 		
 	}
@@ -177,6 +195,7 @@ public class LanguageModel {
 		CMUDict cmud = new CMUDict();
 		cmud.load();
 		for(String word : cmud.getAllWords()) {
+			word = word.trim();
 			if ( ! StrUtils.isWord(word)) {
 				continue;
 			}			
@@ -184,9 +203,9 @@ public class LanguageModel {
 			if (unusedWords.contains(word)) {
 				continue;
 			}
-			
-			if ( ! dictionary.contains(word)) {
-				continue;
+			// in the dictionary
+			if ( ! isWord(word)) {
+				continue; // most of these are junk
 			}
 			
 			int syllables = cmud.getSyllableCount(word);
@@ -201,7 +220,6 @@ public class LanguageModel {
             	wi.setPOS(posTag);
             	allVocab.addWord(wi);
             }
-
 		}
 	}
 	
@@ -305,7 +323,7 @@ public class LanguageModel {
 	}
 
 	public String getRandomTopic(){
-		return Utils.getRandomMember(glove.getWords());
+		return Utils.getRandomMember(Arrays.asList("love","beauty","business","travel","the city","sunshine","sadness","happiness","madness"));
 	}
 	
 
@@ -362,6 +380,38 @@ public class LanguageModel {
 		});
 		SitnStream ss = new SitnStream(null, zeroPunctuation, sig);
 		return ss;
+	}
+
+	public static List<String> getPossiblePOSTags(String text) {
+		if ("rt".equalsIgnoreCase(text)) {
+			return Arrays.asList("VB");
+		}
+		return PosTagByOpenNLP.getPossibleTags(text);
+	}
+
+	public boolean isWord(String word) {
+		if (StrUtils.isPunctuation(word)) return false;
+		word = word.toLowerCase();
+		// special case removed 's
+		if (Arrays.asList("im","id","ive","cant","wont","wouldnt","shouldnt","couldnt").contains(word)) {
+			return true;
+		}
+		assert ! dictionary.isEmpty();
+		boolean ok = dictionary.contains(word);
+		if (ok) return true;
+		// stemmed?
+		String stemmed = new PorterStemmer().stem(word);
+		if (dictionary.contains(stemmed)) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean avoidWord(String w) {
+		if (unusedWords.contains(w.toLowerCase())) {
+			return true;
+		}
+		return false;
 	}
 
 }

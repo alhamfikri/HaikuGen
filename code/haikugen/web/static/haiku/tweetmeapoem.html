@@ -15,7 +15,7 @@
 	<link rel="stylesheet/less" type="text/css" href="/static/css/coinvent.less">
   </head>
 
-  <body role="document">
+  <body role="document" class='poetry'>
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -37,32 +37,52 @@
         </div><!--/.nav-collapse -->
       </div>
     </nav><!-- ./navbar -->
-
-    <div id='main-container' class="container" role="main">     
-           
+    
+    <div id='main-container' class="container flex-container" role="main">     
+      
+		<div class='lhs'>
+			<div class='thumbnail'>
+				<img class='img-rounded' src='../img/robot-reading.jpg'>		
+				<p>
+				This is a chatbot we made for fun. <b>SoGrow is <i>not</i> a chatbot!</b><br> 
+				SoGrow is an automated social media manager -- it will do everything for you but talk (or write poetry):
+				find relevant people, follow, favorite/like, retweet, and post relevant news. 
+				It takes 10 minutes to setup, then works for you, day-in day-out, 
+				doing the groundwork so you can focus on what matters.			
+				</p>
+			</div>
+		</div>
+		
+		<div class='rhs'>
+		
      <div class="jumbotron">
-     	<h1>Tweet #poem @SoDash, and the Haiku Bot will make a poem based on your tweets.</h1>
+     	<h2>Tweet #poem @SoDash, and Henry the Haiku Bot will make a poem based on your tweets.</h2>
       	<form id='topic-form' role='form' class='form-inline'>
       		<div class='flex-container'>
 	      		<div class='form-group'>
 	      			<label>or enter your Twitter Name here</label>
 	      			<input id='username' class='form-control' name='username' type='text'>      			
 	      		</div>
+	      		&nbsp;&nbsp;&nbsp;
 	      		<div class='form-group'>
 	      			<label>Topic (optional)</label>
 	      			<input id='topic-input' class='form-control' name='topic' type='text'>      			
 	      		</div>
-	      	</div>
-      		<button class='btn btn-default'>Compose Haiku</button>
+	      		&nbsp;&nbsp;&nbsp;
+	      		<button class='btn btn-default'>Compose Haiku</button>
+	      	</div>      		
       	</form>
+      	<div id='msgbox'></div>
      </div>
      
-     <div class="jumbotron output-wrapper">
-   		<h3>AI Haiku</h3>
-   		<div id='haiku-output'>
-   			<!-- Haiku go here -->
-   		</div>
-   	</div>      	
+	     <div class="jumbotron output-wrapper">
+	   		<h3>AI Haiku</h3>
+	   		<div id='haiku-output' class='flex-container'>
+	   			<!-- Haiku go here -->
+	   		</div>
+	   	</div>    
+	   	  	
+	</div><!-- ./rhs -->
 	
     </div> <!-- /#main-container -->
 

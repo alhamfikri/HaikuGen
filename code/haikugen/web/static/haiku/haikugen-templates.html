@@ -1,6 +1,19 @@
 
 <template id='DisplayHaiku'>
-	<div class='well'>
-		<pre><%= text %></pre>
+	<div class='panel panel-default haiku' id='<%= context.id %>'>
+		<button type="button" class="close" onclick='$(this).parent().hide(); return false;'><span aria-hidden="true">&times;</span></button>
+		<script>
+		if (context.recipient) {
+			print("<div class='panel-heading'>For <img class='img-thumbnail' src='"+recipient.img+"'> @"+recipient.screenname+"</div>");
+		} else if (context.topic) {
+			print("<div class='panel-heading'>On "+topic+"</div>");
+		}
+		print("<div class='panel-body poem-body'>")
+		var lines = context.text.split("\n");
+		for(var i=0; i<lines.length; i++) {
+			print(lines[i]+"<br>");	
+		}
+		</script>
+		</div>
 	</div>
 </template>
