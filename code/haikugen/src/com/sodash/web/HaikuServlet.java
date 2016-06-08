@@ -17,6 +17,7 @@ import org.coinvent.haiku.PoemVocab;
 import org.coinvent.haiku.VocabFromTwitterProfile;
 
 import com.winterwell.utils.Proc;
+import com.winterwell.utils.ReflectionUtils;
 
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterTest;
@@ -45,6 +46,7 @@ import creole.data.XId;
  */
 public class HaikuServlet implements IServlet {
 
+	private static final String LOGTAG = "haiku";
 	private static boolean initFlag;
 	private static LanguageModel languageModel;
 	private static List<Haiku> haikus;
@@ -107,6 +109,7 @@ public class HaikuServlet implements IServlet {
 	
 
 	List<Poem> doWritePoem(String topic, String topic2, XId tweep) {
+		Log.d(LOGTAG, "doWritePoem "+topic+" "+topic2+" "+tweep+" "+ReflectionUtils.getSomeStack(6));
 		int constraint[] = {5,7,5};
 
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);

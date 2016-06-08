@@ -10,10 +10,16 @@ import java.util.TimerTask;
 import org.coinvent.haiku.Poem;
 import org.eclipse.jetty.util.ajax.JSON;
 
+import winterwell.jtwitter.AStream;
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
+import winterwell.jtwitter.TwitterEvent;
 import winterwell.jtwitter.TwitterTest;
+import winterwell.jtwitter.UserStream;
+import winterwell.jtwitter.Twitter.ITweet;
 import winterwell.utils.reporting.Log;
+import winterwell.utils.time.Dt;
+import winterwell.utils.time.TUnit;
 import winterwell.utils.time.Time;
 import winterwell.utils.web.SimpleJson;
 import winterwell.utils.web.XStreamUtils;
@@ -43,9 +49,36 @@ public class ListenForRequests {
 	Actor actor = new ListenActor();
 	
 	Timer time = new Timer();
+	private UserStream userStream;
 	
 	public void start() {
-		time.schedule(new ListenTask(actor), 10000, 10000);
+		// listen to @sodash #poem
+//		time.schedule(new ListenTask(actor), new Dt(1,TUnit.MINUTE).getMillisecs(), new Dt(1,TUnit.MINUTE).getMillisecs());
+		
+		// listen to @aihaiku
+		userStream = new UserStream(jtwit);
+		userStream.setAutoReconnect(true);
+		userStream.addListener(new AStream.IListen() {			
+			@Override
+			public boolean processTweet(ITweet tweet) {
+				Log.d("haiku", "Got tweet to @aihaiku: "+tweet);
+				if (tweet.getText().startsWith("RT ")) return true;
+				if ( ! tweet.getText().toLowerCase().contains("@aihaiku")) return true;
+				actor.send(tweet);
+				return true;
+			}
+			
+			@Override
+			public boolean processSystemEvent(Object[] obj) {
+				return true;
+			}
+			
+			@Override
+			public boolean processEvent(TwitterEvent event) {
+				return true;
+			}
+		});
+		userStream.connect();
 	}
 
 }
@@ -120,7 +153,14 @@ class ListenTask extends TimerTask {
 			Object cargo = jobj.get("cargo");
 			Object[] msgs = (Object[]) cargo;
 			for (Object msg : msgs) {
-				actor.send(msg);
+				if (msg instanceof Map) {
+					Map m = (Map) msg;
+					String text = (String) m.get("contents");
+					if (text==null || text.startsWith("RT ") || ! text.toLowerCase().contains("poem")) {
+						continue;
+					}
+					actor.send(msg);
+				}
 			}
 //			Log.d("ListenTask", "ran, found "+msgs.length);							
 		} catch(Throwable ex) {
