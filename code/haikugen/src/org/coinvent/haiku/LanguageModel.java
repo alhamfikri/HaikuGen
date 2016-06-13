@@ -370,7 +370,7 @@ public class LanguageModel {
 		WWModelFactory wwmf = new WWModelFactory();
 		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(1000, 2, 100, 2);
 		// use a low TPW value to encourage phrases
-		double t2tpw = 0.25;
+		double t2tpw = 1.0;
 		WWModel<Tkn> wordModel = wwmf.fullFromSig(sig, null, 
 				trackedFormula, 
 				t2tpw, 100, new HashMap()

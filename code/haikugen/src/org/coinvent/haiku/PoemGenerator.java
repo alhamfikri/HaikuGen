@@ -230,7 +230,7 @@ public class PoemGenerator {
 		
 		// filter by rhyme? (allow occasional rhyme-breaking)
 		String rhyme = null;
-		if (Utils.getRandomChoice(0.9)) {
+		if (Utils.getRandomChoice(1 - Config.P_IGNORE_RHYME)) {
 			if (rhymeConstraint!=null) {
 				for(int[] rhymes : rhymeConstraint) {
 					for (int i = 0; i < rhymes.length; i++) {
@@ -288,7 +288,7 @@ public class PoemGenerator {
 				Tkn outcome = new Tkn(w);
 				WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
 				double p = wm.prob(outcome, context);
-				assert p > 0 : outcome+" "+context;
+				assert p > 0 : p+" "+outcome+" "+context;
 				wordChoices.setProb(outcome, p*Config.DOWNVOTE_USEALLVOCAB);
 			}	
 		}
@@ -389,14 +389,19 @@ public class PoemGenerator {
 
 		List candidates = new ArrayList();
 		for(int i=0; i<Config.batchSize; i++) {
-			Poem res = generate2();
-			if (res==null) {
-				Log.d(LOGTAG, "generate "+i+" failed :(");
+			try {
+				Poem res = generate2();
+				if (res==null) {
+					Log.d(LOGTAG, "generate "+i+" failed :(");
+					continue;
+				}
+				res.score = score(res);			
+				assert res.score != -1;
+				candidates.add(res);
+			} catch(Exception ex) {
+				Log.e(LOGTAG, ex);
 				continue;
 			}
-			res.score = score(res);			
-			assert res.score != -1;
-			candidates.add(res);
 		}
 		if (candidates.isEmpty()) {
 			throw new FailureException("no poem found :(");

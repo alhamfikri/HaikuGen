@@ -12,5 +12,6 @@ public class Config {
 	 * Used to reduce the score for words picked from all-vocab
 	 */
 	public static final double DOWNVOTE_USEALLVOCAB = 0.01;
-	public static int batchSize = 5;
+	public static final double P_IGNORE_RHYME = 0.05;
+	public static int batchSize = 20;
 }

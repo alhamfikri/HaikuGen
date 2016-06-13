@@ -26,9 +26,9 @@ public class PoemGeneratorTest {
 	@Test
 	public void testRhyme() {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
-		int[] constraint = {5,5};
+		int[] constraint = {5,7,5};
 		PoemGenerator pg = new PoemGenerator(LanguageModel.get(), haikus, constraint);
-		pg.setRhymeConstraint(Arrays.asList(new int[]{0,1}));
+		pg.setRhymeConstraint(Arrays.asList(new int[]{0,1,2}));
 		PoemVocab vocab = LanguageModel.get().allVocab;
 		pg.setVocab(vocab);
 		pg.setWordGen(LanguageModel.get().getAllWordModel());
