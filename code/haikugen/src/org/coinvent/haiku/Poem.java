@@ -29,6 +29,7 @@ public class Poem implements Comparable<Poem>, IHasJson {
 		this.lines = new Line[lineLengthSyllables.length];
 		for (int i = 0; i < lineLengthSyllables.length; i++) {
 			lines[i] = new Line(lineLengthSyllables[i]);
+			lines[i].num = i;
 		}
 	}
 

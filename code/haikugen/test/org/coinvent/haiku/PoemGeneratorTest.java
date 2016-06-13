@@ -2,6 +2,7 @@ package org.coinvent.haiku;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -23,6 +24,19 @@ import winterwell.nlp.io.Tkn;
 public class PoemGeneratorTest {
 
 	@Test
+	public void testRhyme() {
+		List<Haiku> haikus = HaikuMain.loadHaikus();
+		int[] constraint = {5,5};
+		PoemGenerator pg = new PoemGenerator(LanguageModel.get(), haikus, constraint);
+		pg.setRhymeConstraint(Arrays.asList(new int[]{0,1}));
+		PoemVocab vocab = LanguageModel.get().allVocab;
+		pg.setVocab(vocab);
+		pg.setWordGen(LanguageModel.get().getAllWordModel());
+		Poem poem = pg.generate("love");
+		System.out.println(poem);
+	}
+	
+	@Test
 	public void testGenerateWord() {
 		List<Haiku> haikus = HaikuMain.loadHaikus();
 		int constraint[] = {5,7,5};
@@ -42,7 +56,8 @@ public class PoemGeneratorTest {
 		line.words.add(new WordInfo("cat", 1).setPOS("NN"));
 		
 		for(int i=0; i<5; i++) {
-			Object gen = pg.generateWord(wi, line);
+			Poem poem = new Poem(new int[]{1});
+			Object gen = pg.generateWord(wi, line, poem);
 			System.out.println(gen);
 		}
 	}

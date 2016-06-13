@@ -369,9 +369,11 @@ public class LanguageModel {
 		List<String> sig = Arrays.asList(LanguageModel.sig);
 		WWModelFactory wwmf = new WWModelFactory();
 		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(1000, 2, 100, 2);
+		// use a low TPW value to encourage phrases
+		double t2tpw = 0.25;
 		WWModel<Tkn> wordModel = wwmf.fullFromSig(sig, null, 
 				trackedFormula, 
-				1, 100, new HashMap()
+				t2tpw, 100, new HashMap()
 				);
 		return wordModel;
 	}

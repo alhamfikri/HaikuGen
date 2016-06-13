@@ -28,6 +28,7 @@ import winterwell.maths.stats.distributions.discrete.ObjectDistribution;
 import winterwell.maths.timeseries.DataUtils;
 import winterwell.maths.vector.VectorUtilsTest;
 import winterwell.nlp.NLPWorkshop;
+import winterwell.nlp.dict.CMUDict;
 import winterwell.nlp.docmodels.IDocModel;
 import winterwell.nlp.io.ApplyFnToTokenStream;
 import winterwell.nlp.io.FilteredTokenStream;
@@ -61,6 +62,7 @@ public class PoemGenerator {
 	private String topic2;
 	private String topic1;
 	private PoemVocab vocab;
+	private List<int[]> rhymeConstraint;
 	/**
 	 * Constructor
 	 * @param languageModel : set corpus for words and relational information
@@ -73,6 +75,16 @@ public class PoemGenerator {
 		this.vocab = languageModel.allVocab;
 		this.haikus = haikus;
 		this.syllableConstraint = syllableConstraint;
+	}
+	
+	/**
+	 * The lines (zero-indexed) which should rhyme.
+	 * @param rhymes
+	 * @return
+	 */
+	public PoemGenerator setRhymeConstraint(List<int[]> rhymes) {
+		rhymeConstraint = rhymes;
+		return this;
 	}
 	
 	public void setVocab(PoemVocab vocab) {
@@ -125,12 +137,12 @@ public class PoemGenerator {
 		// Fill in words
 		generate3_fillInWords(poem);
 		
-		// sanity check: words filled in
-		for(Line line : poem.lines) {
-			for(WordInfo wi : line.words) {
-				assert ! Utils.isBlank(wi.word) : line;
-			}
-		}
+//		// sanity check: words filled in -- But rhymes can fail :(
+//		for(Line line : poem.lines) {
+//			for(WordInfo wi : line.words) {
+//				assert ! Utils.isBlank(wi.word) : line;
+//			}
+//		}
 		
 		//post-processing the Haiku, fixes some inconsistencies
 		postProcessing(poem);
@@ -138,8 +150,6 @@ public class PoemGenerator {
 	}
 	
 	void generate3_fillInWords(Poem poem) {
-		double topicScore = 0.0;
-		int topicCount=0;
 		for(Line line : poem.lines) {
 			for(WordInfo word : line.words) {
 				if (word.fixed) {
@@ -153,7 +163,7 @@ public class PoemGenerator {
 					assert ! Utils.isBlank(word.word) : line;
 					continue;
 				}
-				Tkn picked = generateWord(word, line);
+				Tkn picked = generateWord(word, line, poem);
 				if (picked==null) {
 					// Fail
 					Log.e(LOGTAG, "Failed to pick a word for "+word+" in "+line);
@@ -161,10 +171,7 @@ public class PoemGenerator {
 				}
 				word.setWord(picked.getText());
 				assert ! Utils.isBlank(picked.getText());
-			}
-			for(WordInfo wi : line.words) {
-				assert ! Utils.isBlank(wi.word) : line;
-			}
+			}			
 		} // end for-each-line
 	}
 	
@@ -189,7 +196,7 @@ public class PoemGenerator {
 	 * @param line
 	 * @return
 	 */
-	Tkn generateWord(WordInfo wordInfo, Line line) {
+	Tkn generateWord(WordInfo wordInfo, Line line, Poem poem) {
 		assert ! wordInfo.fixed && wordInfo.syllables() > 0 : wordInfo;		
 		assert wordInfo!=null;
 		// context
@@ -221,10 +228,33 @@ public class PoemGenerator {
 		}
 		assert context != null : wordInfo+" "+inst+" not in "+list;
 		
+		// filter by rhyme? (allow occasional rhyme-breaking)
+		String rhyme = null;
+		if (Utils.getRandomChoice(0.9)) {
+			if (rhymeConstraint!=null) {
+				for(int[] rhymes : rhymeConstraint) {
+					for (int i = 0; i < rhymes.length; i++) {
+						if (rhymes[i] != line.num) continue;
+						int ri = rhymes[line.num==0? 1 : 0];
+						Line lineri = poem.lines[ri];
+						WordInfo endWord = lineri.words.get(lineri.words.size()-1);
+						if (endWord.syllables()==0 && lineri.words.size() > 1) {
+							endWord = lineri.words.get(lineri.words.size()-2);
+						}
+						if (Utils.isBlank(endWord.word)) {
+							continue;
+						}					
+						rhyme = endWord.word;
+					}
+				}
+			}
+		}
+
+		
 		// sample
 		// ...score each option
 		ObjectDistribution<Tkn> wordChoices = new ObjectDistribution<>();
-		Set<String> wordList = vocab.getWordlist(wordInfo.pos, wordInfo.syllables());
+		Set<String> wordList = vocab.getWordlist(wordInfo.pos, wordInfo.syllables());		
 		for(String w : wordList) {
 			if (LanguageModel.get().avoidWord(w)) {
 				continue;
@@ -243,7 +273,7 @@ public class PoemGenerator {
 			wordChoices.setProb(outcome, s);
 		}
 		// include the wider vocab?
-		if (wordChoices.size() < 5) {
+		if (wordChoices.size() < 5 || rhyme!=null) {
 			Set<String> wordList2 = LanguageModel.get().allVocab.getWordlist(wordInfo.pos, wordInfo.syllables());
 			for(String w : wordList2) {
 				if (LanguageModel.get().avoidWord(w)) {
@@ -258,6 +288,7 @@ public class PoemGenerator {
 				Tkn outcome = new Tkn(w);
 				WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
 				double p = wm.prob(outcome, context);
+				assert p > 0 : outcome+" "+context;
 				wordChoices.setProb(outcome, p*Config.DOWNVOTE_USEALLVOCAB);
 			}	
 		}
@@ -265,7 +296,21 @@ public class PoemGenerator {
 			Log.w("poem", "No word for "+wordInfo.pos+" "+wordInfo.syllables());
 			return null;
 		}
-		
+		// filter by rhyme? (allow occasional rhyme-breaking)
+		if (rhyme!=null) {
+			List<String> rhymeWords = new CMUDict().getRhymes(rhyme);
+			ArrayList remove = new ArrayList();
+			for(Tkn tkn : wordChoices) {
+				if ( ! rhymeWords.contains(tkn.getText())) {
+					remove.add(tkn);
+				}
+			}
+			wordChoices.removeAll(remove);
+			if (wordChoices.isEmpty()) {
+				Log.w("poem", "No word for "+wordInfo.pos+" "+wordInfo.syllables()+" that rhymes with "+rhyme);
+				return null;
+			}
+		}				
 		
 		Tkn sampled = wordChoices.sample(); //wordGen.sample(context);
 		

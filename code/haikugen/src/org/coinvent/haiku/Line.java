@@ -14,6 +14,11 @@ import com.winterwell.utils.Utils;
 
 public class Line extends ATokenStream {
 
+	/**
+	 * zero indexed
+	 */
+	int num;
+	
 	public Line(int syllables) {
 		this.syllables = syllables;
 	}
