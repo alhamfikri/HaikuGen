@@ -230,18 +230,15 @@ public class PoemGenerator {
 		
 		// filter by rhyme? (allow occasional rhyme-breaking)
 		String rhyme = null;
-		if (Utils.getRandomChoice(1 - Config.P_IGNORE_RHYME)) {
+		if (isLastWord(wordInfo, line) && Utils.getRandomChoice(1 - Config.P_IGNORE_RHYME)) {
 			if (rhymeConstraint!=null) {
 				for(int[] rhymes : rhymeConstraint) {
 					for (int i = 0; i < rhymes.length; i++) {
 						if (rhymes[i] != line.num) continue;
 						int ri = rhymes[line.num==0? 1 : 0];
 						Line lineri = poem.lines[ri];
-						WordInfo endWord = lineri.words.get(lineri.words.size()-1);
-						if (endWord.syllables()==0 && lineri.words.size() > 1) {
-							endWord = lineri.words.get(lineri.words.size()-2);
-						}
-						if (Utils.isBlank(endWord.word)) {
+						WordInfo endWord = getLastWord(line);
+						if (endWord==null || Utils.isBlank(endWord.word)) {
 							continue;
 						}					
 						rhyme = endWord.word;
@@ -318,6 +315,20 @@ public class PoemGenerator {
 //		Tkn mle = marginal.getMostLikely();
 						
 		return sampled;
+	}
+
+	private WordInfo getLastWord(Line line) {
+		for(int i=line.words.size()-1; i>=0; i--) {
+			WordInfo wi = line.words.get(i);
+			if (wi.syllables()!=0 || StrUtils.isWord(wi.word)) {
+				return wi;
+			}
+		}
+		return null;
+	}
+
+	private boolean isLastWord(WordInfo wordInfo, Line line) {
+		return wordInfo == getLastWord(line);
 	}
 
 	private double scoreWord(Tkn outcome, Cntxt context, WordInfo wordInfo, Line line) {
