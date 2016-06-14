@@ -53,7 +53,7 @@
 	      			<input id='topic-input2' class='form-control' name='topic2' type='text'>      			
 	      		</div>
 	      	</div>
-      		<button class='btn btn-default'>Compose Haiku</button>
+      		<button class='btn btn-default'>Compose Haiku</button>      		      		
       	</form>
      </div>
      
@@ -68,6 +68,10 @@
 	API: Call http://_host_/haiku.json with the parameters topic and topic2, e.g. 
 	<a href='http://_host_/haiku.json?topic=love&topic2=food'>http://_host_/haiku.json?topic=love&topic2=food</a>. 
 	The server will return haiku in a json format.
+	<p>
+	Advanced API: 
+	Set rhyme=true to make it rhyme. 
+	<!-- TODO Add ! to a topic to ensure that topic is used in a quite literal way (e.g. the word is used as-is). -->
 	</div>
 
     </div> <!-- /container -->

@@ -120,7 +120,7 @@ class ListenActor extends Actor<Object> {
 			if (Utils.isBlank(topic)) topic = null;
 			String topic2 = null;
 			XId tweep = XId.xid(SimpleJson.get(m, "owner", "xid"));
-			List<Poem> poems = hs.doWritePoem(topic, topic2, tweep);
+			List<Poem> poems = hs.doWritePoem(topic, topic2, tweep, false);
 			Poem poem = poems.get(0);
 			if (tweep!=null) {
 				String txt = "#poem for @"+tweep.getName()+":\n"+poem;

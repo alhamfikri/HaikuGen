@@ -34,6 +34,7 @@ import winterwell.utils.reporting.Log;
 import winterwell.utils.time.Dt;
 import winterwell.utils.time.TUnit;
 import winterwell.web.app.WebRequest;
+import winterwell.web.fields.Checkbox;
 
 import com.winterwell.utils.web.WebUtils2;
 import com.winterwell.web.ajax.JsonResponse;
@@ -88,6 +89,7 @@ public class HaikuServlet implements IServlet {
 		String topic = webRequest.get("topic");
 		String topic2 = webRequest.get("topic2");
 		String tweep = webRequest.get("tweep");
+		Boolean rhyme = webRequest.get(new Checkbox("rhyme"));
 		XId xid = null;
 		if (tweep!=null) {
 			tweep = tweep.trim();
@@ -96,7 +98,7 @@ public class HaikuServlet implements IServlet {
 			}
 			xid = new XId(tweep.toLowerCase(), "twitter");
 		}
-		List<Poem> poems = doWritePoem(topic, topic2, xid);
+		List<Poem> poems = doWritePoem(topic, topic2, xid, rhyme);
 		
 		List<Map> jsoncandidates10 = new ArrayList();
 		for (Poem poem : poems) {
@@ -108,12 +110,15 @@ public class HaikuServlet implements IServlet {
 	}
 	
 
-	List<Poem> doWritePoem(String topic, String topic2, XId tweep) {
+	List<Poem> doWritePoem(String topic, String topic2, XId tweep, Boolean rhyme) {
 		Log.d(LOGTAG, "doWritePoem "+topic+" "+topic2+" "+tweep+" "+ReflectionUtils.getSomeStack(6));
 		int constraint[] = {5,7,5};
 
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 
+		if (Utils.yes(rhyme)) {
+			generator.setRhymeConstraint(Arrays.asList(new int[]{0,1,2}));
+		}
 		// TODO for a Twitter profile?
 		
 		Map tweepInfo = null; 
