@@ -203,7 +203,7 @@ public class PoemGenerator {
 		String posTag = wordInfo.pos;
 		assert posTag != null;		
 		SitnStream ss = LanguageModel.get().getSitnStream(line);
-		List<Sitn<Tkn>> list = Containers.list(ss);
+		List<Sitn<Tkn>> list = Containers.getList(ss);
 		// work out which element of list we want (sorry - this is ugly due to dropped punctuation)
 		int inst=0;
 		for(WordInfo wi : line.words) {
