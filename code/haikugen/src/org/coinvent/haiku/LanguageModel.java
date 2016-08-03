@@ -47,6 +47,7 @@ import winterwell.nlp.corpus.brown.BrownDocument;
 import winterwell.nlp.dict.CMUDict;
 import winterwell.nlp.io.ApplyFnToTokenStream;
 import winterwell.nlp.io.ITokenStream;
+import winterwell.nlp.io.ListTokenStream;
 import winterwell.nlp.io.SitnStream;
 import winterwell.nlp.io.Tkn;
 import winterwell.nlp.io.WordAndPunctuationTokeniser;
@@ -70,7 +71,7 @@ import winterwell.utils.reporting.Log.KErrorPolicy;
  */
 public class LanguageModel {
 		
-	ITokenStream tweetTokeniser = makeTokeniser();
+	ITokenStream tokeniser = makeTokeniser();
 	
 	//set of unique words
 	private HashMap<String,WordInfo> wordDatabase;
@@ -115,7 +116,7 @@ public class LanguageModel {
 		addSpecialSeparator("..",".");
 	}
 	
-	private ITokenStream makeTokeniser() {
+	private static ITokenStream makeTokeniser() {
 		WordAndPunctuationTokeniser words = new WordAndPunctuationTokeniser()
 										.setLowerCase(true)
 										.setNormaliseToAscii(KErrorPolicy.ACCEPT)
@@ -128,7 +129,17 @@ public class LanguageModel {
 				return value;
 			}
 		});
-		return noUrls;
+		ITokenStream zeroPunctuation = new ApplyFnToTokenStream(noUrls, new IFn<Tkn, Tkn>() {			
+			@Override
+			public Tkn apply(Tkn value) {
+				if (Tkn.UNKNOWN.equals(value.getText())) return value;
+				if (StrUtils.AZ.matcher(value.getText()).find()) {
+					return value;
+				}
+				return null;
+			}
+		});		
+		return zeroPunctuation;
 	}
 
 	private void addSpecialSeparator(String separator, String tag) {
@@ -233,12 +244,13 @@ public class LanguageModel {
 	public synchronized WWModel<Tkn> getAllWordModel() {
 		if (allWordModel!=null) return allWordModel;
 		final VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(null, null);
+		vftp.setTokeniser(getTokeniser());
 		WWModel<Tkn> model = vftp.getWordModel();
 		Desc<WWModel> desc = model.getDesc();
 		desc.unset();
 		desc.setTag("poem");
 		desc.put("sig", sig);
-		desc.put("training", "brown");
+		desc.put("train", "brown");
 		desc.put("punc", false); // no punctuation		
 		// also stash the internal model settings, e.g. TPW
 		ArrayList allModels = new ArrayList();
@@ -258,23 +270,14 @@ public class LanguageModel {
 		Log.d("lang", "WordModel: Processing Brown Corpus...");
 		BrownCorpus bc = new BrownCorpus();		
 		final AtomicInteger cnt = new AtomicInteger();
-//		SafeExecutor exec = new SafeExecutor(Executors.newFixedThreadPool(8));		
 		for (final IDocument doc : bc) {
 			BrownDocument bdoc = (BrownDocument) doc;
 			bdoc.setSwallowPunctuation(true);
 			bdoc.setLowerCase(true);
-//			exec.submit(new Callable<Object>(){
-//				@Override
-//				public Object call() throws Exception {
-					vftp.train(bdoc);
-					int c = cnt.incrementAndGet();
-					if (c % 10 == 0) Log.d("lang", "WordModel: Processing Brown Corpus: docs:"+cnt+" "+(c/5)+"%\twords:"+model.getTrainingCnt() +"...");
-//					return null;
-//				}				
-//			});			
+			vftp.train(bdoc);
+			int c = cnt.incrementAndGet();
+			if (c % 10 == 0) Log.d("lang", "WordModel: Processing Brown Corpus: docs:"+cnt+" "+(c/5)+"%\twords:"+model.getTrainingCnt() +"...");
 		}
-//		exec.shutdown();
-//		exec.awaitTermination();
 		
 		allWordModel = model;
 		Depot.getDefault().put(desc, allWordModel);
@@ -282,7 +285,9 @@ public class LanguageModel {
 		return allWordModel;
 	}
 
-	public static String[] sig = new String[]{"w-3", "w-2", "w-1"};
+	public static String[] sig = 
+//			new String[]{"w-1"};
+			new String[]{"w-3", "w-2", "w-1"};
 		
 	/**
 	 * 
@@ -368,7 +373,7 @@ public class LanguageModel {
 	static WWModel<Tkn> newWordModel() {
 		List<String> sig = Arrays.asList(LanguageModel.sig);
 		WWModelFactory wwmf = new WWModelFactory();
-		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(1000, 2, 100, 2);
+		IFn<List<String>, int[]> trackedFormula = wwmf.trackedFormula(10000, 2, 100, 2);
 		// use a low TPW value to encourage phrases
 		double t2tpw = 1.0;
 		WWModel<Tkn> wordModel = wwmf.fullFromSig(sig, null, 
@@ -382,18 +387,9 @@ public class LanguageModel {
 		return allVocab;
 	}
 
-	public SitnStream getSitnStream(Line line) {
-		ITokenStream zeroPunctuation = new ApplyFnToTokenStream(line, new IFn<Tkn, Tkn>() {			
-			@Override
-			public Tkn apply(Tkn value) {
-				if (Tkn.UNKNOWN.equals(value.getText())) return value;
-				if (StrUtils.AZ.matcher(value.getText()).find()) {
-					return value;
-				}
-				return null;
-			}
-		});
-		SitnStream ss = new SitnStream(null, zeroPunctuation, sig);
+	public SitnStream getSitnStream(Line line) {		
+		ITokenStream tokens = new ListTokenStream(line.toList());
+		SitnStream ss = new SitnStream(null, tokens, sig);
 		return ss;
 	}
 
@@ -432,6 +428,10 @@ public class LanguageModel {
 	public static List<Tkn> posTag(ITokenStream linei) {
 		PosTagByOpenNLP tagger = new PosTagByOpenNLP(linei);
 		return Containers.getList(tagger);
+	}
+
+	public ITokenStream getTokeniser() {
+		return tokeniser;
 	}
 
 }

@@ -57,7 +57,7 @@ public class PoemGeneratorTest {
 		
 		for(int i=0; i<5; i++) {
 			Poem poem = new Poem(new int[]{1});
-			Object gen = pg.generateWord(wi, line, poem);
+			Object gen = pg.generateWord(wi, line, poem, 0);
 			System.out.println(gen);
 		}
 	}

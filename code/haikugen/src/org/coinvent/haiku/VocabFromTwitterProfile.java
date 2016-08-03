@@ -55,8 +55,12 @@ public class VocabFromTwitterProfile {
 		this.txid = target;
 	}
 	
-	ITokenStream tokeniser = LanguageModel.get().tweetTokeniser;
+	ITokenStream tokeniser = LanguageModel.get().tokeniser;
 	private ArrayMap tweepInfo;
+	
+	public void setTokeniser(ITokenStream tokeniser) {
+		this.tokeniser = tokeniser;
+	}
 	
 	public void run() {
 		List<Status> tweets = fetchTweets();
@@ -80,9 +84,10 @@ public class VocabFromTwitterProfile {
 	}
 
 	void train(IDocument doc) {
-		ITokenStream tokens = doc instanceof BrownDocument? doc.getTokenStream() : tokeniser.factory(doc.getContents());		
-		SitnStream ss = new SitnStream(doc, tokens, LanguageModel.sig);
+		ITokenStream tokens = tokeniser.factory(doc.getContents());		
+		SitnStream ss = new SitnStream(doc, tokens, wordModel.getContextSignature());
 		String text = ss.getText();
+		// guess fallback POS tags
 		List<Tkn> postags = LanguageModel.posTag(new DumbTokenStream(text));
 		List<Sitn<Tkn>> tkns = Containers.getList(ss);
 		assert postags.size() == tkns.size() : postags+" !~ "+tkns;
@@ -94,13 +99,10 @@ public class VocabFromTwitterProfile {
 			int s = LanguageModel.get().getSyllable(sitn.outcome.getText());
 			WordInfo wi = new WordInfo(sitn.outcome.getText(), s);
 			String tag = sitn.outcome.getPOS();
-			if (tag==null) tag = postags.get(i).getPOS();
+			if (tag==null) {
+				tag = postags.get(i).getPOS();
+			}
 			wi.setPOS(tag);
-//			} else {
-//				// WTF? Guess NN
-//				Log.w("poem.vocab", "No POS for "+wi+"?!");
-//				wi.setPOS("NN");
-//			}
 			vocab.addWord(wi);
 		}
 	}

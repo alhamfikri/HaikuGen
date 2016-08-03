@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.coinvent.haiku.Config;
 import org.coinvent.haiku.Haiku;
 import org.coinvent.haiku.PoemGenerator;
 import org.coinvent.haiku.HaikuMain;
@@ -21,6 +22,8 @@ import com.winterwell.utils.ReflectionUtils;
 
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterTest;
+import winterwell.maths.stats.distributions.cond.Cntxt;
+import winterwell.maths.stats.distributions.cond.ICondDistribution;
 import winterwell.maths.stats.distributions.cond.WWModel;
 import winterwell.nlp.docmodels.IDocModel;
 import winterwell.nlp.io.Tkn;
@@ -106,9 +109,14 @@ public class HaikuServlet implements IServlet {
 		}
 		Log.d("haiku", "Sending top 10 results");
 		JsonResponse out = new JsonResponse(webRequest, jsoncandidates10);
+		// debug info
+		out.put("debug_wordmodel", wordModel.toString());
+		out.put("debug_config", Config.get().toString());
 		WebUtils2.sendJson(out, webRequest);
 	}
 	
+	
+	ICondDistribution<Tkn, Cntxt> wordModel;
 
 	List<Poem> doWritePoem(String topic, String topic2, XId tweep, Boolean rhyme) {
 		Log.d(LOGTAG, "doWritePoem "+topic+" "+topic2+" "+tweep+" "+ReflectionUtils.getSomeStack(6));
@@ -137,6 +145,7 @@ public class HaikuServlet implements IServlet {
 			WWModel<Tkn> wordGen = LanguageModel.get().getAllWordModel();
 			generator.setWordGen(wordGen);
 		}
+		wordModel = generator.getWordGen();
 
 		
 		ArrayList<Poem> candidates = new ArrayList<>();

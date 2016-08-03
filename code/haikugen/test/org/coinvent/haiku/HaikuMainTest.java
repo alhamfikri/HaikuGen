@@ -17,12 +17,8 @@ public class HaikuMainTest {
 		int constraint[] = {5,7,5};
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 		String idea = "love";
-		String randomizedIdea = "";
-		if (idea.length() == 0) {
-			randomizedIdea = languageModel.getRandomTopic();
-		}
 		System.out.println("Creating Haiku...");
-		Object res = generator.generate(idea, randomizedIdea);
+		Object res = generator.generate(idea, null);
 		System.out.println(res);		
 	}
 	

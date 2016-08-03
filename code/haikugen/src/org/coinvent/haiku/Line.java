@@ -19,6 +19,9 @@ public class Line extends ATokenStream {
 	 */
 	int num;
 	
+	public Line() {
+		
+	}
 	public Line(int syllables) {
 		this.syllables = syllables;
 	}

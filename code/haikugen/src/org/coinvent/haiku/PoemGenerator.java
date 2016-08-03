@@ -53,6 +53,11 @@ public class PoemGenerator {
 		this.docModel = docModel;
 	}
 	
+	
+	public ICondDistribution<Tkn, Cntxt> getWordGen() {
+		return wordGen;
+	}
+	
 	private static final String LOGTAG = "haiku";
 	private LanguageModel languageModel;
 	private List<Haiku> haikus;
@@ -75,6 +80,7 @@ public class PoemGenerator {
 		this.vocab = languageModel.allVocab;
 		this.haikus = haikus;
 		this.syllableConstraint = syllableConstraint;
+		setWordGen(languageModel.getAllWordModel());
 	}
 	
 	/**
@@ -135,7 +141,8 @@ public class PoemGenerator {
 		}
 		
 		// Fill in words
-		generate3_fillInWords(poem);
+		generate3_fillInWords(poem, 1);
+		generate3_fillInWords(poem, 0);
 		
 //		// sanity check: words filled in -- But rhymes can fail :(
 //		for(Line line : poem.lines) {
@@ -149,7 +156,7 @@ public class PoemGenerator {
 		return poem;
 	}
 	
-	void generate3_fillInWords(Poem poem) {
+	void generate3_fillInWords(Poem poem, double randomness) {
 		for(Line line : poem.lines) {
 			for(WordInfo word : line.words) {
 				if (word.fixed) {
@@ -163,7 +170,7 @@ public class PoemGenerator {
 					assert ! Utils.isBlank(word.word) : line;
 					continue;
 				}
-				Tkn picked = generateWord(word, line, poem);
+				Tkn picked = generateWord(word, line, poem, randomness);
 				if (picked==null) {
 					// Fail
 					Log.e(LOGTAG, "Failed to pick a word for "+word+" in "+line);
@@ -182,8 +189,8 @@ public class PoemGenerator {
 	
 	ICondDistribution<Tkn, Cntxt> wordGen;
 
-	double topicScoreWeight = 1;
-	double senseScoreWeight = 1;
+	double topicScoreWeight = Config.get().weight_topic;
+	double senseScoreWeight = Config.get().weight_sense;
 	double focusScoreWeight = 1;
 	
 	public void setWordGen(ICondDistribution<Tkn, Cntxt> wordGen) {
@@ -196,14 +203,15 @@ public class PoemGenerator {
 	 * @param line
 	 * @return
 	 */
-	Tkn generateWord(WordInfo wordInfo, Line line, Poem poem) {
+	Tkn generateWord(WordInfo wordInfo, Line line, Poem poem, double randomness) {
 		assert ! wordInfo.fixed && wordInfo.syllables() > 0 : wordInfo;		
 		assert wordInfo!=null;
 		// context
 		String posTag = wordInfo.pos;
 		assert posTag != null;		
-		SitnStream ss = LanguageModel.get().getSitnStream(line);
+		SitnStream ss = languageModel.getSitnStream(line);
 		List<Sitn<Tkn>> list = Containers.getList(ss);
+		assert list.size() <= line.words.size() : list+" vs "+line.words;
 		// work out which element of list we want (sorry - this is ugly due to dropped punctuation)
 		int inst=0;
 		for(WordInfo wi : line.words) {
@@ -296,7 +304,7 @@ public class PoemGenerator {
 		// filter by rhyme? (allow occasional rhyme-breaking)
 		if (rhyme!=null) {
 			List<String> rhymeWords = new CMUDict().getRhymes(rhyme);
-			ArrayList remove = new ArrayList();
+			ArrayList<Tkn> remove = new ArrayList();
 			for(Tkn tkn : wordChoices) {
 				if ( ! rhymeWords.contains(tkn.getText())) {
 					remove.add(tkn);
@@ -307,14 +315,14 @@ public class PoemGenerator {
 				Log.w("poem", "No word for "+wordInfo.pos+" "+wordInfo.syllables()+" that rhymes with "+rhyme);
 				return null;
 			}
-		}				
+		}
 		
 		Tkn sampled = wordChoices.sample(); //wordGen.sample(context);
-		
-//		IFiniteDistribution<Tkn> marginal = (IFiniteDistribution<Tkn>) wordGen.getMarginal(context);
-//		Tkn mle = marginal.getMostLikely();
-						
-		return sampled;
+		Tkn best = wordChoices.getMostLikely();
+		if (Utils.getRandomChoice(randomness)) {
+			return sampled;
+		}						
+		return best;
 	}
 
 	private WordInfo getLastWord(Line line) {
@@ -331,14 +339,24 @@ public class PoemGenerator {
 		return wordInfo == getLastWord(line);
 	}
 
+	/**
+	 * Weighted score: word-model flow and topic-match
+	 * @param outcome
+	 * @param context
+	 * @param wordInfo
+	 * @param line
+	 * @return
+	 */
 	private double scoreWord(Tkn outcome, Cntxt context, WordInfo wordInfo, Line line) {
+		assert wordGen != null : this;
 		double p = wordGen.prob(outcome, context);
 		if (topicVector==null) {
 			return p;
 		}
 		Vector vec = LanguageModel.glove.getVector(outcome.getText());
 		double ts = vec==null? 0.0001 : Math.abs(topicVector.dot(vec));
-		return (p + ts*0.001) / 2;
+		double s = p*Config.get().weight_sense + ts*Config.get().weight_topic;
+		return s;
 	}
 
 	private boolean keepTemplateWord(String word) {
@@ -486,12 +504,14 @@ public class PoemGenerator {
 			focusScore = focusScore / (20*repeats);
 		}
 		
+		// TODO rhyme!
+		
 		// sense: multiply per-word scores
 		double senseScore = 1;
 		MeanVar1D mv = new MeanVar1D();
 		for(Line line : res.lines) {			
-			WWModel<Tkn> wm = LanguageModel.get().getAllWordModel();
-			SitnStream ss = LanguageModel.get().getSitnStream(line);			
+			WWModel<Tkn> wm = languageModel.getAllWordModel();
+			SitnStream ss = languageModel.getSitnStream(line);			
 			for (Sitn<Tkn> sitn : ss) {
 				double p = wm.prob(sitn.outcome, sitn.context);
 				mv.train1(p);

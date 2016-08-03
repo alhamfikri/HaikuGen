@@ -19,8 +19,13 @@ import com.winterwell.utils.io.FileUtils;
 import winterwell.utils.time.Time;
 
 /**
+ * Run via tmux with 
+ * 
  * java -cp poetry-server.jar:lib/* com.sodash.web.PoetryServer
-
+ * or
+ * java -cp poetry-server.jar:bin:lib/*:~/sodash/web/WEB-INF/lib/* com.sodash.web.PoetryServer
+ * (not sure which will work)
+ * 
  * @author daniel
  *
  */
@@ -58,8 +63,6 @@ public class PublishPoetryServer extends BuildTask {
 		jar.run();
 		
 		// NB: use tmux on the server to go into a persistent screen
-		// run with  
-		// java -cp simple-server.jar:web/WEB-INF/lib/* org.coinvent.SimpleServe
 		
 		RSyncTask rsync = new RSyncTask(projectDir.getAbsolutePath()+"/", 
 				"winterwell@socrash.soda.sh:~/poetry-server", false);
