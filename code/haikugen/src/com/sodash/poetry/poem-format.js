@@ -11,7 +11,7 @@ Design Aims:
  - Similar to descriptions already used by poets.
  
 @author Daniel Winterstein, 2016
-@version 0.1 (release candidate)
+@version 0.1
 
 _All_ properties are optional.
 This spec uses a JSDoc markup to describe property types and values (see http://usejsdoc.org/tags-type.html)
