@@ -7,11 +7,11 @@ Design Aims:
  - Simpler than a formal grammar.
  - Able to describe a wide range of poems. 
  - Suitable for use in AI generation systems.
- - Support variables (e.g. "rhyme ABAB") and specific instantiations (e.g. "must use an -ee rhyme").
+ - Support variables (e.g. "rhyme-scheme ABAB") and specific instantiations (e.g. "must use an -ee rhyme").
  - Similar where possible to descriptions already used by poets.
  
 @author Daniel Winterstein, 2016
-@version 0.1
+@version 0.1.1
 
 *All_ properties are optional.*
 This spec uses a JSDoc markup to describe property types and values (see http://usejsdoc.org/tags-type.html)
@@ -21,6 +21,10 @@ This spec uses a JSDoc markup to describe property types and values (see http://
 References:
 
  - http://www.poetryarchive.org/glossary
+ 
+Note: Before creating this, I did look for something similar already in existence -- couldn't
+find it. I also toyed with a domain specific language instead of javascript
+-- but I couldn't get it to carry enough info without becoming messy.
  
 Some formats:
 
@@ -55,9 +59,16 @@ Some formats:
 		This can also be specified at the Verse and Line level.
 @property stress {string} The pattern of stress per line -- using "s" and "u" for stressed and unstressed. E.g. iambic pentameter is: "ususususus"
 		This can also be specified at the Verse and Line level.
-@property weight {object} For specifying that some constraints can be broken.
+@property weight {object} For specifying that some constraints can be broken. 
+		This also provides a guide to evaluating a poem - the weightings could be used to say which factors matter more when scoring poems.
 		A map of constraint property names (e.g. topic, stress) to a [0, 1] weighting.
-		0 means "of no importance", 1 means "must be followed".
+		0 means "of no importance", 1 means "must be followed". 
+		The interpretation inbetween is up to the implementation - a harmonic mean is suggested.
+		Constraint property names are those used to specify poem form, plus a couple of extra properties: 
+			rhyme, refrain, stress, feet, syllables -- or "form" which covers all of these,
+			topic, emotion, reference,
+			grammar (should the poem be grammatical?),
+			sense (should the poem make "normal" prosaic sense? This might be approcimately evaluated by an n-gram model),
 */
 
 /**
@@ -73,18 +84,24 @@ Some formats:
 @property rhyme {Variable} If specific, then the International Phonetic Alphabet (IPA) is the preferred format.
 @property syllables {number}
 @property refrain {Variable} Repeated lines should share the same refrain variable.
+@property start_refrain {Variable} Repeated lines should begin the same way.
+@property end_refrain {Variable} Repeated lines should end the same way.
 @property text {string}
 @property tokens {Token[]} This allows for fine-grained constraints, such as "start the sentence with 'If'".
-@property num {number} It can be helpful to number verses.
+@property num {number} It can be helpful to number lines.
 */
 
 /**
-@typedef {Object} Token A single word. Can be an empty object for a blank placeholder. Most constraints can be specified at the individual word level, if so desired.
-@property rhyme
-@property syllables
-@property feet
-@property stress
-@property text
+@typedef {Object} Token A single word. Most constraints can be specified at the individual word level, if so desired.
+Can be an empty object for a blank placeholder.
+Unless text or words are set, a Token can expand to any number of words! 
+This is the case even when pos is set -- e.g. a noun could become a noun-phrase.
+@property rhyme {Variable}
+@property syllables {number}
+@property feet {Variable}
+@property stress {Variable}
+@property words {number} If set, this token represents this many words, no more, no less.
+@property text {string}
 @property pos {string} part-of-speech. Brown Corpus POS-tags are the preferred format.
 */
 
