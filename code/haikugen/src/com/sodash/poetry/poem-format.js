@@ -13,7 +13,7 @@ Design Aims:
 @author Daniel Winterstein, 2016
 @version 0.1
 
-<b>All_ properties are optional.</b>
+*All_ properties are optional.*
 This spec uses a JSDoc markup to describe property types and values (see http://usejsdoc.org/tags-type.html)
 
 // Comments are allowed in .spec.json files, by using //. They are removed in processing (NB: and are not re-inserted in the output json).
