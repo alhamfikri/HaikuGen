@@ -8,12 +8,12 @@ Design Aims:
  - Able to describe a wide range of poems. 
  - Suitable for use in AI generation systems.
  - Support variables (e.g. "rhyme ABAB") and specific instantiations (e.g. "must use an -ee rhyme").
- - Similar to descriptions already used by poets.
+ - Similar where possible to descriptions already used by poets.
  
 @author Daniel Winterstein, 2016
 @version 0.1
 
-_All_ properties are optional.
+<b>All_ properties are optional.</b>
 This spec uses a JSDoc markup to describe property types and values (see http://usejsdoc.org/tags-type.html)
 
 // Comments are allowed in .spec.json files, by using //. They are removed in processing (NB: and are not re-inserted in the output json).
@@ -91,6 +91,7 @@ Some formats:
 /**
  * Future features:
  * 
+ *  - add a control section, to say "please write this verse", for collaborative writing
  *  - alliteration
  *  - metre: other than English-style feet
  *  - voice: 1st "I", 2nd "you", 3rd "he"
