@@ -7,13 +7,15 @@ Design Aims:
  - Simpler than a formal grammar.
  - Able to describe a wide range of poems. 
  - Suitable for use in AI generation systems.
+ - ..including collaborative systems.
  - Support variables (e.g. "rhyme-scheme ABAB") and specific instantiations (e.g. "must use an -ee rhyme").
  - Similar where possible to descriptions already used by poets.
  
 @author Daniel Winterstein, 2016
 @version 0.1.1
 
-*All_ properties are optional.*
+*All properties are optional.*
+*
 This spec uses a JSDoc markup to describe property types and values (see http://usejsdoc.org/tags-type.html)
 
 // Comments are allowed in .spec.json files, by using //. They are removed in processing (NB: and are not re-inserted in the output json).
@@ -68,7 +70,11 @@ Some formats:
 			rhyme, refrain, stress, feet, syllables -- or "form" which covers all of these,
 			topic, emotion, reference,
 			grammar (should the poem be grammatical?),
-			sense (should the poem make "normal" prosaic sense? This might be approcimately evaluated by an n-gram model),
+			sense (should the poem make "normal" prosaic sense? This might be approximately evaluated by an n-gram model),
+@property comment {Comment} Can be set at the Poem, Verse, or Line level. 
+@property request {Request} Can be set at the Poem, Verse, or Line level. For controlling the flow of collaboration.
+	If no requests are set, then default behaviour applies (either "write the whole poem" or "score the whole poem")
+	If any requests are present in the Poem, then they are all that the recipient should do.	 			
 */
 
 /**
@@ -106,9 +112,22 @@ This is the case even when pos is set -- e.g. a noun could become a noun-phrase.
 */
 
 /**
+@typedef {Object} Comment A comment
+@property author {string}
+@property text {string}
+*/
+
+/**
+@typedef {Object} Request A writing request, to say "please write this verse", for collaborative writing
+@property to {string} Who is this request to?
+@property action {string} The requested action -- "write" or "score"
+@property response {object} Where the agent requested puts details on their response (as well as modifying the poem). 
+*/
+
+
+/**
  * Future features:
  * 
- *  - add a control section, to say "please write this verse", for collaborative writing
  *  - alliteration
  *  - metre: other than English-style feet
  *  - voice: 1st "I", 2nd "you", 3rd "he"
