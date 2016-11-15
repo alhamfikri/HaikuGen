@@ -15,6 +15,7 @@ import com.winterwell.utils.StrUtils;
 import com.winterwell.utils.containers.ArrayMap;
 import com.winterwell.utils.containers.Containers;
 import com.winterwell.utils.log.Log;
+import com.winterwell.utils.web.XStreamUtils;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
@@ -38,7 +39,6 @@ import winterwell.nlp.io.Tkn;
 import winterwell.utils.FailureException;
 import winterwell.utils.IFn;
 import winterwell.utils.Utils;
-import winterwell.utils.web.XStreamUtils;
 
 /**
  * What is and isn’t haiku: http://www.litkicks.com/EssentialElementsofHaiku
