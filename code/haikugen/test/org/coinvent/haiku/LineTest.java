@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import winterwell.nlp.io.Tkn;
-import winterwell.utils.containers.Containers;
+import com.winterwell.nlp.io.Tkn;
+import com.winterwell.utils.containers.Containers;
 
 public class LineTest {
 

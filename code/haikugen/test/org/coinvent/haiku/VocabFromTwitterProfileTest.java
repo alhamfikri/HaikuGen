@@ -9,24 +9,24 @@ import java.util.List;
 
 import org.junit.Test;
 
-import creole.data.XId;
 import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterTest;
-import winterwell.maths.stats.distributions.cond.Cntxt;
-import winterwell.maths.stats.distributions.cond.Sitn;
-import winterwell.maths.stats.distributions.cond.WWModel;
-import winterwell.nlp.corpus.IDocument;
-import winterwell.nlp.io.DumbTokenStream;
-import winterwell.nlp.io.ITokenStream;
-import winterwell.nlp.io.SitnStream;
-import winterwell.nlp.io.Tkn;
-import winterwell.nlp.io.pos.PosTagByOpenNLP;
-import winterwell.utils.StrUtils;
-import winterwell.utils.containers.Containers;
+import com.winterwell.maths.stats.distributions.cond.Cntxt;
+import com.winterwell.maths.stats.distributions.cond.Sitn;
+import com.winterwell.maths.stats.distributions.cond.WWModel;
+import com.winterwell.nlp.corpus.IDocument;
+import com.winterwell.nlp.io.DumbTokenStream;
+import com.winterwell.nlp.io.ITokenStream;
+import com.winterwell.nlp.io.SitnStream;
+import com.winterwell.nlp.io.Tkn;
+import com.winterwell.nlp.io.pos.PosTagByOpenNLP;
+import com.winterwell.utils.StrUtils;
+import com.winterwell.utils.containers.Containers;
 
 import com.winterwell.utils.Printer;
 import com.winterwell.utils.io.FileUtils;
+import com.winterwell.web.data.XId;
 
 public class VocabFromTwitterProfileTest {
 

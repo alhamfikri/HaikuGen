@@ -8,9 +8,9 @@ import java.util.Set;
 
 import com.winterwell.utils.MathUtils;
 
-import winterwell.maths.stats.distributions.IntDistribution;
-import winterwell.nlp.corpus.brown.BrownCorpusTags;
-import winterwell.utils.reporting.Log;
+import com.winterwell.maths.stats.distributions.IntDistribution;
+import com.winterwell.nlp.corpus.brown.BrownCorpusTags;
+import com.winterwell.utils.log.Log;
 
 import com.winterwell.utils.StrUtils;
 import com.winterwell.utils.Utils;

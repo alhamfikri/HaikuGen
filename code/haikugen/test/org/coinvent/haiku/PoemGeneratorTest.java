@@ -8,18 +8,18 @@ import java.util.List;
 import org.junit.Test;
 
 import com.winterwell.utils.io.FileUtils;
+import com.winterwell.web.data.XId;
 
-import creole.data.XId;
 import winterwell.jtwitter.Status;
 import winterwell.jtwitter.TwitterTest;
-import winterwell.maths.stats.distributions.cond.Cntxt;
-import winterwell.maths.stats.distributions.cond.ICondDistribution;
-import winterwell.maths.stats.distributions.cond.UnConditional;
-import winterwell.maths.stats.distributions.cond.WWModel;
-import winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
-import winterwell.maths.stats.distributions.discrete.ObjectDistribution;
-import winterwell.nlp.docmodels.IDocModel;
-import winterwell.nlp.io.Tkn;
+import com.winterwell.maths.stats.distributions.cond.Cntxt;
+import com.winterwell.maths.stats.distributions.cond.ICondDistribution;
+import com.winterwell.maths.stats.distributions.cond.UnConditional;
+import com.winterwell.maths.stats.distributions.cond.WWModel;
+import com.winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
+import com.winterwell.maths.stats.distributions.discrete.ObjectDistribution;
+import com.winterwell.nlp.docmodels.IDocModel;
+import com.winterwell.nlp.io.Tkn;
 
 public class PoemGeneratorTest {
 
@@ -96,7 +96,8 @@ public class PoemGeneratorTest {
 		int constraint[] = {5,7,5};
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 
-		VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(TwitterTest.newTestTwitter(), new XId("winterstein@twitter"));
+		VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(TwitterTest.newTestTwitter(), 
+				new XId("winterstein@twitter"));
 		List<Status> tweets = FileUtils.load(VocabFromTwitterProfileTest.TWEET_FILE);
 		assert tweets != null;
 		vftp.train(tweets);		

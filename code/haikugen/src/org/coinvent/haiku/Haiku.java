@@ -2,9 +2,9 @@ package org.coinvent.haiku;
 
 import java.util.List;
 
-import winterwell.nlp.io.DumbTokenStream;
-import winterwell.nlp.io.ITokenStream;
-import winterwell.nlp.io.Tkn;
+import com.winterwell.nlp.io.DumbTokenStream;
+import com.winterwell.nlp.io.ITokenStream;
+import com.winterwell.nlp.io.Tkn;
 
 import com.winterwell.utils.MathUtils;
 import com.winterwell.utils.StrUtils;

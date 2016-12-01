@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
-import winterwell.nlp.corpus.IDocument;
+import com.winterwell.maths.stats.distributions.discrete.IDiscreteDistribution;
+import com.winterwell.nlp.corpus.IDocument;
 
 /**
  * The vocab this poem can use, with info on the words. 

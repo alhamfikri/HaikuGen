@@ -8,11 +8,11 @@ import jobs.BuildStat;
 import jobs.BuildUtils;
 import jobs.BuildWeb;
 import jobs.BuildWinterwellProject;
-import winterwell.bob.BuildTask;
-import winterwell.bob.tasks.GitTask;
-import winterwell.bob.tasks.JarTask;
-import winterwell.bob.tasks.RSyncTask;
-import winterwell.utils.time.Time;
+import com.winterwell.bob.BuildTask;
+import com.winterwell.bob.tasks.GitTask;
+import com.winterwell.bob.tasks.JarTask;
+import com.winterwell.bob.tasks.RSyncTask;
+import com.winterwell.utils.time.Time;
 
 import com.sodash.web.PoetryServer;
 import com.winterwell.utils.io.FileUtils;

@@ -4,8 +4,8 @@ import java.util.regex.Pattern;
 
 import com.winterwell.utils.StrUtils;
 
-import winterwell.nlp.corpus.brown.BrownCorpusTags;
-import winterwell.nlp.io.Tkn;
+import com.winterwell.nlp.corpus.brown.BrownCorpusTags;
+import com.winterwell.nlp.io.Tkn;
 
 
 public class WordInfo {

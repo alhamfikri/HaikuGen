@@ -1,12 +1,12 @@
 package org.coinvent.haiku;
 
-import winterwell.maths.stats.distributions.cond.ExplnOfDist;
-import winterwell.maths.stats.distributions.cond.Sitn;
-import winterwell.maths.stats.distributions.cond.WWModel;
-import winterwell.nlp.io.ITokenStream;
-import winterwell.nlp.io.SitnStream;
-import winterwell.nlp.io.Tkn;
-import winterwell.utils.StrUtils;
+import com.winterwell.maths.stats.distributions.cond.ExplnOfDist;
+import com.winterwell.maths.stats.distributions.cond.Sitn;
+import com.winterwell.maths.stats.distributions.cond.WWModel;
+import com.winterwell.nlp.io.ITokenStream;
+import com.winterwell.nlp.io.SitnStream;
+import com.winterwell.nlp.io.Tkn;
+import com.winterwell.utils.StrUtils;
 
 public class WordModelQualityTest {
 

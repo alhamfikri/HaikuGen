@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import winterwell.nlp.io.ATokenStream;
-import winterwell.nlp.io.ITokenStream;
-import winterwell.nlp.io.Tkn;
-import winterwell.utils.containers.AbstractIterator;
+import com.winterwell.nlp.io.ATokenStream;
+import com.winterwell.nlp.io.ITokenStream;
+import com.winterwell.nlp.io.Tkn;
+import com.winterwell.utils.containers.AbstractIterator;
 
 import com.winterwell.utils.StrUtils;
 import com.winterwell.utils.Utils;

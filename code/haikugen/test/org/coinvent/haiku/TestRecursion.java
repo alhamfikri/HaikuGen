@@ -7,7 +7,7 @@ import org.coinvent.haiku.HaikuMain;
 import org.coinvent.haiku.LanguageModel;
 import org.junit.Test;
 
-import winterwell.utils.Utils;
+import com.winterwell.utils.Utils;
 
 
 /**

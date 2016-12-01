@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import winterwell.utils.Utils;
-import winterwell.utils.io.FileUtils;
-import winterwell.utils.io.LineReader;
-import winterwell.utils.reporting.Log;
+import com.winterwell.utils.Utils;
+import com.winterwell.utils.io.FileUtils;
+import com.winterwell.utils.io.LineReader;
+import com.winterwell.utils.log.Log;
 
 
 public class HaikuMain {

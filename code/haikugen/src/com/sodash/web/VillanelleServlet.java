@@ -13,15 +13,15 @@ import org.coinvent.haiku.LanguageModel;
 
 import com.winterwell.utils.Proc;
 
-import winterwell.utils.Utils;
+import com.winterwell.utils.Utils;
 
 import com.winterwell.utils.io.FileUtils;
 
-import winterwell.utils.containers.Containers;
-import winterwell.utils.reporting.Log;
-import winterwell.utils.time.Dt;
-import winterwell.utils.time.TUnit;
-import winterwell.web.app.WebRequest;
+import com.winterwell.utils.containers.Containers;
+import com.winterwell.utils.log.Log;
+import com.winterwell.utils.time.Dt;
+import com.winterwell.utils.time.TUnit;
+import com.winterwell.web.app.WebRequest;
 
 import com.winterwell.utils.web.WebUtils2;
 import com.winterwell.web.ajax.JsonResponse;

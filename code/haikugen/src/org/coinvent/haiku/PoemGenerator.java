@@ -19,26 +19,26 @@ import com.winterwell.utils.web.XStreamUtils;
 
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
-import winterwell.maths.stats.distributions.cond.Cntxt;
-import winterwell.maths.stats.distributions.cond.ICondDistribution;
-import winterwell.maths.stats.distributions.cond.Sitn;
-import winterwell.maths.stats.distributions.cond.WWModel;
-import winterwell.maths.stats.distributions.d1.MeanVar1D;
-import winterwell.maths.stats.distributions.discrete.IFiniteDistribution;
-import winterwell.maths.stats.distributions.discrete.ObjectDistribution;
-import winterwell.maths.timeseries.DataUtils;
-import winterwell.maths.vector.VectorUtilsTest;
-import winterwell.nlp.NLPWorkshop;
-import winterwell.nlp.dict.CMUDict;
-import winterwell.nlp.docmodels.IDocModel;
-import winterwell.nlp.io.ApplyFnToTokenStream;
-import winterwell.nlp.io.FilteredTokenStream;
-import winterwell.nlp.io.ITokenStream;
-import winterwell.nlp.io.SitnStream;
-import winterwell.nlp.io.Tkn;
-import winterwell.utils.FailureException;
-import winterwell.utils.IFn;
-import winterwell.utils.Utils;
+import com.winterwell.maths.stats.distributions.cond.Cntxt;
+import com.winterwell.maths.stats.distributions.cond.ICondDistribution;
+import com.winterwell.maths.stats.distributions.cond.Sitn;
+import com.winterwell.maths.stats.distributions.cond.WWModel;
+import com.winterwell.maths.stats.distributions.d1.MeanVar1D;
+import com.winterwell.maths.stats.distributions.discrete.IFiniteDistribution;
+import com.winterwell.maths.stats.distributions.discrete.ObjectDistribution;
+import com.winterwell.maths.timeseries.DataUtils;
+import com.winterwell.maths.vector.VectorUtilsTest;
+import com.winterwell.nlp.NLPWorkshop;
+import com.winterwell.nlp.dict.CMUDict;
+import com.winterwell.nlp.docmodels.IDocModel;
+import com.winterwell.nlp.io.ApplyFnToTokenStream;
+import com.winterwell.nlp.io.FilteredTokenStream;
+import com.winterwell.nlp.io.ITokenStream;
+import com.winterwell.nlp.io.SitnStream;
+import com.winterwell.nlp.io.Tkn;
+import com.winterwell.utils.FailureException;
+import com.winterwell.utils.IFn;
+import com.winterwell.utils.Utils;
 
 /**
  * What is and isn’t haiku: http://www.litkicks.com/EssentialElementsofHaiku

@@ -7,24 +7,25 @@ import java.util.Map;
 
 import com.winterwell.utils.containers.ArrayMap;
 
-import creole.data.XId;
+import com.winterwell.maths.stats.distributions.cond.Sitn;
+import com.winterwell.maths.stats.distributions.cond.WWModel;
+import com.winterwell.maths.stats.distributions.cond.WWModelFactory;
+import com.winterwell.nlp.corpus.IDocument;
+import com.winterwell.nlp.corpus.SimpleDocument;
+import com.winterwell.nlp.corpus.brown.BrownDocument;
+import com.winterwell.nlp.io.DumbTokenStream;
+import com.winterwell.nlp.io.ITokenStream;
+import com.winterwell.nlp.io.SitnStream;
+import com.winterwell.nlp.io.Tkn;
+import com.winterwell.nlp.io.pos.PosTagByOpenNLP;
+import com.winterwell.utils.IFn;
+import com.winterwell.utils.containers.Containers;
+import com.winterwell.utils.log.Log;
+import com.winterwell.web.data.XId;
+
 import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.User;
-import winterwell.maths.stats.distributions.cond.Sitn;
-import winterwell.maths.stats.distributions.cond.WWModel;
-import winterwell.maths.stats.distributions.cond.WWModelFactory;
-import winterwell.nlp.corpus.IDocument;
-import winterwell.nlp.corpus.SimpleDocument;
-import winterwell.nlp.corpus.brown.BrownDocument;
-import winterwell.nlp.io.DumbTokenStream;
-import winterwell.nlp.io.ITokenStream;
-import winterwell.nlp.io.SitnStream;
-import winterwell.nlp.io.Tkn;
-import winterwell.nlp.io.pos.PosTagByOpenNLP;
-import winterwell.utils.IFn;
-import winterwell.utils.containers.Containers;
-import winterwell.utils.reporting.Log;
 
 /**
  * @testedby {@link VocabFromTwitterProfileTest}

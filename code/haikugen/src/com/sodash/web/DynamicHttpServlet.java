@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.winterwell.web.WebEx;
-import winterwell.web.app.FileServlet;
-import winterwell.web.app.WebRequest;
+import com.winterwell.web.app.FileServlet;
+import com.winterwell.web.app.WebRequest;
 
 import com.winterwell.utils.log.Log;
 import com.winterwell.utils.web.WebUtils2;

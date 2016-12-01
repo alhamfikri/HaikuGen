@@ -1,6 +1,6 @@
 package com.sodash.web;
 
-import winterwell.web.app.WebRequest;
+import com.winterwell.web.app.WebRequest;
 
 public interface IServlet {
 

@@ -1,6 +1,6 @@
 package org.coinvent.haiku;
 
-import winterwell.utils.StrUtils;
+import com.winterwell.utils.StrUtils;
 
 
 public class StringDouble implements Comparable<StringDouble>{
