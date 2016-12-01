@@ -97,7 +97,10 @@ public class PoemGeneratorTest {
 		PoemGenerator generator = new PoemGenerator(languageModel, haikus, constraint);
 
 		VocabFromTwitterProfile vftp = new VocabFromTwitterProfile(TwitterTest.newTestTwitter(), 
-				new XId("winterstein@twitter"));
+				new XId(
+						"greenogress@twitter"
+//						"winterstein@twitter"
+						));
 		List<Status> tweets = FileUtils.load(VocabFromTwitterProfileTest.TWEET_FILE);
 		assert tweets != null;
 		vftp.train(tweets);		
@@ -113,9 +116,26 @@ public class PoemGeneratorTest {
 		WWModel<Tkn> wordGen = vftp.getWordModel();
 		generator.setWordGen(wordGen);
 		
+		{
+			Poem haiku = generator.generate("wisdom");
+			System.out.println("Wisdom");
+			System.out.println(haiku);
+			}
+		{
+		Poem haiku = generator.generate("robot");
+		System.out.println("Robot");
+		System.out.println(haiku);
+		}
+		{
+		Poem haiku = generator.generate("planet earth");
+		System.out.println("Planet Earth");
+		System.out.println(haiku);
+		}
+		{
 		Poem haiku = generator.generate("love", "food");
 		System.out.println("Love Food");
 		System.out.println(haiku);
+		}
 	}
 
 }
