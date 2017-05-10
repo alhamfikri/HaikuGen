@@ -4,7 +4,7 @@ import jobs.BuildBob;
 import jobs.BuildDepot;
 import jobs.BuildMaths;
 import jobs.BuildNLP;
-import jobs.BuildStat;
+import jobs.BuildDataLog;
 import jobs.BuildUtils;
 import jobs.BuildWeb;
 import jobs.BuildWinterwellProject;
@@ -39,7 +39,7 @@ public class PublishPoetryServer extends BuildTask {
 			new BuildNLP(),
 			new BuildDepot(),
 			new BuildBob(),
-			new BuildStat(),
+			new BuildDataLog(),
 			new BuildSens()
 		};
 		for (BuildWinterwellProject bwp : projects) {
